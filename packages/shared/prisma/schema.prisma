@@ -1,0 +1,165 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator prisma_client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String
+  providerType       String
+  providerId         String
+  providerAccountId  String
+  refreshToken       String?
+  accessToken        String?
+  accessTokenExpires DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([providerId, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  expires      DateTime
+  sessionToken String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id               String    @id @default(cuid())
+  name             String?
+  email            String?   @unique
+  emailVerified    DateTime?
+  image            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  stripeCustomerId String?
+
+  accounts        Account[]
+  sessions        Session[]
+  projects        UserProject[]
+  billingAccounts BillingAccount[]
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model UserProject {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  projectId String
+  role      UserRole @default(USER)
+
+  user    User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users           UserProject[]
+  billingAccounts BillingAccountProject[]
+}
+
+model BillingAccountProject {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  billingAccountId String
+  projectId        String
+
+  billingAccount BillingAccount @relation(fields: [billingAccountId], references: [id])
+  project        Project        @relation(fields: [projectId], references: [id])
+
+  @@unique([billingAccountId, projectId])
+}
+
+model BillingAccount {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+
+  user           User                     @relation(fields: [userId], references: [id])
+  paymentMethods PaymentMethod[]
+  projects       BillingAccountProject[]
+
+}
+
+model PaymentMethod {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brand    String
+  last4    String
+  expMonth Int
+  expYear  Int
+
+  type PaymentMethodType
+
+  billingAccountId String
+
+  billingAccount BillingAccount @relation(fields: [billingAccountId], references: [id])
+}
+
+enum PaymentMethodType {
+  PRIMARY
+  BACKUP
+  OTHER
+}
+
+model VerificationRequest {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id          String  @id
+  active      Boolean
+  name        String
+  description String?
+  image       String?
+  metadata    Json
+
+  prices ProductPrice[]
+}
+
+model ProductPrice {
+  id                String  @id
+  productId         String
+  active            Boolean
+  currency          String
+  description       String
+  type              String
+  unitAmount        Int
+  interval          String?
+  trial_period_days Int?
+  metadata          Json
+
+  product Product[] @relation(fields: [productId], references: [id])
+}

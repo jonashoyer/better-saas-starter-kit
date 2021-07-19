@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+    "sourceMap": true,
+    "composite": true,
+    "strict": true,
+    "baseUrl": "./packages",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}

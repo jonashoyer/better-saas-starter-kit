@@ -1,0 +1,37 @@
+import type { AppProps } from 'next/app'
+import React from 'react';
+import { ThemeProvider } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import theme from '../constants/theme';
+import { useApollo } from '../utils/GraphqlClient';
+import { ApolloProvider } from '@apollo/client';
+import { Provider as NextAuthProvider } from 'next-auth/client'
+
+function MyApp({ Component, pageProps }: AppProps) {
+
+  React.useEffect(() => {
+    // Remove the server-side injected CSS.
+    const jssStyles = document.querySelector('#jss-server-side');
+    if (jssStyles) {
+      jssStyles.parentElement?.removeChild(jssStyles);
+    }
+  }, []);
+
+  const apolloClient = useApollo(pageProps.initialApolloState);
+
+  return (
+    <NextAuthProvider options={{
+      clientMaxAge: 60 * 30,
+      keepAlive: 60 * 60,
+    }} session={pageProps.session}>
+      <ApolloProvider client={apolloClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </ApolloProvider>
+    </NextAuthProvider>
+  );
+}
+
+export default MyApp

@@ -1,0 +1,17 @@
+{
+  "name": "bs-root",
+  "private": true,
+  "workspaces": [
+    "./packages/*"
+  ],
+  "engines": {
+    "npm": "7.20.0",
+    "node": "16.5.0"
+  },
+  "scripts": {
+    "web:dev": "npm run dev -w bs-web-kit",
+    "web:generate": "npm run generate -w bs-web-kit",
+    "api:dev": "npm run dev -w bs-api-kit",
+    "api:generate": "npm run generate -w bs-api-kit"
+  }
+}

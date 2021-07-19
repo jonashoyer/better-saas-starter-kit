@@ -1,0 +1,62 @@
+{
+  "name": "bs-api-kit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && npm run generate && tsc",
+    "style": "prettier --write 'src/**/*'",
+    "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/server.ts",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:reset": "npx prisma migrate reset",
+    "prisma:deploy": "npx prisma migrate deploy",
+    "prisma:format": "npx prisma format",
+    "gen": "npm run generate",
+    "generate": "npm run generate:prisma && npm run generate:nexus",
+    "generate:prisma": "npx prisma generate",
+    "generate:nexus": "NODE_ENV=development ts-node --transpile-only src/schema"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^2.27.0",
+    "apollo-server-express": "^2.25.2",
+    "cookie": "^0.4.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.3.0",
+    "graphql": "^15.5.1",
+    "graphql-depth-limit": "^1.1.0",
+    "graphql-redis-subscriptions": "^2.4.0",
+    "graphql-scalars": "^1.10.0",
+    "ioredis": "^4.27.6",
+    "jose": "^1.28.1",
+    "jsonwebtoken": "^8.5.1",
+    "nexus": "^1.1.0",
+    "nexus-plugin-prisma": "^0.35.0",
+    "rate-limit-redis": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.4.1",
+    "@types/express-rate-limit": "^5.1.3",
+    "@types/graphql-depth-limit": "^1.1.2",
+    "@types/ioredis": "^4.26.5",
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/rate-limit-redis": "^1.7.2",
+    "prettier": "^2.3.2",
+    "prisma": "^2.27.0",
+    "ts-node": "^10.1.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.3.5"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "prisma": {
+    "schema": "../shared/prisma/schema.prisma"
+  }
+}
