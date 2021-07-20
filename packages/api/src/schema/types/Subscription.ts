@@ -1,5 +1,4 @@
 import { subscriptionField } from 'nexus';
-import { pubsub } from '../../context';
 
 export const PING = 'PING';
 

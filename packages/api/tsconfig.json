@@ -10,6 +10,6 @@
     "outDir": "dist",
     "esModuleInterop": true,
   },
-  "exclude": ["prisma/**/*"],
-  "references": [{ "path": "../shared" }]
+  "include": ["src/**/*"],
+  "exclude": ["prisma/**/*", "dist/**/*"]
 }

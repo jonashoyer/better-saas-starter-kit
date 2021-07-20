@@ -1,11 +1,6 @@
 import * as dotenv from 'dotenv';
+import { NodeEnv } from 'bs-shared-kit';
 dotenv.config();
-
-export enum NodeEnv {
-  Testing = 'TESTING',
-  Development = 'DEVELOPMENT',
-  Production = 'PRODUCTION',
-};
 
 export const NODE_ENV = (process.env.NODE_ENV || NodeEnv.Development) as NodeEnv;
 

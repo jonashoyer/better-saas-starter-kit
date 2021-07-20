@@ -1,7 +1,7 @@
 import { PrismaClient, User } from '@prisma/client';
 import { ExpressContext } from 'apollo-server-express';
 import Redis from 'ioredis';
-import { redisClient } from './redis';
+import { redisClient } from 'bs-shared-kit';
 import { ContextFunction, Context as CoreContext } from 'apollo-server-core'
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { authorize } from './nextAuthUtils';

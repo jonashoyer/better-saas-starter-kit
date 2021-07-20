@@ -25,7 +25,8 @@
       "@/components/*": ["components/*"],
       "@/utils/*": ["utils/*"],
       "@/assets/*": ["assets/*"],
-      "@/prisma/*": ["prisma/*"]
+      "@/prisma/*": ["prisma/*"],
+      "@/pages/*": ["pages/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

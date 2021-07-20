@@ -7,8 +7,8 @@ import depthLimit from 'graphql-depth-limit';
 import cors from 'cors';
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
-import { redisClient } from './redis';
-import { NodeEnv, NODE_ENV } from './config';
+import { NodeEnv, redisClient } from 'bs-shared-kit';
+import { NODE_ENV } from './config';
 import { authorize } from './nextAuthUtils';
 
 const apollo = new ApolloServer({

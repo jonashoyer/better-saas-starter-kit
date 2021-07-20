@@ -1,5 +1,7 @@
 ## Better SasS Starter Kit
 
+- Using npm workspaces
+
 - Web App
   - 
   - NextJs
@@ -8,7 +10,7 @@
   - Apollo Client
   - Stripe
   - Next Translate (i18n)
-  - Serverless api
+  - Serverless API
     - Apollo Server
     - Prisma, Nexus
     - Redis
@@ -23,7 +25,7 @@
   - Bull
 
 - Worker
-  -
+  - 
   - Bull
   - Prisma
   - Redis

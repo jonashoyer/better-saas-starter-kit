@@ -1,11 +1,12 @@
 import Redis from 'ioredis';
+import { NodeEnv } from '../types';
 
-export const redisClient: Redis.Redis = createClient('new');
-export const redisSubscriber : Redis.Redis = createClient('new');;
+export const redisClient: Redis.Redis = createRedisClient('new');
+export const redisSubscriber : Redis.Redis = createRedisClient('new');;
 
 type clientTypes = 'client' | 'subscriber' | 'new' | 'bclient';
 
-export function createClient (type: clientTypes) {
+export function createRedisClient (type: clientTypes) {
   switch (type) {
     case 'client':
       return redisClient;
@@ -14,7 +15,7 @@ export function createClient (type: clientTypes) {
     case 'new':
     case 'bclient':
       return new Redis(process.env.REDIS_URL, {
-        showFriendlyErrorStack: ('production' !== process.env.NODE_ENV),
+        showFriendlyErrorStack: (process.env.NODE_ENV !== NodeEnv.Production),
         connectTimeout: 10e3,
         retryStrategy(times) {
           return Math.min(times * 50, 2000);

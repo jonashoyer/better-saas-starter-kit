@@ -1,6 +1,6 @@
 import { PrismaClient, User } from '@prisma/client';
 import Redis from 'ioredis';
-import { redisClient } from './redis';
+import { redisClient } from 'bs-shared-kit';
 import { ContextFunction } from 'apollo-server-core'
 import { getSession } from 'next-auth/client';
 

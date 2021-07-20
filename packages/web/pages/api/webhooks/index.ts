@@ -1,10 +1,5 @@
-import { stripe } from '@/utils/stripe';
+import { stripe } from 'bs-shared-kit';
 import { NextApiHandler } from 'next';
-import {
-  upsertProductRecord,
-  upsertPriceRecord,
-  manageSubscriptionStatusChange
-} from '../../../utils/useDatabase';
 
 // Stripe requires the raw body to construct the event.
 export const config = {

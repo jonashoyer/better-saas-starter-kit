@@ -2,13 +2,15 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": true,
+    "composite": true,
     "target": "es2016",
     "module": "commonjs",
-    "lib": ["esnext"],
     "rootDir": "src",
+    "lib": ["esnext"],
+    "declarationDir": "dist",
     "strict": true,
     "outDir": "dist",
     "esModuleInterop": true,
   },
-  "exclude": ["prisma/**/*"]
+  "includes": ["src/**/*.ts"]
 }
