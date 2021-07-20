@@ -1,31 +1,28 @@
 ## Better SasS Starter Kit
 
-- Using npm workspaces
+Monorepo using npm workspace
 
-- Web App
-  - 
-  - NextJs
-  - Material UI
-  - NextAuth
-  - Apollo Client
-  - Stripe
-  - Next Translate (i18n)
-  - Serverless API
-    - Apollo Server
-    - Prisma, Nexus
-    - Redis
-    - Bull
-
-- API
-  - 
-  - Express
-  - Apollo Server (Subscription support)
+### Web
+- NextJS
+- Material UI
+- NextAuth.js
+- Apollo Client
+- Stripe
+- Next Translate (i18n)
+- Serverless API
+  - Apollo Server
+  - BullMQ
   - Prisma, Nexus
   - Redis
-  - Bull
 
-- Worker
-  - 
-  - Bull
-  - Prisma
-  - Redis
+### API
+- Apollo Server
+- Express
+- BullMQ
+- Prisma, Nexus
+- Redis
+
+### Worker
+- BullMQ
+- Prisma
+- Redis

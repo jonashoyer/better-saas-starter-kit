@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { NodeEnv } from '../types';
+import { NodeEnv } from './types';
 
 export const redisClient: Redis.Redis = createRedisClient('new');
 export const redisSubscriber : Redis.Redis = createRedisClient('new');;
