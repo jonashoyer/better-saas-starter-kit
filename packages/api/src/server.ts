@@ -1,6 +1,8 @@
 import schema from './schema';
-import { createContext } from './context';
-import { ApolloServer } from 'apollo-server-express';
+import { execute, subscribe } from "graphql";
+import { Context, createContext, createSubscriptionContext } from './context';
+import { ApolloServer, ExpressContext } from 'apollo-server-express';
+import { SubscriptionServer } from "subscriptions-transport-ws";
 import express from 'express';
 import http from 'http';
 import depthLimit from 'graphql-depth-limit';
@@ -8,47 +10,58 @@ import cors from 'cors';
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import { NodeEnv, redisClient } from 'bs-shared-kit';
-import { NODE_ENV } from './config';
-import { authorize } from './nextAuthUtils';
+import { NODE_ENV, PORT } from './config';
 
-const apollo = new ApolloServer({
-  schema,
-  context: createContext,
-  validationRules: [depthLimit(4)],
-  debug: NODE_ENV === NodeEnv.Development,
-  subscriptions: {
-    path: '/subscriptions',
-    async onConnect(connectionParams: any, websocket, ctx) {
-        const { accessToken } = connectionParams;
-        const user = await authorize({ req: ctx.request, accessToken } as any);
-        return { user, accessToken };
-    }
-  }
-});
+(async function () {
+  
+  const app = express();
+  const httpServer = http.createServer(app);
+  
+  app.use(cors({
+    credentials: true,
+    origin: process.env.NODE_ENV === 'production' ? process.env.CORS_ORIGIN : /.*/,
+  }));
+  
+  app.use(rateLimit({
+    store: new RedisStore({
+      client: redisClient,
+    }),
+    max: 60,
+    windowMs: 60000,
+  }))
+  if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
-const app = express();
+  const apollo = new ApolloServer({
+    schema,
+    context: createContext,
+    validationRules: [depthLimit(4)],
+    debug: NODE_ENV === NodeEnv.Development
+  });
 
-if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+  await apollo.start();  
+  
+  apollo.applyMiddleware({ app, cors: false });
 
-app.use(cors({
-  credentials: true,
-  origin: process.env.NODE_ENV === 'production' ? process.env.CORS_ORIGIN : /.*/,
-}));
+  const subscriptionServer = SubscriptionServer.create(
+    {
+      schema, execute, subscribe,
+      async onConnect(connectionParams: any, websocket: any, ctx: ExpressContext): Promise<Context> {
+        return createSubscriptionContext(connectionParams, websocket, ctx);
+      }
+    },
+    { server: httpServer, path: apollo.graphqlPath }
+  );
+  
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 GraphQL service ready at http://localhost:${PORT}/graphql`);
+  });
+  
+  ['SIGINT', 'SIGTERM'].forEach(signal => {
+    process.on(signal, async () => {
+      console.log('Kill signal!');
 
-app.use(rateLimit({
-  store: new RedisStore({
-    client: redisClient,
-  }),
-  max: 60,
-  windowMs: 60000,
-}))
+      subscriptionServer.close();
+    });
+  });
 
-
-const server = http.createServer(app);
-
-apollo.applyMiddleware({ app, cors: false });
-apollo.installSubscriptionHandlers(server);
-
-server.listen(4000, () => {
-  console.log(`🚀 GraphQL service ready at http://localhost:4000/graphql`);
-});
+})();

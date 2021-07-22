@@ -2,7 +2,7 @@
 
 Monorepo using npm workspace
 
-### Web
+### NextJS
 - NextJS
 - Material UI
 - NextAuth.js
@@ -15,14 +15,21 @@ Monorepo using npm workspace
   - Prisma, Nexus
   - Redis
 
-### API
+### Apollo Server, Express API
 - Apollo Server
 - Express
 - BullMQ
 - Prisma, Nexus
 - Redis
 
-### Worker
+### BullMQ Worker
 - BullMQ
 - Prisma
 - Redis
+
+
+
+#### Shared environment variables
+- REDIS_URL
+- NODE_ENV
+- STRIPE_SECRET_KEY

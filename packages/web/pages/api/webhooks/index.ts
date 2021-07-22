@@ -1,4 +1,4 @@
-import { stripe } from 'bs-shared-kit';
+import { stripe } from 'bs-shared-server-kit';
 import { NextApiHandler } from 'next';
 
 // Stripe requires the raw body to construct the event.

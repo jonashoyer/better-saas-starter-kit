@@ -4,6 +4,7 @@ import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import { AUTH_SECRET } from "./config";
 import http from 'http';
+import type { ExecutionParams } from 'subscriptions-transport-ws';
 
 const SESSION_TOKEN_NAME = 'next-auth.session-token';
 
@@ -31,26 +32,40 @@ export async function verifyAccessToken(accessToken: string) {
 
 export async function getSession({ req, sessionToken }: { req?: {  headers: http.IncomingHttpHeaders }, sessionToken?: string }): Promise<(Session & { user: User }) | null> {
 
+  if (sessionToken) {
+    return findSession(sessionToken!);
+  }
   if (req) {
     const parsed = cookie.parse(req.headers.cookie || '');
     const sessionToken = parsed[SESSION_TOKEN_NAME];
-    if (!sessionToken) return null;
-    return findSession(sessionToken);
+    if (sessionToken) {
+      return findSession(sessionToken);
+    }
   }
-
-  return findSession(sessionToken!);
+  return null;
 };
 
-export async function authorize({ req, sessionToken, accessToken }: {
-  req?: {  headers: http.IncomingHttpHeaders },
+export async function authorize({ req, connection, sessionToken, accessToken }: {
+  req?: { headers: http.IncomingHttpHeaders },
+  connection?: ExecutionParams<any>,
   sessionToken?: string,
   accessToken?: string,
 }): Promise<(User & { session?: Session }) | null> {
 
-  if (accessToken) return verifyAccessToken(accessToken);
+  
+  if (accessToken) {
+    return verifyAccessToken(accessToken);
+  }
 
+  if (connection) {
+    const { accessToken } = connection.context;
+    if (accessToken) {
+      return verifyAccessToken(accessToken);
+    }
+  }
+  
   if (req || sessionToken) {
-    const session = await getSession({ req, sessionToken } as any);
+    const session = await getSession({ req, sessionToken, connection } as any);
     if (!session) return null;
     return { ...session.user, session };
   }

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "target": "es2019",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "removeComments": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2019", "esnext.asynciterable"],
+    "types": ["node"],
+    "rootDir": "./src",
+    "outDir": "./lib",
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { stripe } from './stripe';
 
 
 export function StripeHandler(prisma: PrismaClient) {

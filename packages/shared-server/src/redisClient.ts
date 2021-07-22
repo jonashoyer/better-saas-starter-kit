@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { NodeEnv } from './types';
+import { NodeEnv } from 'bs-shared-kit';
 
 export const redisClient: Redis.Redis = createRedisClient('new');
 export const redisSubscriber : Redis.Redis = createRedisClient('new');;
@@ -18,7 +18,7 @@ export function createRedisClient (type: clientTypes) {
         showFriendlyErrorStack: (process.env.NODE_ENV !== NodeEnv.Production),
         connectTimeout: 10e3,
         retryStrategy(times) {
-          return Math.min(times * 50, 2000);
+          return Math.min(times * 50, 3000);
         },
       }).on('error', err => {
         console.error('redis', err);
