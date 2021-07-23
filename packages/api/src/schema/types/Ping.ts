@@ -1,5 +1,5 @@
 import { queryField } from "nexus";
-import { PubSubTriggers } from "bs-shared-kit";
+import { PubSubTriggers } from "bs-shared-server-kit";
 
 export const Ping = queryField('ping', {
   type: 'String',

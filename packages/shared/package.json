@@ -1,11 +1,11 @@
 {
   "name": "bs-shared-kit",
-  "main": "./lib/main.cjs.js",
-  "module": "./lib/index.js",
+  "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "sideEffects": false,
   "scripts": {
-    "compile": "tsc",
+    "clean": "rm -rf lib",
+    "compile": "npm run clean && tsc",
     "watch": "tsc --watch"
   }
 }

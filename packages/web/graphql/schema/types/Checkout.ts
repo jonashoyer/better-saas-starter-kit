@@ -1,4 +1,4 @@
-import { stripe } from 'bs-shared-kit';
+import { stripe } from 'bs-shared-server-kit';
 import { getURL } from '@/utils/utils';
 import { arg, intArg, mutationField, objectType, stringArg } from 'nexus';
 import { AuthenticationError, UserInputError } from 'apollo-server-micro';

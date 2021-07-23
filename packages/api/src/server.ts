@@ -9,7 +9,8 @@ import depthLimit from 'graphql-depth-limit';
 import cors from 'cors';
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
-import { NodeEnv, redisClient } from 'bs-shared-kit';
+import { NodeEnv } from 'bs-shared-kit';
+import { redisClient } from 'bs-shared-server-kit';
 import { NODE_ENV, PORT } from './config';
 
 (async function () {

@@ -1,13 +1,14 @@
 {
   "name": "bs-shared-server-kit",
-  "files": [
-    "lib"
-  ],
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "sideEffects": false,
   "devDependencies": {
     "prisma": "^2.27.0"
   },
   "scripts": {
-    "compile": "tsc",
+    "clean": "rm -rf lib",
+    "compile": "npm run clean && tsc",
     "watch": "tsc --watch"
   },
   "dependencies": {
