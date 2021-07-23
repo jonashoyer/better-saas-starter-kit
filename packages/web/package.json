@@ -8,13 +8,13 @@
     "start": "next start",
     "lint": "next lint",
     "gen": "npm run generate",
-    "generate": "npm-run-all -p -r generate:*",
+    "generate": "npm-run-all generate:prisma generate:nexus generate:gql",
     "analyze": "cross-env ANALYZE=true next build",
     "analyze:server": "cross-env ANALYZE=true BUNDLE_ANALYZE=server next build",
     "analyze:browser": "cross-env ANALYZE=true BUNDLE_ANALYZE=browser next build",
     "generate:gql": "npx gql-gen --config codegen.yml",
-    "generate:prisma": "npx prisma generate",
-    "generate:nexus": "NODE_ENV=development ts-node --transpile-only graphql/schema"
+    "generate:nexus": "ts-node --transpile-only graphql/schema",
+    "generate:prisma": "npx prisma generate"
   },
   "dependencies": {
     "@apollo/client": "^3.3.21",
@@ -65,6 +65,6 @@
     "yaml-loader": "^0.6.0"
   },
   "prisma": {
-    "schema": "../shared/prisma/schema.prisma"
+    "schema": "../shared-server/prisma/schema.prisma"
   }
 }

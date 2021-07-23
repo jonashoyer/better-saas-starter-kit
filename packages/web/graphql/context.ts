@@ -1,10 +1,11 @@
 import { PrismaClient, User } from '@prisma/client';
 import Redis from 'ioredis';
-import { redisClient } from 'bs-shared-server-kit';
+import { createRedisClient } from 'bs-shared-server-kit';
 import { ContextFunction } from 'apollo-server-core'
 import { getSession } from 'next-auth/client';
 
 export const prisma = new PrismaClient();
+export const redis = createRedisClient('client');
 
 export type Context = {
   prisma: PrismaClient;
@@ -17,7 +18,7 @@ export const createContext: ContextFunction<any> = async (ctx)  => {
   
   return {
     prisma,
-    redis: redisClient,
+    redis,
     user: session?.user,
   }
 }

@@ -13,9 +13,9 @@
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:format": "npx prisma format",
     "gen": "npm run generate",
-    "generate": "npm run generate:prisma && npm run generate:nexus",
+    "generate": "npm-run-all generate:prisma generate:nexus",
     "generate:prisma": "npx prisma generate",
-    "generate:nexus": "NODE_ENV=development ts-node --transpile-only src/schema"
+    "generate:nexus": "ts-node --transpile-only src/schema"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +36,7 @@
     "jsonwebtoken": "^8.5.1",
     "nexus": "^1.1.0",
     "nexus-plugin-prisma": "^0.35.0",
+    "npm-run-all": "^4.1.5",
     "rate-limit-redis": "^2.1.0"
   },
   "devDependencies": {
@@ -57,6 +58,6 @@
     "trailingComma": "all"
   },
   "prisma": {
-    "schema": "../shared/prisma/schema.prisma"
+    "schema": "../shared-server/prisma/schema.prisma"
   }
 }

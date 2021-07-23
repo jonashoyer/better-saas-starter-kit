@@ -59,8 +59,6 @@ import { NODE_ENV, PORT } from './config';
   
   ['SIGINT', 'SIGTERM'].forEach(signal => {
     process.on(signal, async () => {
-      console.log('Kill signal!');
-
       subscriptionServer.close();
     });
   });

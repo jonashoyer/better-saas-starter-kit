@@ -1,3 +1,3 @@
-export const PubSubTriggers = {
-  Ping: 'PING'
+export enum PubSubTriggers {
+  Ping = 'PING'
 }

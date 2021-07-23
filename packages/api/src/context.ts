@@ -1,7 +1,7 @@
 import { PrismaClient, User } from '@prisma/client';
 import { ExpressContext } from 'apollo-server-express';
 import Redis from 'ioredis';
-import { redisClient, createPubsub } from 'bs-shared-server-kit';
+import { createRedisClient, createPubsub } from 'bs-shared-server-kit';
 import { ContextFunction } from 'apollo-server-core'
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { authorize } from './nextAuthUtils';
@@ -9,6 +9,7 @@ import { Request } from 'express';
 
 export const pubsub = createPubsub();
 export const prisma = new PrismaClient();
+export const redis = createRedisClient('client');
 
 
 export type Context = {
@@ -26,7 +27,7 @@ export const createContext: ContextFunction<ExpressContext, Context> = async (ct
     req: ctx.req,
     prisma,
     pubsub,
-    redis: redisClient,
+    redis,
     user,
   }
 }
@@ -38,7 +39,7 @@ export const createSubscriptionContext = async (connectionParams: any, websocket
     req: ctx.request,
     prisma,
     pubsub,
-    redis: redisClient,
+    redis,
     user,
   }
 }

@@ -1,20 +1,20 @@
 import Redis from 'ioredis';
 import { NodeEnv } from 'bs-shared-kit';
 
-export const redisClient: Redis.Redis = createRedisClient('new');
-export const redisSubscriber : Redis.Redis = createRedisClient('new');;
-
 type clientTypes = 'client' | 'subscriber' | 'new' | 'bclient';
 
-export function createRedisClient (type: clientTypes) {
+let redisClient: Redis.Redis, redisSubscriber: Redis.Redis;
+export function createRedisClient (type: clientTypes, redisUrl?: string) {
   switch (type) {
     case 'client':
+      if (!redisClient) redisClient = createRedisClient('new');
       return redisClient;
     case 'subscriber':
+      if (!redisSubscriber) redisSubscriber = createRedisClient('new');
       return redisSubscriber;
     case 'new':
     case 'bclient':
-      return new Redis(process.env.REDIS_URL, {
+      return new Redis(redisUrl || process.env.REDIS_URL, {
         showFriendlyErrorStack: (process.env.NODE_ENV !== NodeEnv.Production),
         connectTimeout: 10e3,
         retryStrategy(times) {
