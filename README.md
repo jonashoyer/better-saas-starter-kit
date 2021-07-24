@@ -1,4 +1,4 @@
-## Better SasS Starter Kit
+## Better SaaS Starter Kit
 
 Monorepo using npm workspace
 

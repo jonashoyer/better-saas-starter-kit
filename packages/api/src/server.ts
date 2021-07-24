@@ -10,7 +10,7 @@ import cors from 'cors';
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import { NodeEnv } from 'bs-shared-kit';
-import { redisClient } from 'bs-shared-server-kit';
+import { createRedisClient } from 'bs-shared-server-kit';
 import { NODE_ENV, PORT } from './config';
 
 (async function () {
@@ -25,7 +25,7 @@ import { NODE_ENV, PORT } from './config';
   
   app.use(rateLimit({
     store: new RedisStore({
-      client: redisClient,
+      client: createRedisClient('client'),
     }),
     max: 60,
     windowMs: 60000,
