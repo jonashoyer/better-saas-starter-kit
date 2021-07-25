@@ -1,5 +1,6 @@
-import { stripe } from 'bs-shared-server-kit';
 import { NextApiHandler } from 'next';
+import { buffer } from 'micro';
+
 
 // Stripe requires the raw body to construct the event.
 export const config = {
@@ -8,15 +9,15 @@ export const config = {
   }
 };
 
-async function buffer(readable: string[] | Buffer[]) {
-  const chunks = [];
-  for await (const chunk of readable) {
-    chunks.push(
-      typeof chunk === "string" ? Buffer.from(chunk) : chunk
-    );
-  }
-  return Buffer.concat(chunks);
-}
+// async function buffer(readable: string[] | Buffer[]) {
+//   const chunks = [];
+//   for await (const chunk of readable) {
+//     chunks.push(
+//       typeof chunk === "string" ? Buffer.from(chunk) : chunk
+//     );
+//   }
+//   return Buffer.concat(chunks);
+// }
 
 const relevantEvents = new Set([
   'product.created',

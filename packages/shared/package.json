@@ -5,7 +5,7 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rm -rf lib",
-    "compile": "npm run clean && tsc",
+    "build": "npm run clean && tsc",
     "watch": "tsc --watch"
   }
 }

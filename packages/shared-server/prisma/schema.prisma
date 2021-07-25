@@ -36,19 +36,17 @@ model Session {
 }
 
 model User {
-  id               String    @id @default(cuid())
-  name             String?
-  email            String?   @unique
-  emailVerified    DateTime?
-  image            String?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  stripeCustomerId String?
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  accounts        Account[]
-  sessions        Session[]
-  projects        UserProject[]
-  billingAccounts BillingAccount[]
+  accounts Account[]
+  sessions Session[]
+  projects UserProject[]
 }
 
 enum UserRole {
@@ -70,38 +68,14 @@ model UserProject {
 }
 
 model Project {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users           UserProject[]
-  billingAccounts BillingAccountProject[]
-}
-
-model BillingAccountProject {
   id               String   @id @default(cuid())
+  name             String
   createdAt        DateTime @default(now())
-  billingAccountId String
-  projectId        String
+  updatedAt        DateTime @updatedAt
+  stripeCustomerId String   @unique
 
-  billingAccount BillingAccount @relation(fields: [billingAccountId], references: [id])
-  project        Project        @relation(fields: [projectId], references: [id])
-
-  @@unique([billingAccountId, projectId])
-}
-
-model BillingAccount {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String
-
-  user           User                     @relation(fields: [userId], references: [id])
+  users          UserProject[]
   paymentMethods PaymentMethod[]
-  projects       BillingAccountProject[]
-
 }
 
 model PaymentMethod {
@@ -113,15 +87,16 @@ model PaymentMethod {
   last4    String
   expMonth Int
   expYear  Int
+  type     String
 
-  type PaymentMethodType
+  importance PaymentMethodImportance
 
-  billingAccountId String
+  projectId String
 
-  billingAccount BillingAccount @relation(fields: [billingAccountId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
 }
 
-enum PaymentMethodType {
+enum PaymentMethodImportance {
   PRIMARY
   BACKUP
   OTHER
@@ -151,10 +126,10 @@ model Product {
 
 model ProductPrice {
   id                String  @id
-  productId         String
+  productId         String?
   active            Boolean
   currency          String
-  description       String
+  description       String?
   type              String
   unitAmount        Int
   interval          String?

@@ -19,8 +19,6 @@ interface PrismaModels {
   User: Prisma.User
   UserProject: Prisma.UserProject
   Project: Prisma.Project
-  BillingAccountProject: Prisma.BillingAccountProject
-  BillingAccount: Prisma.BillingAccount
   PaymentMethod: Prisma.PaymentMethod
   VerificationRequest: Prisma.VerificationRequest
   Product: Prisma.Product
@@ -39,28 +37,20 @@ interface NexusPrismaInputs {
       ordering: 'id' | 'userId' | 'expires' | 'sessionToken' | 'createdAt' | 'updatedAt'
     }
     users: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'name' | 'email' | 'emailVerified' | 'image' | 'createdAt' | 'updatedAt' | 'stripeCustomerId' | 'accounts' | 'sessions' | 'projects' | 'billingAccounts'
-      ordering: 'id' | 'name' | 'email' | 'emailVerified' | 'image' | 'createdAt' | 'updatedAt' | 'stripeCustomerId'
+      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'name' | 'email' | 'emailVerified' | 'image' | 'createdAt' | 'updatedAt' | 'accounts' | 'sessions' | 'projects'
+      ordering: 'id' | 'name' | 'email' | 'emailVerified' | 'image' | 'createdAt' | 'updatedAt'
     }
     userProjects: {
       filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'userId' | 'projectId' | 'role' | 'user' | 'project'
       ordering: 'id' | 'createdAt' | 'userId' | 'projectId' | 'role'
     }
     projects: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'name' | 'createdAt' | 'updatedAt' | 'users' | 'billingAccounts'
-      ordering: 'id' | 'name' | 'createdAt' | 'updatedAt'
-    }
-    billingAccountProjects: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'billingAccountId' | 'projectId' | 'billingAccount' | 'project'
-      ordering: 'id' | 'createdAt' | 'billingAccountId' | 'projectId'
-    }
-    billingAccounts: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'name' | 'createdAt' | 'updatedAt' | 'userId' | 'user' | 'paymentMethods' | 'projects'
-      ordering: 'id' | 'name' | 'createdAt' | 'updatedAt' | 'userId'
+      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'name' | 'createdAt' | 'updatedAt' | 'stripeCustomerId' | 'users' | 'paymentMethods'
+      ordering: 'id' | 'name' | 'createdAt' | 'updatedAt' | 'stripeCustomerId'
     }
     paymentMethods: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'billingAccountId' | 'billingAccount'
-      ordering: 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'billingAccountId'
+      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'projectId' | 'project'
+      ordering: 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'projectId'
     }
     verificationRequests: {
       filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'identifier' | 'token' | 'expires' | 'createdAt' | 'updatedAt'
@@ -94,10 +84,6 @@ interface NexusPrismaInputs {
       filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'userId' | 'projectId' | 'role' | 'user' | 'project'
       ordering: 'id' | 'createdAt' | 'userId' | 'projectId' | 'role'
     }
-    billingAccounts: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'name' | 'createdAt' | 'updatedAt' | 'userId' | 'user' | 'paymentMethods' | 'projects'
-      ordering: 'id' | 'name' | 'createdAt' | 'updatedAt' | 'userId'
-    }
   }
   UserProject: {
 
@@ -107,22 +93,9 @@ interface NexusPrismaInputs {
       filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'userId' | 'projectId' | 'role' | 'user' | 'project'
       ordering: 'id' | 'createdAt' | 'userId' | 'projectId' | 'role'
     }
-    billingAccounts: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'billingAccountId' | 'projectId' | 'billingAccount' | 'project'
-      ordering: 'id' | 'createdAt' | 'billingAccountId' | 'projectId'
-    }
-  }
-  BillingAccountProject: {
-
-  }
-  BillingAccount: {
     paymentMethods: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'billingAccountId' | 'billingAccount'
-      ordering: 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'billingAccountId'
-    }
-    projects: {
-      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'billingAccountId' | 'projectId' | 'billingAccount' | 'project'
-      ordering: 'id' | 'createdAt' | 'billingAccountId' | 'projectId'
+      filtering: 'AND' | 'OR' | 'NOT' | 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'projectId' | 'project'
+      ordering: 'id' | 'createdAt' | 'updatedAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'projectId'
     }
   }
   PaymentMethod: {
@@ -158,10 +131,6 @@ interface NexusPrismaOutputs {
     userProjects: 'UserProject'
     project: 'Project'
     projects: 'Project'
-    billingAccountProject: 'BillingAccountProject'
-    billingAccountProjects: 'BillingAccountProject'
-    billingAccount: 'BillingAccount'
-    billingAccounts: 'BillingAccount'
     paymentMethod: 'PaymentMethod'
     paymentMethods: 'PaymentMethod'
     verificationRequest: 'VerificationRequest'
@@ -202,18 +171,6 @@ interface NexusPrismaOutputs {
     deleteOneProject: 'Project'
     deleteManyProject: 'AffectedRowsOutput'
     upsertOneProject: 'Project'
-    createOneBillingAccountProject: 'BillingAccountProject'
-    updateOneBillingAccountProject: 'BillingAccountProject'
-    updateManyBillingAccountProject: 'AffectedRowsOutput'
-    deleteOneBillingAccountProject: 'BillingAccountProject'
-    deleteManyBillingAccountProject: 'AffectedRowsOutput'
-    upsertOneBillingAccountProject: 'BillingAccountProject'
-    createOneBillingAccount: 'BillingAccount'
-    updateOneBillingAccount: 'BillingAccount'
-    updateManyBillingAccount: 'AffectedRowsOutput'
-    deleteOneBillingAccount: 'BillingAccount'
-    deleteManyBillingAccount: 'AffectedRowsOutput'
-    upsertOneBillingAccount: 'BillingAccount'
     createOnePaymentMethod: 'PaymentMethod'
     updateOnePaymentMethod: 'PaymentMethod'
     updateManyPaymentMethod: 'AffectedRowsOutput'
@@ -269,11 +226,9 @@ interface NexusPrismaOutputs {
     image: 'String'
     createdAt: 'DateTime'
     updatedAt: 'DateTime'
-    stripeCustomerId: 'String'
     accounts: 'Account'
     sessions: 'Session'
     projects: 'UserProject'
-    billingAccounts: 'BillingAccount'
   }
   UserProject: {
     id: 'String'
@@ -289,26 +244,9 @@ interface NexusPrismaOutputs {
     name: 'String'
     createdAt: 'DateTime'
     updatedAt: 'DateTime'
+    stripeCustomerId: 'String'
     users: 'UserProject'
-    billingAccounts: 'BillingAccountProject'
-  }
-  BillingAccountProject: {
-    id: 'String'
-    createdAt: 'DateTime'
-    billingAccountId: 'String'
-    projectId: 'String'
-    billingAccount: 'BillingAccount'
-    project: 'Project'
-  }
-  BillingAccount: {
-    id: 'String'
-    name: 'String'
-    createdAt: 'DateTime'
-    updatedAt: 'DateTime'
-    userId: 'String'
-    user: 'User'
     paymentMethods: 'PaymentMethod'
-    projects: 'BillingAccountProject'
   }
   PaymentMethod: {
     id: 'String'
@@ -318,9 +256,10 @@ interface NexusPrismaOutputs {
     last4: 'String'
     expMonth: 'Int'
     expYear: 'Int'
-    type: 'PaymentMethodType'
-    billingAccountId: 'String'
-    billingAccount: 'BillingAccount'
+    type: 'String'
+    importance: 'PaymentMethodImportance'
+    projectId: 'String'
+    project: 'Project'
   }
   VerificationRequest: {
     id: 'String'
@@ -361,8 +300,6 @@ interface NexusPrismaMethods {
   User: Typegen.NexusPrismaFields<'User'>
   UserProject: Typegen.NexusPrismaFields<'UserProject'>
   Project: Typegen.NexusPrismaFields<'Project'>
-  BillingAccountProject: Typegen.NexusPrismaFields<'BillingAccountProject'>
-  BillingAccount: Typegen.NexusPrismaFields<'BillingAccount'>
   PaymentMethod: Typegen.NexusPrismaFields<'PaymentMethod'>
   VerificationRequest: Typegen.NexusPrismaFields<'VerificationRequest'>
   Product: Typegen.NexusPrismaFields<'Product'>

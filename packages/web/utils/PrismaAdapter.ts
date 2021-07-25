@@ -3,6 +3,7 @@ import { randomBytes } from "crypto"
 import type { Profile } from "next-auth"
 import type { Adapter } from "next-auth/adapters"
 import jwt from 'jsonwebtoken';
+import { createStripe, StripeHandler } from 'bs-shared-server-kit';
 
 export const PrismaAdapter: Adapter<
   Prisma.PrismaClient,
@@ -26,22 +27,13 @@ export const PrismaAdapter: Adapter<
       return {
         displayName: "PRISMA",
         async createUser(profile) {
+
           const user = await prisma.user.create({
             data: {
               name: profile.name,
               email: profile.email,
               image: profile.image,
               emailVerified: profile.emailVerified?.toISOString() ?? null,
-              projects: {
-                create: {
-                  role: 'ADMIN',
-                  project: {
-                    create: {
-                      name: `${profile.name}'s Project`,
-                    }
-                  }
-                }
-              }
             },
             include: {
               projects: {
@@ -51,20 +43,30 @@ export const PrismaAdapter: Adapter<
           });
 
           try {
-            await prisma.billingAccount.create({
+
+            const handler = new StripeHandler(createStripe(), prisma);
+            const stripeCustomer = await handler.createStripeCustomer({
+              email: profile.email,
+              metadata: {
+                userId: user.id,
+              },
+            });
+            
+            await prisma.project.create({
               data: {
-                name: 'My Billing Account',
-                projects: {
-                  connect: {
-                    id: user.projects[0].id,
+                name: `${profile.name}'s Project`,
+                stripeCustomerId: stripeCustomer.id,
+                users: {
+                  create: {
+                    user: { connect: { id: user.id } },
+                    role: 'ADMIN'
                   }
                 },
-                user: {
-                  connect: { id: user.id }
-                }
               }
-            });
-          } catch {}
+            })
+          } catch(err) {
+            console.error('Failed to create init user project!', err);
+          }
 
           return user;
         },

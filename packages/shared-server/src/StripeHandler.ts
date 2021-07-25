@@ -1,13 +1,43 @@
-import { PrismaClient } from '@prisma/client';
+import { PaymentMethodImportance, PrismaClient } from '@prisma/client';
+import Stripe from 'stripe'
 
+// https://egghead.io/blog/saas-app-with-nextjs-prisma-auth0-and-stripe
 
-export function StripeHandler(prisma: PrismaClient) {
+// TODO: https://stripe.com/docs/billing/subscriptions/metered
+// TODO: https://stripe.com/docs/payments/save-and-reuse?platform=web
 
+const secondsToDate = (sec: number) => {
+  var t = new Date('1970-01-01T00:30:00Z'); // Unix epoch start.
+  t.setSeconds(sec);
+  return t;
+};
+
+export class StripeHandler {
+
+  stripe: Stripe;
+  prisma: PrismaClient;
+
+  constructor(stripe: Stripe, prisma: PrismaClient){
+    this.stripe = stripe;
+    this.prisma = prisma;
+  }
+
+  createStripeCustomer(params?: Stripe.CustomerCreateParams & { email: string, metadata: { userId: string } }, options?: Stripe.RequestOptions) {
+    return this.stripe.customers.create(params, options);
+  }
+
+  createPaymentMethod(params?: Stripe.PaymentMethodCreateParams & { metadata: { importance: PaymentMethodImportance, projectId: string } }, options?: Stripe.RequestOptions) {
+    return this.stripe.paymentMethods.create(params, options);
+  }
+
+  createUsageRecord(subscriptionItemId: string, params: Stripe.UsageRecordCreateParams, options?: Stripe.RequestOptions) {
+    return this.stripe.subscriptionItems.createUsageRecord(subscriptionItemId, params, options);
+  }
 
   // This entire file should be removed and moved to supabase-admin
   // It's not a react hook, so it shouldn't have useDatabase format
   // It should also properly catch ands throw errors
-  const upsertProductRecord = async (product: any) => {
+  upsertProductRecord (product: Stripe.Product) {
     const productData = {
       id: product.id,
       active: product.active,
@@ -17,21 +47,19 @@ export function StripeHandler(prisma: PrismaClient) {
       metadata: product.metadata
     };
 
-    await prisma.product.upsert({
+    return this.prisma.product.upsert({
       create: productData,
       update: productData,
       where: {
         id: product.id,
       }
     })
-
-    console.log(`Product inserted/updated: ${product.id}`);
   };
 
-  const upsertPriceRecord = async (price: any) => {
-    const priceData = {
+  upsertPriceRecord (price: Stripe.Price) {
+    const priceData: any = {
       id: price.id,
-      productId: price.product,
+      productId: typeof price.product == 'string' ? price.product : price.product.id,
       active: price.active,
       currency: price.currency,
       description: price.nickname,
@@ -43,101 +71,79 @@ export function StripeHandler(prisma: PrismaClient) {
       metadata: price.metadata
     };
 
-    await prisma.productPrice.upsert({
+    return this.prisma.productPrice.upsert({
       create: priceData,
       update: priceData,
       where: { id: price.id }
     })
-    console.log(`Price inserted/updated: ${price.id}`);
-  };
-
-  const createOrRetrieveCustomer = async ({ email, projectId }: { email?: string, projectId: string }) => {
-
-    // const user = await prisma.user.findUnique({ where: { id: projectId }, select: { stripeCustomerId: true } });
-
-    // if (error) {
-    //   // No customer record found, let's create one.
-    //   const customerData = {
-    //     metadata: {
-    //       supabaseUUID: uuid
-    //     }
-    //   };
-    //   if (email) customerData.email = email;
-    //   const customer = await stripe.customers.create(customerData);
-    //   // Now insert the customer ID into our Supabase mapping table.
-    //   const { error: supabaseError } = await supabaseAdmin
-    //     .from('customers')
-    //     .insert([{ id: uuid, stripe_customer_id: customer.id }]);
-    //   if (supabaseError) throw supabaseError;
-    //   console.log(`New customer created and inserted for ${uuid}.`);
-    //   return customer.id;
-    // }
-    // if (data) return data.stripe_customer_id;
-
-    return {} as any;
   };
 
   /**
    * Copies the billing details from the payment method to the customer object.
    */
-  const copyBillingDetailsToCustomer = async (uuid: string, payment_method: any) => {
-    // const customer = payment_method.customer;
-    // const { name, phone, address } = payment_method.billing_details;
-    // await stripe.customers.update(customer, { name, phone, address });
-    // const { error } = await supabaseAdmin
-    //   .from('users')
-    //   .update({
-    //     billing_address: address,
-    //     payment_method: payment_method[payment_method.type]
-    //   })
-    //   .eq('id', uuid);
-    // if (error) throw error;
-  };
+  //  async copyBillingDetailsToCustomer (userId: string, paymentMethod: Stripe.PaymentMethod) {
+  //   const customer = paymentMethod.customer;
+  //   const customerId = typeof customer == 'string' ? customer : customer?.id;
+  //   if (!customerId) return;
 
-  const manageSubscriptionStatusChange = async (
+  //   const { name, phone, address } = paymentMethod.billing_details;
+  //   await this.stripe.customers.update(customerId, { name, phone, address });
+
+  //   await this.prisma.user.update({
+  //     data: {
+  //       billing_address: address,
+  //       payment_method: paymentMethod[paymentMethod.type]
+  //     }
+  //   })
+
+  //   const { error } = await supabaseAdmin
+  //     .from('users')
+  //     .update({
+  //       billing_address: address,
+  //       payment_method: paymentMethod[paymentMethod.type]
+  //     })
+  //     .eq('id', uuid);
+
+  //   if (error) throw error;
+  // };
+
+  async manageSubscriptionStatusChange(
     subscriptionId: string,
-    customerId: string,
+    stripeCustomerId: string,
     createAction = false
-  ) => {
-    // // Get customer's UUID from mapping table.
-    // const {
-    //   data: { id: uuid },
-    //   error: noCustomerError
-    // } = await supabaseAdmin
-    //   .from('customers')
-    //   .select('id')
-    //   .eq('stripe_customer_id', customerId)
-    //   .single();
-    // if (noCustomerError) throw noCustomerError;
+  ) {
 
-    // const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+    // const project = await this.prisma.project.findUnique({
+    //   where: { stripeCustomerId }
+    // });
+
+    // if (!project) {
+    //   throw new Error(`Stripe customer not found! (id: ${stripeCustomerId})`);
+    // }
+
+    // const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, {
     //   expand: ['default_payment_method']
     // });
+
     // // Upsert the latest status of the subscription object.
     // const subscriptionData = {
     //   id: subscription.id,
-    //   user_id: uuid,
+    //   projectId: project.id,
     //   metadata: subscription.metadata,
     //   status: subscription.status,
-    //   price_id: subscription.items.data[0].price.id,
+    //   priceId: subscription.items.data[0].price.id,
     //   quantity: subscription.quantity,
     //   cancel_at_period_end: subscription.cancel_at_period_end,
     //   cancel_at: subscription.cancel_at
-    //     ? toDateTime(subscription.cancel_at)
+    //     ? secondsToDate(subscription.cancel_at)
     //     : null,
     //   canceled_at: subscription.canceled_at
-    //     ? toDateTime(subscription.canceled_at)
+    //     ? secondsToDate(subscription.canceled_at)
     //     : null,
-    //   current_period_start: toDateTime(subscription.current_period_start),
-    //   current_period_end: toDateTime(subscription.current_period_end),
-    //   created: toDateTime(subscription.created),
-    //   ended_at: subscription.ended_at ? toDateTime(subscription.ended_at) : null,
-    //   trial_start: subscription.trial_start
-    //     ? toDateTime(subscription.trial_start)
-    //     : null,
-    //   trial_end: subscription.trial_end
-    //     ? toDateTime(subscription.trial_end)
-    //     : null
+    //   current_period_start: secondsToDate(subscription.current_period_start),
+    //   current_period_end: secondsToDate(subscription.current_period_end),
+    //   created: secondsToDate(subscription.created),
+    //   ended_at: subscription.ended_at ? secondsToDate(subscription.ended_at) : null,
     // };
 
     // const { error } = await supabaseAdmin
@@ -157,10 +163,70 @@ export function StripeHandler(prisma: PrismaClient) {
     //   );
   };
 
-  return {
-    upsertProductRecord,
-    upsertPriceRecord,
-    createOrRetrieveCustomer,
-    manageSubscriptionStatusChange
-  };
+  createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam ) {
+    // const lineItems = [
+    //   {
+    //     price_data: {
+    //       currency: 'usd', // swap this out for your currency
+    //       product_data: {
+    //         name: course.title,
+    //       },
+    //       unit_amount: course.price,
+    //     },
+    //     quantity: 1,
+    //   },
+    // ]
+
+    return this.stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL}/success`,
+      cancel_url: `${process.env.CLIENT_URL}/cancelled`,
+      payment_intent_data: {
+        metadata // NOTE: { userId, productId }
+      },
+    })
+  }
+
+
+  upsertPaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
+    if (!paymentMethod.card) {
+      throw new Error('Payment method must be of type card!');
+    }
+    if (!paymentMethod.metadata?.importance) {
+      throw new Error(`Missing metadata field 'importance'!`);
+    }
+    if (!paymentMethod.metadata?.projectId) {
+      throw new Error(`Missing metadata field 'projectId'!`);
+    }
+
+    const paymentMethodData = {
+      id: paymentMethod.id,
+      type: paymentMethod.type,
+
+      brand: paymentMethod.card.brand,
+      last4: paymentMethod.card.last4,
+      expMonth: paymentMethod.card.exp_month,
+      expYear: paymentMethod.card.exp_year,
+
+      importance: paymentMethod.metadata.importance as PaymentMethodImportance,
+      project: {
+        connect: { id: paymentMethod.metadata.projectId },
+      },
+    };
+
+    return this.prisma.paymentMethod.upsert({
+      create: paymentMethodData,
+      update: paymentMethodData,
+      where: {
+        id: paymentMethod.id,
+      }
+    })
+  }
+
+  manageChargeSucceeded(charge: Stripe.Charge) {
+    
+  }
 }

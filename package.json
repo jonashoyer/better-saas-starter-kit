@@ -13,14 +13,22 @@
     "watch": "npm-run-all -l -p -r *:watch",
     "generate": "npm-run-all -p -r *:generate",
     "build": "npm-run-all -p -r *:build",
+    
     "web:dev": "npm run dev -w bs-web-kit",
     "api:dev": "npm run dev -w bs-api-kit",
+
+    "prisma:generate": "npx prisma generate --schema packages/shared-server/prisma/schema.prisma",
     "api:generate": "npm run generate -w bs-api-kit",
     "web:generate": "npm run generate -w bs-web-kit",
+    "prisma:format": "npx prisma format --schema packages/shared-server/prisma/schema.prisma",
+    
     "api:build": "npm run build -w bs-api-kit",
     "web:build": "npm run build -w bs-web-kit",
+    
+    
     "shared:build": "npm run build -w bs-shared-kit",
     "shared:watch": "npm run watch -w bs-shared-kit",
+    
     "shared-server:build": "npm run build -w bs-shared-server-kit",
     "shared-server:watch": "npm run watch -w bs-shared-server-kit"
   },

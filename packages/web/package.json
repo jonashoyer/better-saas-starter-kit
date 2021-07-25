@@ -7,14 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "gen": "npm run generate",
-    "generate": "npm-run-all generate:prisma generate:nexus generate:gql",
+    "generate": "npm-run-all generate:nexus generate:gql",
     "analyze": "cross-env ANALYZE=true next build",
     "analyze:server": "cross-env ANALYZE=true BUNDLE_ANALYZE=server next build",
     "analyze:browser": "cross-env ANALYZE=true BUNDLE_ANALYZE=browser next build",
     "generate:gql": "npx gql-gen --config codegen.yml",
-    "generate:nexus": "ts-node --transpile-only graphql/schema",
-    "generate:prisma": "npx prisma generate"
+    "generate:nexus": "ts-node --transpile-only graphql/schema"
   },
   "dependencies": {
     "@apollo/client": "^3.3.21",
@@ -23,6 +21,7 @@
     "@emotion/styled": "^11.3.0",
     "@material-ui/core": "^5.0.0-beta.0",
     "@prisma/client": "^2.27.0",
+    "@stripe/react-stripe-js": "^1.4.1",
     "@stripe/stripe-js": "^1.16.0",
     "apollo-server-micro": "^3.0.2",
     "graphql-depth-limit": "^1.1.0",
