@@ -1,7 +1,6 @@
-import { stripe } from 'bs-shared-server-kit';
-import { getURL } from '@/utils/utils';
 import { arg, intArg, mutationField, objectType, stringArg } from 'nexus';
 import { AuthenticationError, UserInputError } from 'apollo-server-micro';
+import { getURL } from '@/utils/utils';
 
 export const CheckoutSession = objectType({
   name: "CheckoutSession",
@@ -15,7 +14,9 @@ export const CreateCheckoutSession = mutationField("CreateCheckoutSession", {
   args: {
     price: stringArg({ required: true }),
     quantity: intArg({ default: 1 }),
-    metadata: arg({ type: "Json", default: {} })
+    metadata: arg({ type: "Json", default: '{}' }),
+
+    projectId: stringArg({ required: true }),
   },
   async resolve(root, args, ctx) {
     const { price, quantity, metadata } = args;
@@ -27,12 +28,12 @@ export const CreateCheckoutSession = mutationField("CreateCheckoutSession", {
       throw new UserInputError('User must has set a email!');
     }
 
-    const customer = await createOrRetrieveCustomer({
-      projectId: '1', //userSession.user.id!,
-      email: ctx.user.email
-    });
+    const customer = await ctx.getStripeHandler().upsertCustomer(
+      args.projectId,
+      { email: ctx.user.email },
+    );
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await ctx.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       billing_address_collection: 'required',
       customer,

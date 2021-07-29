@@ -115,9 +115,9 @@ model VerificationRequest {
 
 model Product {
   id          String  @id
+  type        String  @unique
   active      Boolean
   name        String
-  description String?
   image       String?
   metadata    Json
 
@@ -125,16 +125,16 @@ model Product {
 }
 
 model ProductPrice {
-  id                String  @id
-  productId         String?
-  active            Boolean
-  currency          String
-  description       String?
-  type              String
-  unitAmount        Int
-  interval          String?
-  trial_period_days Int?
-  metadata          Json
+  id              String  @id
+  productId       String?
+  active          Boolean
+  currency        String
+  type            String
+  unitAmount      Int?
+  interval        String?
+  intervalCount   Int?
+  trialPeriodDays Int?
+  metadata        Json
 
-  product Product[] @relation(fields: [productId], references: [id])
+  product Product? @relation(fields: [productId], references: [id])
 }

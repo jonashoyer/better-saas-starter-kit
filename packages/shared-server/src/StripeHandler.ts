@@ -22,7 +22,15 @@ export class StripeHandler {
     this.prisma = prisma;
   }
 
-  createStripeCustomer(params?: Stripe.CustomerCreateParams & { email: string, metadata: { userId: string } }, options?: Stripe.RequestOptions) {
+  async upsertCustomer(projectId: string, params?: Stripe.CustomerCreateParams, options?: Stripe.RequestOptions) {
+    const project = await this.prisma.project.findUnique({ where: { id: projectId }, select: { stripeCustomerId: true }});
+    if (!project) throw new Error(`Project not found by id (${projectId})!`)
+    if (project.stripeCustomerId) return project.stripeCustomerId;
+    const customer = await this.createCustomer({...params, metadata: { ...params?.metadata, projectId }}, options);
+    return customer.id;
+  }
+
+  createCustomer(params?: Stripe.CustomerCreateParams & { metadata: { projectId: string } }, options?: Stripe.RequestOptions) {
     return this.stripe.customers.create(params, options);
   }
 
@@ -34,17 +42,19 @@ export class StripeHandler {
     return this.stripe.subscriptionItems.createUsageRecord(subscriptionItemId, params, options);
   }
 
-  // This entire file should be removed and moved to supabase-admin
-  // It's not a react hook, so it shouldn't have useDatabase format
-  // It should also properly catch ands throw errors
   upsertProductRecord (product: Stripe.Product) {
+    if (!product.metadata?.type) {
+      console.error(`Stripe product is missing field 'type' in metadata!`);
+      return;
+    }
     const productData = {
       id: product.id,
       active: product.active,
+      type: product.metadata?.type,
       name: product.name,
-      description: product.description,
+      description: product.description ?? null,
       image: product.images?.[0] ?? null,
-      metadata: product.metadata
+      metadata: product.metadata,
     };
 
     return this.prisma.product.upsert({
@@ -66,7 +76,7 @@ export class StripeHandler {
       type: price.type,
       unitAmount: price.unit_amount,
       interval: price.recurring?.interval ?? null,
-      interval_count: price.recurring?.interval_count ?? null,
+      intervalCount: price.recurring?.interval_count ?? null,
       trialPeriodDays: price.recurring?.trial_period_days ?? null,
       metadata: price.metadata
     };

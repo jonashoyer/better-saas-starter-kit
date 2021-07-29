@@ -8,10 +8,6 @@
     "build": "npm run clean && npm run generate && tsc",
     "style": "prettier --write 'src/**/*'",
     "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/server.ts",
-    "prisma:migrate": "npx prisma migrate dev",
-    "prisma:reset": "npx prisma migrate reset",
-    "prisma:deploy": "npx prisma migrate deploy",
-    "prisma:format": "npx prisma format",
     "generate": "npm-run-all generate:nexus",
     "generate:nexus": "ts-node --transpile-only src/schema"
   },
@@ -33,7 +29,6 @@
     "jose": "^1.28.1",
     "jsonwebtoken": "^8.5.1",
     "nexus": "^1.1.0",
-    "nexus-plugin-prisma": "^0.35.0",
     "npm-run-all": "^4.1.5",
     "rate-limit-redis": "^2.1.0"
   },
@@ -44,6 +39,7 @@
     "@types/ioredis": "^4.26.5",
     "@types/jsonwebtoken": "^8.5.4",
     "@types/rate-limit-redis": "^1.7.2",
+    "nexus-plugin-prisma": "^0.35.0",
     "prettier": "^2.3.2",
     "prisma": "^2.27.0",
     "ts-node": "^10.1.0",

@@ -26,7 +26,8 @@
       "@/utils/*": ["utils/*"],
       "@/assets/*": ["assets/*"],
       "@/prisma/*": ["prisma/*"],
-      "@/pages/*": ["pages/*"]
+      "@/pages/*": ["pages/*"],
+      "@/graphql/*": ["graphql/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { NextApiHandler } from 'next';
+import { NextApiHandler, NextApiRequest } from 'next';
 import Stripe from 'stripe';
 import { StripeHandler } from './StripeHandler';
 
@@ -22,6 +22,21 @@ async function buffer(readable: string[] | Buffer[]) {
   return Buffer.concat(chunks);
 }
 
+async function reqToBuffer(req: NextApiRequest): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: any = [];
+    req.on('data', chunk => {
+      chunks.push(chunk);
+    })
+    req.on('end', () => {
+      resolve(Buffer.concat(chunks));
+    })
+    req.on('error', err => {
+      reject(err);
+    })
+  })
+}
+
 const relevantEvents = new Set([
   'charge.succeeded',
   'payment_method.updated',
@@ -37,13 +52,13 @@ const relevantEvents = new Set([
   'invoice.payment_failed',
 ]);
 
-const webhookHandler = (stripe: Stripe, prisma: PrismaClient): NextApiHandler => async (req, res) => {
+export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): NextApiHandler => async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).end('Method Not Allowed');
   }
 
-  const buf = await buffer(req.body);
+  const buf = await reqToBuffer(req);
   const sig = req.headers['stripe-signature']!;
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
   let event;
@@ -106,11 +121,9 @@ const webhookHandler = (stripe: Stripe, prisma: PrismaClient): NextApiHandler =>
       }
     } catch (error) {
       console.log(error);
-      return res.json({ error: 'Webhook handler failed. View logs.' });
+      return res.status(500).json({ error: 'Webhook handler failed. View logs.' });
     }
   }
 
   res.json({ received: true });
 };
-
-export default webhookHandler;

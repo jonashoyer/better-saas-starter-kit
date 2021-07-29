@@ -13,29 +13,29 @@
     "watch": "npm-run-all -l -p -r *:watch",
     "generate": "npm-run-all -p -r *:generate",
     "build": "npm-run-all -p -r *:build",
-    
     "web:dev": "npm run dev -w bs-web-kit",
     "api:dev": "npm run dev -w bs-api-kit",
-
     "prisma:generate": "npx prisma generate --schema packages/shared-server/prisma/schema.prisma",
+    "prisma:migrate": "npx prisma migrate dev --schema packages/shared-server/prisma/schema.prisma",
+    "prisma:reset": "npx prisma migrate reset --schema packages/shared-server/prisma/schema.prisma",
+    "prisma:deploy": "npx prisma migrate deploy --schema packages/shared-server/prisma/schema.prisma",
+    "prisma:format": "npx prisma format --schema packages/shared-server/prisma/schema.prisma",
     "api:generate": "npm run generate -w bs-api-kit",
     "web:generate": "npm run generate -w bs-web-kit",
-    "prisma:format": "npx prisma format --schema packages/shared-server/prisma/schema.prisma",
-    
     "api:build": "npm run build -w bs-api-kit",
     "web:build": "npm run build -w bs-web-kit",
-    
-    
     "shared:build": "npm run build -w bs-shared-kit",
     "shared:watch": "npm run watch -w bs-shared-kit",
-    
     "shared-server:build": "npm run build -w bs-shared-server-kit",
-    "shared-server:watch": "npm run watch -w bs-shared-server-kit"
+    "shared-server:watch": "npm run watch -w bs-shared-server-kit",
+    "stripe:relay": "stripe listen --forward-to 127.0.0.1:3000/api/webhook"
   },
   "devDependencies": {
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "prisma": "^2.28.0"
   },
   "dependencies": {
+    "@prisma/client": "^2.28.0",
     "subscriptions-transport-ws": "^0.9.19"
   }
 }

@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
-CREATE TYPE "PaymentMethodType" AS ENUM ('PRIMARY', 'BACKUP', 'OTHER');
+CREATE TYPE "PaymentMethodImportance" AS ENUM ('PRIMARY', 'BACKUP', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -41,7 +41,6 @@ CREATE TABLE "User" (
     "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "stripeCustomerId" TEXT,
 
     PRIMARY KEY ("id")
 );
@@ -63,27 +62,7 @@ CREATE TABLE "Project" (
     "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "BillingAccountProject" (
-    "id" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "billingAccountId" TEXT NOT NULL,
-    "projectId" TEXT NOT NULL,
-
-    PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "BillingAccount" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "userId" TEXT NOT NULL,
+    "stripeCustomerId" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -97,8 +76,9 @@ CREATE TABLE "PaymentMethod" (
     "last4" TEXT NOT NULL,
     "expMonth" INTEGER NOT NULL,
     "expYear" INTEGER NOT NULL,
-    "type" "PaymentMethodType" NOT NULL,
-    "billingAccountId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "importance" "PaymentMethodImportance" NOT NULL,
+    "projectId" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -118,6 +98,7 @@ CREATE TABLE "VerificationRequest" (
 -- CreateTable
 CREATE TABLE "Product" (
     "id" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
@@ -130,23 +111,18 @@ CREATE TABLE "Product" (
 -- CreateTable
 CREATE TABLE "ProductPrice" (
     "id" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
+    "productId" TEXT,
     "active" BOOLEAN NOT NULL,
     "currency" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
     "type" TEXT NOT NULL,
-    "unitAmount" INTEGER NOT NULL,
+    "unitAmount" INTEGER,
     "interval" TEXT,
-    "trial_period_days" INTEGER,
+    "intervalCount" INTEGER,
+    "trialPeriodDays" INTEGER,
     "metadata" JSONB NOT NULL,
 
     PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "_ProductToProductPrice" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL
 );
 
 -- CreateIndex
@@ -162,7 +138,7 @@ CREATE UNIQUE INDEX "User.email_unique" ON "User"("email");
 CREATE UNIQUE INDEX "UserProject.projectId_userId_unique" ON "UserProject"("projectId", "userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "BillingAccountProject.billingAccountId_projectId_unique" ON "BillingAccountProject"("billingAccountId", "projectId");
+CREATE UNIQUE INDEX "Project.stripeCustomerId_unique" ON "Project"("stripeCustomerId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"("token");
@@ -171,10 +147,7 @@ CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"(
 CREATE UNIQUE INDEX "VerificationRequest.identifier_token_unique" ON "VerificationRequest"("identifier", "token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "_ProductToProductPrice_AB_unique" ON "_ProductToProductPrice"("A", "B");
-
--- CreateIndex
-CREATE INDEX "_ProductToProductPrice_B_index" ON "_ProductToProductPrice"("B");
+CREATE UNIQUE INDEX "Product.type_unique" ON "Product"("type");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -189,22 +162,7 @@ ALTER TABLE "UserProject" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON 
 ALTER TABLE "UserProject" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "BillingAccountProject" ADD FOREIGN KEY ("billingAccountId") REFERENCES "BillingAccount"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "BillingAccountProject" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "BillingAccount" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "PaymentMethod" ADD FOREIGN KEY ("billingAccountId") REFERENCES "BillingAccount"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "PaymentMethod" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProductPrice" ADD FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_ProductToProductPrice" ADD FOREIGN KEY ("A") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_ProductToProductPrice" ADD FOREIGN KEY ("B") REFERENCES "ProductPrice"("id") ON DELETE CASCADE ON UPDATE CASCADE;

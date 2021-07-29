@@ -3,7 +3,7 @@ module.exports = {
   defaultLocale: 'en',
   pages: {
     '*': ['common'],
-    '/': ['home'],
+    '/': ['home', 'pricing'],
   },
   async loadLocaleFrom(lang, ns) {
     return import(`./locales/${lang}/${ns}.yml`).then((m) => m.default)

@@ -8,26 +8,14 @@ import type { Context } from "./../graphql/context"
 import type { core } from "nexus"
 declare global {
   interface NexusGenCustomInputMethods<TypeName extends string> {
-    /**
-     * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-     */
-    json<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "JSONObject";
-    /**
-     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
-     */
-    date<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "DateTime";
+    Json<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "Json";
+    Date<FieldName extends string>(fieldName: FieldName, opts?: core.CommonInputFieldConfig<TypeName, FieldName>): void // "Date";
   }
 }
 declare global {
   interface NexusGenCustomOutputMethods<TypeName extends string> {
-    /**
-     * The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-     */
-    json<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "JSONObject";
-    /**
-     * A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
-     */
-    date<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "DateTime";
+    Json<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "Json";
+    Date<FieldName extends string>(fieldName: FieldName, ...opts: core.ScalarOutSpread<TypeName, FieldName>): void // "Date";
   }
 }
 declare global {
@@ -53,11 +41,17 @@ export interface NexusGenScalars {
   Float: number
   Boolean: boolean
   ID: string
+  Date: any
   DateTime: any
   JSONObject: any
+  Json: any
 }
 
 export interface NexusGenObjects {
+  CheckoutSession: { // root type
+    sessionId?: string | null; // String
+  }
+  Mutation: {};
   Query: {};
 }
 
@@ -72,18 +66,38 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
+  CheckoutSession: { // field return type
+    sessionId: string | null; // String
+  }
+  Mutation: { // field return type
+    CreateCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+  }
   Query: { // field return type
     ping: string; // String!
   }
 }
 
 export interface NexusGenFieldTypeNames {
+  CheckoutSession: { // field return type name
+    sessionId: 'String'
+  }
+  Mutation: { // field return type name
+    CreateCheckoutSession: 'CheckoutSession'
+  }
   Query: { // field return type name
     ping: 'String'
   }
 }
 
 export interface NexusGenArgTypes {
+  Mutation: {
+    CreateCheckoutSession: { // args
+      metadata: NexusGenScalars['Json'] | null; // Json
+      price: string; // String!
+      projectId: string; // String!
+      quantity: number | null; // Int
+    }
+  }
 }
 
 export interface NexusGenAbstractTypeMembers {

@@ -1,5 +1,3 @@
-import { GraphQLScalarType } from 'graphql';
-import { DateTimeResolver, JSONObjectResolver } from 'graphql-scalars';
 import * as NexusSchema from 'nexus';
 import { nexusPrisma } from 'nexus-plugin-prisma';
 import * as path from 'path';
@@ -10,14 +8,6 @@ export default NexusSchema.makeSchema({
   plugins: [
     nexusPrisma({
       experimentalCRUD: true,
-      scalars: {
-        DateTime: DateTimeResolver,
-        Json: new GraphQLScalarType({
-          ...JSONObjectResolver,
-          name: 'Json',
-          description: 'The `JSON` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).',
-        })
-      }
     }),
     NexusSchema.declarativeWrappingPlugin(),
   ],
@@ -34,7 +24,7 @@ export default NexusSchema.makeSchema({
   sourceTypes: {
     modules: [
       {
-        module: require.resolve('.prisma/client/index.d.ts'),
+        module: path.join(process.cwd(), '..', '..', 'node_modules', '.prisma', 'client', 'index.d.ts'),
         alias: 'prisma',
       },
     ],
