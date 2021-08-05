@@ -19,7 +19,6 @@ export type Context = {
 
 export const createContext: ContextFunction<any> = async (ctx)  => {
   const session = await getSession({ req: ctx.req });
-  
   return {
     prisma,
     redis,

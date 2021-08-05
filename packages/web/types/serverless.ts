@@ -1,80 +1,7 @@
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
-const defaultOptions =  {}
-
-export const PingDocument = gql`
-    query Ping {
-  ping
-}
-    `;
-
-/**
- * __usePingQuery__
- *
- * To run a query within a React component, call `usePingQuery` and pass it any options that fit your needs.
- * When your component renders, `usePingQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePingQuery({
- *   variables: {
- *   },
- * });
- */
-export function usePingQuery(baseOptions?: Apollo.QueryHookOptions<PingQuery, PingQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PingQuery, PingQueryVariables>(PingDocument, options);
-      }
-export function usePingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PingQuery, PingQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PingQuery, PingQueryVariables>(PingDocument, options);
-        }
-export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
-export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
-export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
-export const SelfQueryDocument = gql`
-    query SelfQuery {
-  self {
-    id
-    email
-    emailVerified
-    name
-  }
-}
-    `;
-
-/**
- * __useSelfQueryQuery__
- *
- * To run a query within a React component, call `useSelfQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useSelfQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSelfQueryQuery({
- *   variables: {
- *   },
- * });
- */
-export function useSelfQueryQuery(baseOptions?: Apollo.QueryHookOptions<SelfQueryQuery, SelfQueryQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SelfQueryQuery, SelfQueryQueryVariables>(SelfQueryDocument, options);
-      }
-export function useSelfQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQueryQuery, SelfQueryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SelfQueryQuery, SelfQueryQueryVariables>(SelfQueryDocument, options);
-        }
-export type SelfQueryQueryHookResult = ReturnType<typeof useSelfQueryQuery>;
-export type SelfQueryLazyQueryHookResult = ReturnType<typeof useSelfQueryLazyQuery>;
-export type SelfQueryQueryResult = Apollo.QueryResult<SelfQueryQuery, SelfQueryQueryVariables>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -160,21 +87,9 @@ export type ProjectPaymentMethodsArgs = {
   after?: Maybe<PaymentMethodWhereUniqueInput>;
 };
 
-export enum ProjectRole {
-  Admin = 'ADMIN',
-  User = 'USER'
-}
-
 export type Query = {
   __typename?: 'Query';
-  currentProject?: Maybe<Project>;
   ping: Scalars['String'];
-  self?: Maybe<User>;
-};
-
-
-export type QueryCurrentProjectArgs = {
-  projectId?: Maybe<Scalars['String']>;
 };
 
 export type Subscription = {
@@ -231,15 +146,4 @@ export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 export type PingQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'ping'>
-);
-
-export type SelfQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type SelfQueryQuery = (
-  { __typename?: 'Query' }
-  & { self?: Maybe<(
-    { __typename?: 'User' }
-    & Pick<User, 'id' | 'email' | 'emailVerified' | 'name'>
-  )> }
 );

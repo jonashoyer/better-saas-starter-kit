@@ -17,3 +17,5 @@ export const DateTimeScalar = scalarType({
 export * as User from './User';
 export * as Ping from './Ping';
 export * as Checkout from './Checkout';
+export * as Project from './Project';
+export * as PaymentMethod from './PaymentMethod';

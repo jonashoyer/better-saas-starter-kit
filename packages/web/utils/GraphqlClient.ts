@@ -50,6 +50,7 @@ const createLink = (headers = {}) => {
 
   const httpLinkSplit = split(
     ({ operationName, getContext }) => {
+      //NOTE: Custom logic for splitting between serverless and remote server. Change as see fit.
       return !operationName.toLowerCase().includes('serverless') && !getContext().serverless;
     },
     createHttpLink(GRAPHQL_ENDPOINT, headers),

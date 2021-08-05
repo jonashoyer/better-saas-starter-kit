@@ -1,0 +1,8 @@
+query SelfQuery {
+  self {
+    id
+    email
+    emailVerified
+    name
+  }
+}

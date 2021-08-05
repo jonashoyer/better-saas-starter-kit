@@ -1,10 +1,10 @@
-
 import prisma from "@/utils/prisma";
 import NextAuth, { DefaultSession } from "next-auth"
 import Providers from 'next-auth/providers'
-// import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@/utils/PrismaAdapter"
 
+
+const prismaAdapter = PrismaAdapter(prisma);
 
 export default NextAuth({
   // Used to debug https://github.com/nextauthjs/next-auth/issues/1664
@@ -42,34 +42,17 @@ export default NextAuth({
       clientSecret: process.env.GITHUB_SECRET,
       scope: 'user:email, read:user'
     }),
-    // CredentialsProvider({
-    //   name: "Credentials",
-    //   credentials: {
-    //     password: { label: "Password", type: "password" },
-    //   },
-    //   async authorize(credentials, req) {
-    //     if (credentials.password === "password") {
-    //       return {
-    //         id: 1,
-    //         name: "Fill Murray",
-    //         email: "bill@fillmurray.com",
-    //         image: "https://www.fillmurray.com/64/64",
-    //       }
-    //     }
-    //     return null
-    //   },
-    // }),
   ],
   debug: false,
   theme: "light",
   
-  adapter: PrismaAdapter(prisma),
+  adapter: prismaAdapter,
   secret: process.env.SECRET,
   callbacks: {
     session(session: any, user: any) {
       session.user.id = user.id;
       return session;
-    }
+    },
   }
 })
 

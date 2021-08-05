@@ -28,6 +28,7 @@ CREATE TABLE "Session" (
     "sessionToken" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "metadata" JSONB NOT NULL DEFAULT E'{}',
 
     PRIMARY KEY ("id")
 );
@@ -101,7 +102,6 @@ CREATE TABLE "Product" (
     "type" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT,
     "image" TEXT,
     "metadata" JSONB NOT NULL,
 
@@ -114,7 +114,6 @@ CREATE TABLE "ProductPrice" (
     "productId" TEXT,
     "active" BOOLEAN NOT NULL,
     "currency" TEXT NOT NULL,
-    "description" TEXT,
     "type" TEXT NOT NULL,
     "unitAmount" INTEGER,
     "interval" TEXT,

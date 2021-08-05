@@ -24,6 +24,71 @@ type Mutation {
   CreateCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
 }
 
+type PaymentMethod {
+  brand: String!
+  createdAt: DateTime!
+  expMonth: Int!
+  expYear: Int!
+  id: String!
+  importance: PaymentMethodImportance!
+  last4: String!
+  project: Project!
+  type: String!
+  updatedAt: DateTime!
+}
+
+enum PaymentMethodImportance {
+  BACKUP
+  OTHER
+  PRIMARY
+}
+
+input PaymentMethodWhereUniqueInput {
+  id: String
+}
+
+type Project {
+  id: String!
+  name: String!
+  paymentMethods(after: PaymentMethodWhereUniqueInput, before: PaymentMethodWhereUniqueInput, first: Int, last: Int): [PaymentMethod!]!
+  users(after: UserProjectWhereUniqueInput, before: UserProjectWhereUniqueInput, first: Int, last: Int): [UserProject!]!
+}
+
+enum ProjectRole {
+  ADMIN
+  USER
+}
+
 type Query {
+  currentProject(projectId: String): Project
   ping: String!
+  self: User
+}
+
+type User {
+  createdAt: DateTime!
+  email: String
+  emailVerified: DateTime
+  id: String!
+  image: String
+  name: String
+  projects(after: UserProjectWhereUniqueInput, before: UserProjectWhereUniqueInput, first: Int, last: Int): [UserProject!]!
+}
+
+type UserProject {
+  createdAt: DateTime!
+  id: String!
+  project: Project!
+  role: ProjectRole!
+  user: User!
+}
+
+input UserProjectProjectIdUserIdCompoundUniqueInput {
+  projectId: String!
+  userId: String!
+}
+
+input UserProjectWhereUniqueInput {
+  id: String
+  projectId_userId: UserProjectProjectIdUserIdCompoundUniqueInput
 }

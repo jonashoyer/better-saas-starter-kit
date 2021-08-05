@@ -4,6 +4,9 @@ import type { Profile } from "next-auth"
 import type { Adapter } from "next-auth/adapters"
 import jwt from 'jsonwebtoken';
 import { createStripe, StripeHandler } from 'bs-shared-server-kit';
+import { NextApiRequest } from "next";
+import cuid from 'cuid';
+import argon2 from 'argon2';
 
 export const PrismaAdapter: Adapter<
   Prisma.PrismaClient,
@@ -24,54 +27,89 @@ export const PrismaAdapter: Adapter<
         return jwt.sign({ userId: userId }, secret, { expiresIn: accessTokenExpiresIn });
       }
 
+      const createUserWithProject = async (profile: Profile & { emailVerified?: Date; password?: string; }) => {
+        const projectId = cuid();
+
+        const name = profile.name || profile.email?.split('@')[0] || 'Unnamed';
+
+        const handler = new StripeHandler(createStripe(), prisma);
+        const stripeCustomer = await handler.createCustomer({
+          name,
+          email: profile.email,
+          metadata: {
+            projectId,
+          },
+        });
+
+        try {
+
+        const project = await prisma.project.create({
+          data: {
+            id: projectId,
+            name: `${name}'s Project`,
+            stripeCustomerId: stripeCustomer.id,
+            users: {
+              create: {
+                role: 'ADMIN',
+                user: {
+                  create: {
+                    name,
+                    email: profile.email,
+                    image: profile.image,
+                    emailVerified: profile.emailVerified?.toISOString() ?? null,
+                  }
+                }
+              }
+            }
+          },
+          include: {
+            users: {
+              include: {
+                user: true,
+              }
+            } 
+          }
+        })
+
+        return {
+          project,
+          user: project.users[0].user,
+        }
+      } catch (err) {
+        await handler.deleteCustomer(stripeCustomer.id);
+        throw new err;
+      }
+    }
+
       return {
         displayName: "PRISMA",
         async createUser(profile) {
+          const { user } = await createUserWithProject(profile);
+          return user;
+        },
 
-          const user = await prisma.user.create({
-            data: {
-              name: profile.name,
-              email: profile.email,
-              image: profile.image,
-              emailVerified: profile.emailVerified?.toISOString() ?? null,
-            },
-            include: {
-              projects: {
-                select: { id: true },
-              },
-            },
-          });
+        //NOTE: Credentials login method is unspported
+        async credentialsAuthorize({ email, password }: { email: string, password: string }, req: NextApiRequest) {
+          const user: any = await prisma.user.findUnique({ where: { email } });
+          if (!user) throw new Error('User not found!')
+          if (!user.password) throw new Error('User not found!');
+          const match = await argon2.verify(user.password, password);
+          if (!match) throw new Error('User not found!');
+          return user;
+        },
 
-          try {
-
-            const handler = new StripeHandler(createStripe(), prisma);
-            const stripeCustomer = await handler.createStripeCustomer({
-              email: profile.email,
-              metadata: {
-                userId: user.id,
-              },
-            });
-            
-            await prisma.project.create({
-              data: {
-                name: `${profile.name}'s Project`,
-                stripeCustomerId: stripeCustomer.id,
-                users: {
-                  create: {
-                    user: { connect: { id: user.id } },
-                    role: 'ADMIN'
-                  }
-                },
-              }
-            })
-          } catch(err) {
-            console.error('Failed to create init user project!', err);
-          }
-
+        //NOTE: Credentials login method is unspported
+        async createCredentialsUser({ email, password }: { email: string, password: string }) {
+          const existingUser = await prisma.user.findUnique({ where: { email }, select: { id: true } });
+          if (existingUser) throw new Error('User already signed up!');
+          if (!email) throw new Error('Missing email!');
+          if (!password) throw new Error('Missing password!');
+          const { user } = await createUserWithProject({ email, password });
           return user;
         },
 
         getUser(id) {
+          // TODO: Caching layer?
           return prisma.user.findUnique({
             where: { id },
           })
@@ -156,6 +194,7 @@ export const PrismaAdapter: Adapter<
         },
 
         async getSession(sessionToken) {
+          // FIXME: Use shared auth.ts
           const session = await prisma.session.findUnique({
             where: { sessionToken },
           })

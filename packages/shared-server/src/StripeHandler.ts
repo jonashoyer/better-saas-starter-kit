@@ -34,6 +34,10 @@ export class StripeHandler {
     return this.stripe.customers.create(params, options);
   }
 
+  deleteCustomer(id: string, options?: Stripe.RequestOptions) {
+    return this.stripe.customers.del(id, options);
+  }
+
   createPaymentMethod(params?: Stripe.PaymentMethodCreateParams & { metadata: { importance: PaymentMethodImportance, projectId: string } }, options?: Stripe.RequestOptions) {
     return this.stripe.paymentMethods.create(params, options);
   }

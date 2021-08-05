@@ -49,7 +49,7 @@ model User {
   projects UserProject[]
 }
 
-enum UserRole {
+enum ProjectRole {
   ADMIN
   USER
 }
@@ -59,7 +59,7 @@ model UserProject {
   createdAt DateTime @default(now())
   userId    String
   projectId String
-  role      UserRole @default(USER)
+  role      ProjectRole @default(USER)
 
   user    User    @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id])

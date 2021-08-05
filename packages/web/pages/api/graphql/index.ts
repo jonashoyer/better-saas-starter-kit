@@ -7,7 +7,8 @@ import createCors from 'micro-cors';
 import { NextApiHandler } from "next";
 
 const cors = createCors({
-  
+  origin: 'https://studio.apollographql.com',
+  allowCredentials: true,
 });
 
 const apolloServer = new ApolloServer({
