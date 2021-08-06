@@ -6,6 +6,7 @@ import theme from '../constants/theme';
 import { useApollo } from '../utils/GraphqlClient';
 import { ApolloProvider } from '@apollo/client';
 import { Provider as NextAuthProvider } from 'next-auth/client'
+import { ProjectValueProvider } from 'hooks/useProject';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -25,9 +26,12 @@ function MyApp({ Component, pageProps }: AppProps) {
       keepAlive: 60 * 60,
     }} session={pageProps.session}>
       <ApolloProvider client={apolloClient}>
+
         <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Component {...pageProps} />
+          <ProjectValueProvider>
+            <CssBaseline />
+            <Component {...pageProps} />
+          </ProjectValueProvider>
         </ThemeProvider>
       </ApolloProvider>
     </NextAuthProvider>

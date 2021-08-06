@@ -19,7 +19,11 @@ export const hasProjectAccess = (options: ProjectAccessOptions = {}) => async (r
   const projectId = projectIdFn(root, args, ctx);
   if (options.nullable && !projectId) return true;
 
-  const userProject = await ctx.prisma.userProject.findUnique({ where: { projectId_userId: { userId: ctx.user!.id, projectId } } });
+  return hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId, role);
+}
+
+export const hasUserProjectAccess = async (prisma: prisma.PrismaClient, userId: string, projectId: string, role: 'ANY' | prisma.ProjectRole = 'ANY') => {
+  const userProject = await prisma.userProject.findUnique({ where: { projectId_userId: { userId, projectId } } });
   if (!userProject) return false;
   if (role == 'ANY') return true;
   return projectRoleMapping[userProject.role].includes(role);

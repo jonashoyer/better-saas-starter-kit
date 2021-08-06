@@ -2,14 +2,18 @@ import { ApolloServer } from "apollo-server-micro";
 import schema from "../../../graphql/schema";
 import { createContext } from '../../../graphql/context';
 import depthLimit from 'graphql-depth-limit';
-import { RequestHandler, send } from 'micro'
-import createCors from 'micro-cors';
+import { RequestHandler } from 'micro'
 import { NextApiHandler } from "next";
+import Cors from 'cors';
+import initMiddleware from "@/utils/init-middleware";
 
-const cors = createCors({
-  origin: 'https://studio.apollographql.com',
-  allowCredentials: true,
-});
+const cors = initMiddleware(
+  Cors({
+    credentials: true,
+    origin: ['http://127.0.0.1:3000', 'http://localhost:3000', 'https://studio.apollographql.com'],
+    allowedHeaders: ['Cookie'],
+  })
+);
 
 const apolloServer = new ApolloServer({
   schema,
@@ -23,10 +27,14 @@ export const config = {
   }
 };
 
+const handler: RequestHandler = async (req, res) => {
+  await cors(req, res);
+  await apolloServer.createHandler({ path: '/api/graphql' })(req, res);
+}
+
 const createHandler = async () => {
   await apolloServer.start();
-  const apolloHandler = apolloServer.createHandler({ path: '/api/graphql' });
-  return cors((req, res) => req.method === 'OPTIONS' ? send(res, 200, 'ok') : apolloHandler(req, res));
+  return handler;
 }
 
 let promiseHandler: Promise<RequestHandler>;

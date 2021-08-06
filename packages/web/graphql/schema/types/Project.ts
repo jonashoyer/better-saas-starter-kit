@@ -27,9 +27,13 @@ export const ProjectRole = enumType({
   members: ['ADMIN', 'USER'],
 })
 
+
 export const CurrentProject = queryField('currentProject', {
   type: 'Project',
-  authorize: hasProjectAccess({ nullable: true, role: 'ADMIN' }),
+  authorize: hasProjectAccess({
+    nullable: true,
+    projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies['bs.project-id'],
+  }),
   args: {
     projectId: stringArg({ nullable: true }),
   },
@@ -37,6 +41,7 @@ export const CurrentProject = queryField('currentProject', {
 
     const getProjetId = async () => {
       if (projectId) return projectId;
+      if (ctx.req.cookies['bs.project-id']) return ctx.req.cookies['bs.project-id'];
       const userProject = await ctx.prisma.userProject.findFirst({
         where: { userId: ctx.user!.id }
       })

@@ -8,6 +8,8 @@ import { NextApiRequest } from "next";
 import cuid from 'cuid';
 import argon2 from 'argon2';
 
+const GENERATE_ACCESS_TOKEN = true;
+
 export const PrismaAdapter: Adapter<
   Prisma.PrismaClient,
   never,
@@ -25,6 +27,14 @@ export const PrismaAdapter: Adapter<
 
       const generateJWT = (userId: string) => {
         return jwt.sign({ userId: userId }, secret, { expiresIn: accessTokenExpiresIn });
+      }
+
+      const withAccessToken = (session: any) => {
+        if (!GENERATE_ACCESS_TOKEN) return session;
+        return {
+          ...session,
+          accessToken: generateJWT(session.userId),
+        }
       }
 
       const createUserWithProject = async (profile: Profile & { emailVerified?: Date; password?: string; }) => {
@@ -187,10 +197,7 @@ export const PrismaAdapter: Adapter<
             },
           })
           
-          return {
-            ...session,
-            accessToken: generateJWT(user.id),
-          }
+          return withAccessToken(session);
         },
 
         async getSession(sessionToken) {
@@ -206,10 +213,7 @@ export const PrismaAdapter: Adapter<
             return null
           }
 
-          return {
-            ...session,
-            accessToken: generateJWT(session.userId),
-          };
+          return withAccessToken(session);
         },
 
         async updateSession(session, force) {
@@ -227,10 +231,7 @@ export const PrismaAdapter: Adapter<
             },
           })
 
-          return {
-            ..._session,
-            accessToken: generateJWT(_session.userId),
-          }
+          return withAccessToken(_session);
         },
 
         async deleteSession(sessionToken) {

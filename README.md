@@ -1,5 +1,7 @@
 ## Better SaaS Starter Kit
 
+### <span style="color:red"> 🚧 Heavily work in progress 🚧</span>
+
 Monorepo using npm workspace
 
 ### NextJS
@@ -9,17 +11,18 @@ Monorepo using npm workspace
 - Apollo Client
 - Stripe
 - Next Translate (i18n)
-- Serverless API
-  - Apollo Server
-  - BullMQ
-  - Prisma, Nexus
-  - Redis
+  
+### NextJS Serverless API
+- Apollo Server
+- Prisma, Nexus
+- BullMQ
+- Redis
 
 ### Apollo Server, Express API
 - Apollo Server
+- Prisma, Nexus
 - Express
 - BullMQ
-- Prisma, Nexus
 - Redis
 
 ### BullMQ Worker
@@ -34,11 +37,16 @@ Monorepo using npm workspace
  - [ ] Basic subscription management
  - [ ] Stripe charge integration
  - [ ] Basic charge management
- - [ ] Work quene magagment
+ - [ ] Work quene management
  - [ ] Server caching
  - [ ] Platform admin page
  - [ ] Landing page template
  - [ ] Web app layout template
+ - [ ] [Going to production](https://nextjs.org/docs/going-to-production)
+   - [ ] Caching
+   - [ ] Reducing JavaScript Size
+   - [ ] Logging
+   - [ ] Sentry
 
 #### Shared environment variables
 - REDIS_URL

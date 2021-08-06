@@ -6,6 +6,7 @@ interface ProjectButtonProps extends PaperProps {
   project: { id: string, name: string };
   dense?: boolean;
   elevation?: number;
+  test?: any;
 }
 
 function stringToColor(string: string) {
@@ -39,7 +40,6 @@ function stringAvatar(name: string) {
 }
 
 const ProjectButton = ({ project, dense, sx, ...rest }: ProjectButtonProps) => {
-
   return (
     <Paper {...rest} sx={{ display: 'flex', alignItems: 'center', px: dense ? 2 : 3, py: dense ? 1 : 2, '&:hover': { bgcolor: 'grey.300' }, transition: 'background-color 200ms ease-in-out', cursor: 'pointer', ...sx }}>
       <Avatar {...stringAvatar(project.name)} />

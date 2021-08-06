@@ -22,6 +22,7 @@
     "plugins": [{ "name": "nexus/typescript-language-service" }],
     "baseUrl": ".",
     "paths": {
+      "@/hooks/*": ["hooks/*"],
       "@/components/*": ["components/*"],
       "@/utils/*": ["utils/*"],
       "@/assets/*": ["assets/*"],

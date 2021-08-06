@@ -6,6 +6,41 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 const defaultOptions =  {}
 
+export const CurrentProjectDocument = gql`
+    query CurrentProject {
+  currentProject {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useCurrentProjectQuery__
+ *
+ * To run a query within a React component, call `useCurrentProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCurrentProjectQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCurrentProjectQuery(baseOptions?: Apollo.QueryHookOptions<CurrentProjectQuery, CurrentProjectQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CurrentProjectQuery, CurrentProjectQueryVariables>(CurrentProjectDocument, options);
+      }
+export function useCurrentProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentProjectQuery, CurrentProjectQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CurrentProjectQuery, CurrentProjectQueryVariables>(CurrentProjectDocument, options);
+        }
+export type CurrentProjectQueryHookResult = ReturnType<typeof useCurrentProjectQuery>;
+export type CurrentProjectLazyQueryHookResult = ReturnType<typeof useCurrentProjectLazyQuery>;
+export type CurrentProjectQueryResult = Apollo.QueryResult<CurrentProjectQuery, CurrentProjectQueryVariables>;
 export const PingDocument = gql`
     query Ping {
   ping
@@ -205,7 +240,7 @@ export type UserProject = {
   __typename?: 'UserProject';
   id: Scalars['String'];
   createdAt: Scalars['DateTime'];
-  role: UserRole;
+  role: ProjectRole;
   user: User;
   project: Project;
 };
@@ -220,10 +255,16 @@ export type UserProjectWhereUniqueInput = {
   projectId_userId?: Maybe<UserProjectProjectIdUserIdCompoundUniqueInput>;
 };
 
-export enum UserRole {
-  Admin = 'ADMIN',
-  User = 'USER'
-}
+export type CurrentProjectQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CurrentProjectQuery = (
+  { __typename?: 'Query' }
+  & { currentProject?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id' | 'name'>
+  )> }
+);
 
 export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 

@@ -1,0 +1,6 @@
+query CurrentProject {
+  currentProject {
+    id
+    name
+  }
+}
