@@ -6,6 +6,7 @@ interface ProjectButtonProps extends PaperProps {
   project: { id: string, name: string };
   dense?: boolean;
   elevation?: number;
+  endAdornment?: React.ReactNode;
   test?: any;
 }
 
@@ -39,11 +40,12 @@ function stringAvatar(name: string) {
   };
 }
 
-const ProjectButton = ({ project, dense, sx, ...rest }: ProjectButtonProps) => {
+const ProjectButton = ({ project, dense, sx, endAdornment, ...rest }: ProjectButtonProps) => {
   return (
     <Paper {...rest} sx={{ display: 'flex', alignItems: 'center', px: dense ? 2 : 3, py: dense ? 1 : 2, '&:hover': { bgcolor: 'grey.300' }, transition: 'background-color 200ms ease-in-out', cursor: 'pointer', ...sx }}>
       <Avatar {...stringAvatar(project.name)} />
-      <Typography>{project.name}</Typography>
+      <Typography sx={{ flex: 1 }}>{project.name}</Typography>
+      {endAdornment}
     </Paper>
   )
 }

@@ -2,25 +2,42 @@ import React from 'react';
 import Head from 'next/head';
 import PageLayout from '../components/layouts/PageLayout';
 import { useSession, signIn, signOut, getSession  } from "next-auth/client";
-import { Button, Typography } from '@material-ui/core';
-import { CurrentProjectDocument } from 'types/gql';
+import { Box, Button, Typography } from '@material-ui/core';
+import { CurrentProjectDocument, SelfProjectsDocument, useCurrentProjectQuery, useSelfProjectsQuery } from 'types/gql';
 import ProductPricingsLayout from '@/components/layouts/ProductPricingsLayout';
 import prisma from '@/utils/prisma';
 import { GetServerSideProps } from 'next';
 import ProjectSelector from '@/components/layouts/ProjectSelector';
 import { initializeApollo } from '@/utils/GraphqlClient';
-import useProject from '../hooks/useProject';
 import { Constants } from 'bs-shared-kit';
 import { setCookie } from '@/utils/cookies';
+import ProjectEditDialog from '@/components/elements/ProjectEditDialog';
+import useProject from '@/hooks/useProject';
 
 export default function Home(props: any) {
 
-  const [session, loading] = useSession();
-
   const [projectId] = useProject();
+
+  const [session, loading] = useSession();
+  const [editProjectDialog, setEditProjectDialog] = React.useState<any>(false);
+
+  const { data: currentProjectData } = useCurrentProjectQuery({
+    variables: {
+      projectId,
+    },
+    context: { serverless: true }
+  });
+  const { data: selfProjectsData } = useSelfProjectsQuery({ context: { serverless: true } });
+
 
   return (
     <React.Fragment>
+
+      <ProjectEditDialog
+        open={!!editProjectDialog}
+        project={editProjectDialog}
+        onClose={() => setEditProjectDialog(false)}
+      />
 
       <Head>
         <title>APP</title>
@@ -32,18 +49,23 @@ export default function Home(props: any) {
 
         {!session && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
         {session && <Button onClick={() => signOut() } variant='contained'>Logout</Button>}
-        <Typography>projectId: {projectId}</Typography>
-        <Typography>{loading ? 'Loading...' : (session ? JSON.stringify(session, null, 2) : 'No session')}</Typography>
+        <Box sx={{ py: 1 }}>
+          <Typography>{currentProjectData?.currentProject?.id} {currentProjectData?.currentProject?.name}</Typography>
+          <Typography>{loading ? 'Loading...' : (session ? JSON.stringify(session, null, 2) : 'No session')}</Typography>
+        </Box>
 
-        {/* {props.projects && <ProjectList projects={props.projects} />} */}
+        <Box sx={{ py: 1 }}>
+          <ProductPricingsLayout products={props.products} />
+        </Box>
 
-        <ProductPricingsLayout products={props.products} />
-
-        {props.projects &&
-          <ProjectSelector
-            projects={props.projects}
-          />
-        }
+        <Box sx={{ py: 1 }}>
+          {selfProjectsData.selfProjects &&
+            <ProjectSelector
+              projects={selfProjectsData.selfProjects}
+              onProjectEdit={proj => setEditProjectDialog(proj)}
+            />
+          }
+        </Box>
         <Typography>Text</Typography>
 
       </PageLayout>
@@ -79,20 +101,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
     if (!projectId && currentProject?.id) setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, currentProject.id, { maxAge: 31540000000 });
 
-    const userProjects = session?.user && await prisma.userProject.findMany({
-      where: { userId: session.user.id },
-      select: {
-        project: {
-          select: {
-            id: true,
-            name: true,
-          }
-        } 
-      }
+    await client.query({
+      query: SelfProjectsDocument,
+      context: { serverless: true },
     });
 
     return {
-      props: { products, projects: userProjects?.map(e => e.project) ?? null, currentProject },
+      props: { products, projectId: currentProject?.id, initialApolloState: client.extract() },
     };
   }
 

@@ -34,6 +34,10 @@ export interface NexusGenInputs {
   PaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
   }
+  UpdateProjectInput: { // input type
+    id: string; // String!
+    name?: string | null; // String
+  }
   UserProjectProjectIdUserIdCompoundUniqueInput: { // input type
     projectId: string; // String!
     userId: string; // String!
@@ -88,7 +92,8 @@ export interface NexusGenFieldTypes {
     sessionId: string | null; // String
   }
   Mutation: { // field return type
-    CreateCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+    createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+    updateProject: NexusGenRootTypes['Project'] | null; // Project
   }
   PaymentMethod: { // field return type
     brand: string; // String!
@@ -112,6 +117,7 @@ export interface NexusGenFieldTypes {
     currentProject: NexusGenRootTypes['Project'] | null; // Project
     ping: string; // String!
     self: NexusGenRootTypes['User'] | null; // User
+    selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
   }
   User: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -136,7 +142,8 @@ export interface NexusGenFieldTypeNames {
     sessionId: 'String'
   }
   Mutation: { // field return type name
-    CreateCheckoutSession: 'CheckoutSession'
+    createCheckoutSession: 'CheckoutSession'
+    updateProject: 'Project'
   }
   PaymentMethod: { // field return type name
     brand: 'String'
@@ -160,6 +167,7 @@ export interface NexusGenFieldTypeNames {
     currentProject: 'Project'
     ping: 'String'
     self: 'User'
+    selfProjects: 'Project'
   }
   User: { // field return type name
     createdAt: 'DateTime'
@@ -181,11 +189,14 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
-    CreateCheckoutSession: { // args
+    createCheckoutSession: { // args
       metadata: NexusGenScalars['Json'] | null; // Json
       price: string; // String!
       projectId: string; // String!
       quantity: number | null; // Int
+    }
+    updateProject: { // args
+      update: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
     }
   }
   Project: {

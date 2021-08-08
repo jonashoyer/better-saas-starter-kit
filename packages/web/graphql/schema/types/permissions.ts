@@ -18,7 +18,6 @@ export const hasProjectAccess = (options: ProjectAccessOptions = {}) => async (r
   const projectIdFn = options.projectIdFn ?? ((_, args) => args.projectId);
   const projectId = projectIdFn(root, args, ctx);
   if (options.nullable && !projectId) return true;
-
   return hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId, role);
 }
 

@@ -9,7 +9,7 @@ export const CheckoutSession = objectType({
   }
 })
 
-export const CreateCheckoutSession = mutationField("CreateCheckoutSession", {
+export const CreateCheckoutSession = mutationField("createCheckoutSession", {
   type: "CheckoutSession",
   args: {
     price: stringArg({ required: true }),

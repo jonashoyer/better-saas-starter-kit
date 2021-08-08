@@ -1,0 +1,6 @@
+query SelfProjects {
+  selfProjects {
+    id
+    name
+  }
+}

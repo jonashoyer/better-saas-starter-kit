@@ -41,6 +41,7 @@ export const PrismaAdapter: Adapter<
         const projectId = cuid();
 
         const name = profile.name || profile.email?.split('@')[0] || 'Unnamed';
+        const firstName = name.split(' ')[0];
 
         const handler = new StripeHandler(createStripe(), prisma);
         const stripeCustomer = await handler.createCustomer({
@@ -56,7 +57,7 @@ export const PrismaAdapter: Adapter<
         const project = await prisma.project.create({
           data: {
             id: projectId,
-            name: `${name}'s Project`,
+            name: `${firstName}'s Project`,
             stripeCustomerId: stripeCustomer.id,
             users: {
               create: {

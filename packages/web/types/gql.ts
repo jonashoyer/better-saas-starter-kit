@@ -7,8 +7,8 @@ export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Mayb
 const defaultOptions =  {}
 
 export const CurrentProjectDocument = gql`
-    query CurrentProject {
-  currentProject {
+    query CurrentProject($projectId: String) {
+  currentProject(projectId: $projectId) {
     id
     name
   }
@@ -27,6 +27,7 @@ export const CurrentProjectDocument = gql`
  * @example
  * const { data, loading, error } = useCurrentProjectQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -73,6 +74,75 @@ export function usePingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PingQ
 export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
 export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
 export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
+export const SelfProjectsDocument = gql`
+    query SelfProjects {
+  selfProjects {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useSelfProjectsQuery__
+ *
+ * To run a query within a React component, call `useSelfProjectsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSelfProjectsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSelfProjectsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSelfProjectsQuery(baseOptions?: Apollo.QueryHookOptions<SelfProjectsQuery, SelfProjectsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SelfProjectsQuery, SelfProjectsQueryVariables>(SelfProjectsDocument, options);
+      }
+export function useSelfProjectsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfProjectsQuery, SelfProjectsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SelfProjectsQuery, SelfProjectsQueryVariables>(SelfProjectsDocument, options);
+        }
+export type SelfProjectsQueryHookResult = ReturnType<typeof useSelfProjectsQuery>;
+export type SelfProjectsLazyQueryHookResult = ReturnType<typeof useSelfProjectsLazyQuery>;
+export type SelfProjectsQueryResult = Apollo.QueryResult<SelfProjectsQuery, SelfProjectsQueryVariables>;
+export const UpdateProjectDocument = gql`
+    mutation UpdateProject($updateProjectUpdate: UpdateProjectInput!) {
+  updateProject(update: $updateProjectUpdate) {
+    id
+    name
+  }
+}
+    `;
+export type UpdateProjectMutationFn = Apollo.MutationFunction<UpdateProjectMutation, UpdateProjectMutationVariables>;
+
+/**
+ * __useUpdateProjectMutation__
+ *
+ * To run a mutation, you first call `useUpdateProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProjectMutation, { data, loading, error }] = useUpdateProjectMutation({
+ *   variables: {
+ *      updateProjectUpdate: // value for 'updateProjectUpdate'
+ *   },
+ * });
+ */
+export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProjectMutation, UpdateProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateProjectMutation, UpdateProjectMutationVariables>(UpdateProjectDocument, options);
+      }
+export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
+export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
+export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
 export const SelfQueryDocument = gql`
     query SelfQuery {
   self {
@@ -136,7 +206,8 @@ export type CheckoutSession = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  CreateCheckoutSession?: Maybe<CheckoutSession>;
+  createCheckoutSession?: Maybe<CheckoutSession>;
+  updateProject?: Maybe<Project>;
 };
 
 
@@ -145,6 +216,11 @@ export type MutationCreateCheckoutSessionArgs = {
   quantity?: Maybe<Scalars['Int']>;
   metadata?: Maybe<Scalars['Json']>;
   projectId: Scalars['String'];
+};
+
+
+export type MutationUpdateProjectArgs = {
+  update: UpdateProjectInput;
 };
 
 export type PaymentMethod = {
@@ -205,6 +281,7 @@ export type Query = {
   currentProject?: Maybe<Project>;
   ping: Scalars['String'];
   self?: Maybe<User>;
+  selfProjects?: Maybe<Array<Maybe<Project>>>;
 };
 
 
@@ -215,6 +292,11 @@ export type QueryCurrentProjectArgs = {
 export type Subscription = {
   __typename?: 'Subscription';
   ping?: Maybe<Scalars['DateTime']>;
+};
+
+export type UpdateProjectInput = {
+  id: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
 };
 
 export type User = {
@@ -255,7 +337,9 @@ export type UserProjectWhereUniqueInput = {
   projectId_userId?: Maybe<UserProjectProjectIdUserIdCompoundUniqueInput>;
 };
 
-export type CurrentProjectQueryVariables = Exact<{ [key: string]: never; }>;
+export type CurrentProjectQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
 
 
 export type CurrentProjectQuery = (
@@ -272,6 +356,30 @@ export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 export type PingQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'ping'>
+);
+
+export type SelfProjectsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SelfProjectsQuery = (
+  { __typename?: 'Query' }
+  & { selfProjects?: Maybe<Array<Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id' | 'name'>
+  )>>> }
+);
+
+export type UpdateProjectMutationVariables = Exact<{
+  updateProjectUpdate: UpdateProjectInput;
+}>;
+
+
+export type UpdateProjectMutation = (
+  { __typename?: 'Mutation' }
+  & { updateProject?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id' | 'name'>
+  )> }
 );
 
 export type SelfQueryQueryVariables = Exact<{ [key: string]: never; }>;

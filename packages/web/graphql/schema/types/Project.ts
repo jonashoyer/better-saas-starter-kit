@@ -1,5 +1,5 @@
-import { enumType, objectType, queryField, stringArg } from 'nexus';
-import { hasProjectAccess } from './permissions';
+import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
+import { hasAuth, hasProjectAccess } from './permissions';
 
 export const Project = objectType({
   name: 'Project',
@@ -50,6 +50,51 @@ export const CurrentProject = queryField('currentProject', {
 
     const project = await ctx.prisma.project.findUnique({
       where: { id: (await getProjetId()) },
+    });
+
+    return project;
+  }
+})
+
+export const SelfProjects = queryField('selfProjects', {
+  type: 'Project',
+  list: true,
+  authorize: hasAuth,
+  async resolve(root, args, ctx) {
+
+    const userProjects = await ctx.prisma.userProject.findMany({
+      where: { userId: ctx.user.id },
+      include: {
+        project: true,
+      }
+    });
+
+    return userProjects.map(e => e.project);
+  }
+})
+
+
+export const UpdateProjectInput = inputObjectType({
+  name: 'UpdateProjectInput',
+  definition(t) {
+    t.string('id', { required: true });
+    t.string('name');
+  }
+})
+
+export const UpdateProject = mutationField('updateProject', {
+  type: 'Project',
+  args: {
+    update: arg({ type: UpdateProjectInput, required: true })
+  },
+  authorize: hasProjectAccess({
+    projectIdFn: (_, { update }) => update.id,
+    role: 'ADMIN',
+  }),
+  async resolve(root, { update: { id, name } }, ctx) {
+    const project = await ctx.prisma.project.update({
+      where: { id },
+      data: { name },
     });
 
     return project;

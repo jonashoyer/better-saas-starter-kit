@@ -28,7 +28,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <ApolloProvider client={apolloClient}>
 
         <ThemeProvider theme={theme}>
-          <ProjectValueProvider>
+          <ProjectValueProvider initialValue={pageProps.projectId}>
             <CssBaseline />
             <Component {...pageProps} />
           </ProjectValueProvider>

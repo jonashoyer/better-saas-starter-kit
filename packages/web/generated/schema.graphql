@@ -21,7 +21,8 @@ scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publicati
 scalar Json
 
 type Mutation {
-  CreateCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
+  createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
+  updateProject(update: UpdateProjectInput!): Project
 }
 
 type PaymentMethod {
@@ -63,6 +64,12 @@ type Query {
   currentProject(projectId: String): Project
   ping: String!
   self: User
+  selfProjects: [Project]
+}
+
+input UpdateProjectInput {
+  id: String!
+  name: String
 }
 
 type User {
