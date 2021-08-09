@@ -100,3 +100,20 @@ export const UpdateProject = mutationField('updateProject', {
     return project;
   }
 })
+
+export const DeleteProject = mutationField('deleteProject', {
+  type: 'Project',
+  args: {
+    id: stringArg({ required: true }),
+  },
+  authorize: hasProjectAccess({
+    projectIdFn: (_, { id }) => id,
+    role: 'ADMIN',
+  }),
+  async resolve(root, { id }, ctx) {
+    const project = await ctx.prisma.project.delete({
+      where: { id }
+    });
+    return project;
+  }
+})

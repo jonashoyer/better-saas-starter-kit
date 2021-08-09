@@ -22,6 +22,7 @@ scalar Json
 
 type Mutation {
   createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
+  deleteProject(id: String!): Project
   updateProject(update: UpdateProjectInput!): Project
 }
 

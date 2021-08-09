@@ -51,10 +51,10 @@ const createLink = (headers = {}) => {
   const httpLinkSplit = split(
     ({ operationName, getContext }) => {
       //NOTE: Custom logic for splitting between serverless and remote server. Change as see fit.
-      return !operationName.toLowerCase().includes('serverless') && !getContext().serverless;
+      return !operationName.toLowerCase().includes('remoteServer') && !getContext().remoteServer;
     },
-    createHttpLink(GRAPHQL_ENDPOINT, headers),
     createHttpLink(`${getURL()}/api/graphql`, headers),
+    createHttpLink(GRAPHQL_ENDPOINT, headers),
   );
 
   if(process.browser) {

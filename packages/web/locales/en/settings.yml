@@ -1,0 +1,9 @@
+projectName: 'Project name'
+deleteProject: 'Delete project'
+deleteProjectContent: 'Once the project is deleted there is no going back! Type "{{projectName}}" to delete the project.'
+projectId: 'Project Id'
+projectSettings: 'Project Settings'
+
+dangerZone: 'Danger Zone'
+
+deleteThisProject: 'Delete this project!'

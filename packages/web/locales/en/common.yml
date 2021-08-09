@@ -1,1 +1,4 @@
-banner: "Banner message"
+banner: 'Banner message'
+cancel: 'Cancel'
+submit: 'Submit'
+save: 'Save'

@@ -42,6 +42,40 @@ export function useCurrentProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type CurrentProjectQueryHookResult = ReturnType<typeof useCurrentProjectQuery>;
 export type CurrentProjectLazyQueryHookResult = ReturnType<typeof useCurrentProjectLazyQuery>;
 export type CurrentProjectQueryResult = Apollo.QueryResult<CurrentProjectQuery, CurrentProjectQueryVariables>;
+export const DeleteProjectDocument = gql`
+    mutation DeleteProject($id: String!) {
+  deleteProject(id: $id) {
+    id
+    name
+  }
+}
+    `;
+export type DeleteProjectMutationFn = Apollo.MutationFunction<DeleteProjectMutation, DeleteProjectMutationVariables>;
+
+/**
+ * __useDeleteProjectMutation__
+ *
+ * To run a mutation, you first call `useDeleteProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProjectMutation, { data, loading, error }] = useDeleteProjectMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOptions<DeleteProjectMutation, DeleteProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteProjectMutation, DeleteProjectMutationVariables>(DeleteProjectDocument, options);
+      }
+export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
+export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
+export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
 export const PingDocument = gql`
     query Ping {
   ping
@@ -110,8 +144,8 @@ export type SelfProjectsQueryHookResult = ReturnType<typeof useSelfProjectsQuery
 export type SelfProjectsLazyQueryHookResult = ReturnType<typeof useSelfProjectsLazyQuery>;
 export type SelfProjectsQueryResult = Apollo.QueryResult<SelfProjectsQuery, SelfProjectsQueryVariables>;
 export const UpdateProjectDocument = gql`
-    mutation UpdateProject($updateProjectUpdate: UpdateProjectInput!) {
-  updateProject(update: $updateProjectUpdate) {
+    mutation UpdateProject($update: UpdateProjectInput!) {
+  updateProject(update: $update) {
     id
     name
   }
@@ -132,7 +166,7 @@ export type UpdateProjectMutationFn = Apollo.MutationFunction<UpdateProjectMutat
  * @example
  * const [updateProjectMutation, { data, loading, error }] = useUpdateProjectMutation({
  *   variables: {
- *      updateProjectUpdate: // value for 'updateProjectUpdate'
+ *      update: // value for 'update'
  *   },
  * });
  */
@@ -208,6 +242,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createCheckoutSession?: Maybe<CheckoutSession>;
   updateProject?: Maybe<Project>;
+  deleteProject?: Maybe<Project>;
 };
 
 
@@ -221,6 +256,11 @@ export type MutationCreateCheckoutSessionArgs = {
 
 export type MutationUpdateProjectArgs = {
   update: UpdateProjectInput;
+};
+
+
+export type MutationDeleteProjectArgs = {
+  id: Scalars['String'];
 };
 
 export type PaymentMethod = {
@@ -350,6 +390,19 @@ export type CurrentProjectQuery = (
   )> }
 );
 
+export type DeleteProjectMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteProjectMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteProject?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id' | 'name'>
+  )> }
+);
+
 export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -370,7 +423,7 @@ export type SelfProjectsQuery = (
 );
 
 export type UpdateProjectMutationVariables = Exact<{
-  updateProjectUpdate: UpdateProjectInput;
+  update: UpdateProjectInput;
 }>;
 
 

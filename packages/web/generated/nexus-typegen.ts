@@ -93,6 +93,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+    deleteProject: NexusGenRootTypes['Project'] | null; // Project
     updateProject: NexusGenRootTypes['Project'] | null; // Project
   }
   PaymentMethod: { // field return type
@@ -143,6 +144,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     createCheckoutSession: 'CheckoutSession'
+    deleteProject: 'Project'
     updateProject: 'Project'
   }
   PaymentMethod: { // field return type name
@@ -194,6 +196,9 @@ export interface NexusGenArgTypes {
       price: string; // String!
       projectId: string; // String!
       quantity: number | null; // Int
+    }
+    deleteProject: { // args
+      id: string; // String!
     }
     updateProject: { // args
       update: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!

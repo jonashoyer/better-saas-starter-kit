@@ -40,6 +40,7 @@
     "nexus": "^1.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-hook-form": "^7.12.2",
     "react-use": "^17.2.4",
     "stripe": "^8.163.0",
     "subscriptions-transport-ws": "^0.9.19"

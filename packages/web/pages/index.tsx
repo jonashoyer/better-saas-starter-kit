@@ -11,7 +11,6 @@ import ProjectSelector from '@/components/layouts/ProjectSelector';
 import { initializeApollo } from '@/utils/GraphqlClient';
 import { Constants } from 'bs-shared-kit';
 import { setCookie } from '@/utils/cookies';
-import ProjectEditDialog from '@/components/elements/ProjectEditDialog';
 import useProject from '@/hooks/useProject';
 
 export default function Home(props: any) {
@@ -19,25 +18,17 @@ export default function Home(props: any) {
   const [projectId] = useProject();
 
   const [session, loading] = useSession();
-  const [editProjectDialog, setEditProjectDialog] = React.useState<any>(false);
 
   const { data: currentProjectData } = useCurrentProjectQuery({
     variables: {
       projectId,
     },
-    context: { serverless: true }
   });
   const { data: selfProjectsData } = useSelfProjectsQuery({ context: { serverless: true } });
 
 
   return (
     <React.Fragment>
-
-      <ProjectEditDialog
-        open={!!editProjectDialog}
-        project={editProjectDialog}
-        onClose={() => setEditProjectDialog(false)}
-      />
 
       <Head>
         <title>APP</title>
@@ -59,10 +50,10 @@ export default function Home(props: any) {
         </Box>
 
         <Box sx={{ py: 1 }}>
-          {selfProjectsData.selfProjects &&
+          {selfProjectsData?.selfProjects &&
             <ProjectSelector
-              projects={selfProjectsData.selfProjects}
-              onProjectEdit={proj => setEditProjectDialog(proj)}
+              projects={selfProjectsData?.selfProjects}
+              onProjectEdit={proj => { }}
             />
           }
         </Box>
@@ -96,14 +87,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       variables: {
         projectId,
       },
-      context: { serverless: true },
     })
 
     if (!projectId && currentProject?.id) setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, currentProject.id, { maxAge: 31540000000 });
 
     await client.query({
       query: SelfProjectsDocument,
-      context: { serverless: true },
     });
 
     return {
