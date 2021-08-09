@@ -6,13 +6,15 @@ import Selector from "../elements/Selector";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import AddIcon from '@material-ui/icons/Add';
 import SettingsIcon from '@material-ui/icons/Settings';
+import { useRouter } from "next/router";
 
 interface ProjectSelectorProps {
   projects: ({ id: string, name: string })[];
-  onProjectEdit: (project: { id: string, name: string }) => any;
 }
 
-const ProjectSelector = ({ projects, onProjectEdit }: ProjectSelectorProps) => {
+const ProjectSelector = ({ projects }: ProjectSelectorProps) => {
+
+  const router = useRouter();
 
   const [open, setOpen] = React.useState(false);
   const [projectId, setProjectId] = useProject();
@@ -28,8 +30,8 @@ const ProjectSelector = ({ projects, onProjectEdit }: ProjectSelectorProps) => {
 
   const onEdit = (proj: any) => e => {
     e.stopPropagation();
-    onProjectEdit(proj);
-    setOpen(false);
+    setProjectId(proj.id);
+    router.push('/settings');
   }
 
   return (    

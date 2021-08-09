@@ -52,8 +52,7 @@ export default function Home(props: any) {
         <Box sx={{ py: 1 }}>
           {selfProjectsData?.selfProjects &&
             <ProjectSelector
-              projects={selfProjectsData?.selfProjects}
-              onProjectEdit={proj => { }}
+              projects={selfProjectsData.selfProjects}
             />
           }
         </Box>
