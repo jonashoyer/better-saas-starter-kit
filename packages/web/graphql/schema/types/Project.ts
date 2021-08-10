@@ -1,5 +1,7 @@
+import cuid from 'cuid';
 import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { hasAuth, hasProjectAccess } from './permissions';
+import { Constants } from 'bs-shared-kit';
 
 export const Project = objectType({
   name: 'Project',
@@ -32,7 +34,7 @@ export const CurrentProject = queryField('currentProject', {
   type: 'Project',
   authorize: hasProjectAccess({
     nullable: true,
-    projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies['bs.project-id'],
+    projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY],
   }),
   args: {
     projectId: stringArg({ nullable: true }),
@@ -41,7 +43,7 @@ export const CurrentProject = queryField('currentProject', {
 
     const getProjetId = async () => {
       if (projectId) return projectId;
-      if (ctx.req.cookies['bs.project-id']) return ctx.req.cookies['bs.project-id'];
+      if (ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY]) return ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY];
       const userProject = await ctx.prisma.userProject.findFirst({
         where: { userId: ctx.user!.id }
       })
@@ -73,6 +75,57 @@ export const SelfProjects = queryField('selfProjects', {
   }
 })
 
+export const CreateProjectInput = inputObjectType({
+  name: 'CreateProjectInput',
+  definition(t) {
+    t.string('name', { required: true });
+  }
+})
+
+export const CreateProject = mutationField('createProject', {
+  type: 'Project',
+  authorize: hasAuth,
+  args: {
+    input: arg({ type: CreateProjectInput, required: true })
+  },
+  async resolve(root, { input }, ctx) {
+
+    const name = ctx.user.name || ctx.user.email?.split('@')[0] || 'Unnamed';
+
+    const projectId = cuid();
+    const stripe = ctx.getStripeHandler();
+
+    const stripeCustomer = await stripe.createCustomer({
+      name,
+      email: ctx.user.email,
+      metadata: {
+        projectId,
+      },
+    });
+
+    try {
+      const project = await ctx.prisma.project.create({
+        data: {
+          ...input,
+          id: projectId,
+          stripeCustomerId: stripeCustomer.id,
+          users: {
+            create: {
+              role: 'ADMIN',
+              user: {
+                connect: { id: ctx.user.id }
+              }
+            }
+          }
+        },
+      })
+      return project;
+    } catch (err) {
+      await stripe.deleteCustomer(stripeCustomer.id);
+      throw new err;
+    }
+  }
+});
 
 export const UpdateProjectInput = inputObjectType({
   name: 'UpdateProjectInput',
@@ -85,13 +138,13 @@ export const UpdateProjectInput = inputObjectType({
 export const UpdateProject = mutationField('updateProject', {
   type: 'Project',
   args: {
-    update: arg({ type: UpdateProjectInput, required: true })
+    input: arg({ type: UpdateProjectInput, required: true })
   },
   authorize: hasProjectAccess({
-    projectIdFn: (_, { update }) => update.id,
+    projectIdFn: (_, { input }) => input.id,
     role: 'ADMIN',
   }),
-  async resolve(root, { update: { id, name } }, ctx) {
+  async resolve(root, { input: { id, name } }, ctx) {
     const project = await ctx.prisma.project.update({
       where: { id },
       data: { name },
@@ -111,9 +164,6 @@ export const DeleteProject = mutationField('deleteProject', {
     role: 'ADMIN',
   }),
   async resolve(root, { id }, ctx) {
-    const project = await ctx.prisma.project.delete({
-      where: { id }
-    });
-    return project;
+    return ctx.prisma.project.delete({ where: { id } });
   }
 })

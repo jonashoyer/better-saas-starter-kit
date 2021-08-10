@@ -13,6 +13,8 @@ import { Constants } from 'bs-shared-kit';
 import { setCookie } from '@/utils/cookies';
 import useProject from '@/hooks/useProject';
 
+// FIXME: Cookie project is deleted it should fallback  
+
 export default function Home(props: any) {
 
   const [projectId] = useProject();

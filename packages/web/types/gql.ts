@@ -5,7 +5,45 @@ export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K]
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 const defaultOptions =  {}
+export const BaseProjcetFragmentDoc = gql`
+    fragment BaseProjcet on Project {
+  id
+  name
+}
+    `;
+export const CreateProjectDocument = gql`
+    mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input: $input) {
+    ...BaseProjcet
+  }
+}
+    ${BaseProjcetFragmentDoc}`;
+export type CreateProjectMutationFn = Apollo.MutationFunction<CreateProjectMutation, CreateProjectMutationVariables>;
 
+/**
+ * __useCreateProjectMutation__
+ *
+ * To run a mutation, you first call `useCreateProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProjectMutation, { data, loading, error }] = useCreateProjectMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateProjectMutation(baseOptions?: Apollo.MutationHookOptions<CreateProjectMutation, CreateProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateProjectMutation, CreateProjectMutationVariables>(CreateProjectDocument, options);
+      }
+export type CreateProjectMutationHookResult = ReturnType<typeof useCreateProjectMutation>;
+export type CreateProjectMutationResult = Apollo.MutationResult<CreateProjectMutation>;
+export type CreateProjectMutationOptions = Apollo.BaseMutationOptions<CreateProjectMutation, CreateProjectMutationVariables>;
 export const CurrentProjectDocument = gql`
     query CurrentProject($projectId: String) {
   currentProject(projectId: $projectId) {
@@ -144,13 +182,12 @@ export type SelfProjectsQueryHookResult = ReturnType<typeof useSelfProjectsQuery
 export type SelfProjectsLazyQueryHookResult = ReturnType<typeof useSelfProjectsLazyQuery>;
 export type SelfProjectsQueryResult = Apollo.QueryResult<SelfProjectsQuery, SelfProjectsQueryVariables>;
 export const UpdateProjectDocument = gql`
-    mutation UpdateProject($update: UpdateProjectInput!) {
-  updateProject(update: $update) {
-    id
-    name
+    mutation UpdateProject($input: UpdateProjectInput!) {
+  updateProject(input: $input) {
+    ...BaseProjcet
   }
 }
-    `;
+    ${BaseProjcetFragmentDoc}`;
 export type UpdateProjectMutationFn = Apollo.MutationFunction<UpdateProjectMutation, UpdateProjectMutationVariables>;
 
 /**
@@ -166,7 +203,7 @@ export type UpdateProjectMutationFn = Apollo.MutationFunction<UpdateProjectMutat
  * @example
  * const [updateProjectMutation, { data, loading, error }] = useUpdateProjectMutation({
  *   variables: {
- *      update: // value for 'update'
+ *      input: // value for 'input'
  *   },
  * });
  */
@@ -234,6 +271,10 @@ export type CheckoutSession = {
   sessionId?: Maybe<Scalars['String']>;
 };
 
+export type CreateProjectInput = {
+  name: Scalars['String'];
+};
+
 
 
 
@@ -241,6 +282,7 @@ export type CheckoutSession = {
 export type Mutation = {
   __typename?: 'Mutation';
   createCheckoutSession?: Maybe<CheckoutSession>;
+  createProject?: Maybe<Project>;
   updateProject?: Maybe<Project>;
   deleteProject?: Maybe<Project>;
 };
@@ -254,8 +296,13 @@ export type MutationCreateCheckoutSessionArgs = {
 };
 
 
+export type MutationCreateProjectArgs = {
+  input: CreateProjectInput;
+};
+
+
 export type MutationUpdateProjectArgs = {
-  update: UpdateProjectInput;
+  input: UpdateProjectInput;
 };
 
 
@@ -377,6 +424,24 @@ export type UserProjectWhereUniqueInput = {
   projectId_userId?: Maybe<UserProjectProjectIdUserIdCompoundUniqueInput>;
 };
 
+export type BaseProjcetFragment = (
+  { __typename?: 'Project' }
+  & Pick<Project, 'id' | 'name'>
+);
+
+export type CreateProjectMutationVariables = Exact<{
+  input: CreateProjectInput;
+}>;
+
+
+export type CreateProjectMutation = (
+  { __typename?: 'Mutation' }
+  & { createProject?: Maybe<(
+    { __typename?: 'Project' }
+    & BaseProjcetFragment
+  )> }
+);
+
 export type CurrentProjectQueryVariables = Exact<{
   projectId?: Maybe<Scalars['String']>;
 }>;
@@ -423,7 +488,7 @@ export type SelfProjectsQuery = (
 );
 
 export type UpdateProjectMutationVariables = Exact<{
-  update: UpdateProjectInput;
+  input: UpdateProjectInput;
 }>;
 
 
@@ -431,7 +496,7 @@ export type UpdateProjectMutation = (
   { __typename?: 'Mutation' }
   & { updateProject?: Maybe<(
     { __typename?: 'Project' }
-    & Pick<Project, 'id' | 'name'>
+    & BaseProjcetFragment
   )> }
 );
 

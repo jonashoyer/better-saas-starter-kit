@@ -1,8 +1,7 @@
 mutation UpdateProject(
-  $update: UpdateProjectInput!
+  $input: UpdateProjectInput!
 ) {
-  updateProject(update: $update) {
-    id
-    name
+  updateProject(input: $input) {
+    ...BaseProjcet
   }
 }

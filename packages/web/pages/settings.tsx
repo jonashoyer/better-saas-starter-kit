@@ -14,19 +14,22 @@ import PageLayout from '@/components/layouts/PageLayout';
 import { LoadingButton } from '@material-ui/lab';
 import DialogTextfield from '@/components/elements/DialogTextfield';
 import useTranslation from 'next-translate/useTranslation';
+import { useRouter } from 'next/router';
 
 export default function Home(props: any) {
 
+  const router = useRouter();
+  
   const { t, lang } = useTranslation();
   
-  const [projectId] = useProject();
-
-  const [session, loading] = useSession();
+  const [projectId, setProject] = useProject();
 
   const [updateProject, { loading: updateLoading }] = useUpdateProjectMutation();
 
   const [deleteProject, { loading: deleteLoading }] = useDeleteProjectMutation({
     onCompleted() {
+      setProject(null);
+      router.push('/');
     },
   });
 
@@ -43,7 +46,15 @@ export default function Home(props: any) {
     }
   });
   
-
+  const onNameSave = (e: any) => {
+    e?.preventDefault?.();
+    if (!name) return;
+    updateProject({ variables: { input: { id: projectId, name } } });
+  }
+  
+  const onDelete = () => {
+    deleteProject({ variables: { id: projectId } });
+  }
 
   return (
     <React.Fragment>
@@ -51,15 +62,21 @@ export default function Home(props: any) {
       <DialogTextfield
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
+        loading={deleteLoading}
         controllerProps={{
           rules: {
             validate: input => input == currentProjectData.currentProject.name
           }
         }}
+        useformProps={{ mode: 'all' }}
         label={t('settings:projectName')}
         title={t('settings:deleteProject')}
-        content={t('settings:deleteProjectContent', { projectName: currentProjectData.currentProject.name })}
-        onSubmit={(input) => console.log('input', input)}
+        content={t('settings:deleteProjectContent', { projectName: currentProjectData?.currentProject?.name })}
+        onSubmit={onDelete}
+        submitText='Delete'
+        submitButtonProps={{
+          color: 'error',
+        }}
       />
 
       <Head>
@@ -87,26 +104,28 @@ export default function Home(props: any) {
             onChange={() => { }}
           />
 
-          <TextField
-            margin='normal'
-            label={t('settings:projectName')}
-            fullWidth
-            value={name ?? ''}
-            onChange={e => setName(e.target.value)}
-            disabled={updateLoading}
-            InputProps={{
-              endAdornment: (
-                <LoadingButton
-                  loading={updateLoading}
-                  variant='outlined'
-                  onClick={() => name && updateProject({ variables: { update: { id: projectId, name } } })}
-                  disabled={name == currentProjectData?.currentProject?.name}
-                >
-                  {t('common:save')}
-                </LoadingButton>
-              )
-            }}
-          />
+          <form onSubmit={onNameSave}>
+            <TextField
+              margin='normal'
+              label={t('settings:projectName')}
+              fullWidth
+              value={name ?? ''}
+              onChange={e => setName(e.target.value)}
+              disabled={updateLoading}
+              InputProps={{
+                endAdornment: (
+                  <LoadingButton
+                    loading={updateLoading}
+                    variant='outlined'
+                    onClick={onNameSave}
+                    disabled={name == currentProjectData?.currentProject?.name}
+                  >
+                    {t('common:save')}
+                  </LoadingButton>
+                )
+              }}
+            />
+          </form>
 
         </Paper>
 

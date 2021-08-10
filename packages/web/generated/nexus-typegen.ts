@@ -31,6 +31,9 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  CreateProjectInput: { // input type
+    name: string; // String!
+  }
   PaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
   }
@@ -93,6 +96,7 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+    createProject: NexusGenRootTypes['Project'] | null; // Project
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     updateProject: NexusGenRootTypes['Project'] | null; // Project
   }
@@ -144,6 +148,7 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     createCheckoutSession: 'CheckoutSession'
+    createProject: 'Project'
     deleteProject: 'Project'
     updateProject: 'Project'
   }
@@ -197,11 +202,14 @@ export interface NexusGenArgTypes {
       projectId: string; // String!
       quantity: number | null; // Int
     }
+    createProject: { // args
+      input: NexusGenInputs['CreateProjectInput']; // CreateProjectInput!
+    }
     deleteProject: { // args
       id: string; // String!
     }
     updateProject: { // args
-      update: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
+      input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
     }
   }
   Project: {

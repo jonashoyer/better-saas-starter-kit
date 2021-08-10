@@ -1,0 +1,4 @@
+fragment BaseProjcet on Project {
+  id
+  name
+}

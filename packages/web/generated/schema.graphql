@@ -6,6 +6,10 @@ type CheckoutSession {
   sessionId: String
 }
 
+input CreateProjectInput {
+  name: String!
+}
+
 scalar Date
 
 """
@@ -22,8 +26,9 @@ scalar Json
 
 type Mutation {
   createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
+  createProject(input: CreateProjectInput!): Project
   deleteProject(id: String!): Project
-  updateProject(update: UpdateProjectInput!): Project
+  updateProject(input: UpdateProjectInput!): Project
 }
 
 type PaymentMethod {

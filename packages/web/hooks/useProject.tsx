@@ -6,10 +6,11 @@ export const [useProjetValue, ProjectValueProvider] = createStateContext<string>
 const useProject = (): [string, (v: string) => void] => {
 
   const [ctxValue, setCtxValue] = useProjetValue();  
-  const [v, s] = useCookie(Constants.PROJECT_ID_COOKIE_KEY);
+  const [v, s, clear] = useCookie(Constants.PROJECT_ID_COOKIE_KEY);
 
-  const set = (projectId: string) => {
-    s(projectId, { expires: 365 });
+  const set = (projectId: null | string) => {
+    if (projectId) s(projectId, { expires: 365 });
+    else clear();
     setCtxValue(projectId);
   }
   return [ctxValue ?? v, set];
