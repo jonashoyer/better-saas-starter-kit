@@ -48,6 +48,9 @@ Monorepo using npm workspace
    - [ ] Logging
    - [ ] Sentry
 
+### Bugs
+  - [ ] Old project id in cookies
+
 #### Shared environment variables
 - REDIS_URL
 - NODE_ENV

@@ -7,6 +7,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddIcon from '@material-ui/icons/Add';
 import DialogYN from '../elements/DialogYN';
+import DialogUserInvite from '../elements/DialogUserInvite';
 
 export interface ProjectMembersPaperProps {
   project?: CurrentProject_MembersQuery['currentProject'] | Project;
@@ -16,9 +17,10 @@ const ProjectMembersPaper = ({ project }: ProjectMembersPaperProps) => {
 
   const { t } = useTranslation();
 
-  const [createUserInvite] = useCreateManyUserInviteMutation();
   const [deleteUserInvite, { loading: loadingDeleteUserInvite }] = useDeleteUserInviteMutation();
   const [deleteUserProject] = useDeleteUserProjectMutation();
+
+  const [inviteDialogOpen, setInviteDialogOpen] = React.useState(false);
 
   const [userMenuAnchorEl, setUserMenuAnchorEl] = React.useState(null);
   const handleUserMenuClick = (event) => {
@@ -56,6 +58,11 @@ const ProjectMembersPaper = ({ project }: ProjectMembersPaperProps) => {
         onSubmit={() => deleteUserInvite({ variables: { id: deleteInvite } })}
         loading={loadingDeleteUserInvite}
         submitText={t('common:remove')}
+      />
+
+      <DialogUserInvite
+        open={inviteDialogOpen}
+        onClose={() => setInviteDialogOpen(false)}
       />
 
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
@@ -110,7 +117,7 @@ const ProjectMembersPaper = ({ project }: ProjectMembersPaperProps) => {
             <ListItemIcon>
               <AddIcon />
             </ListItemIcon>
-            <ListItemText primary='Invite new member' />
+            <ListItemText primary='Invite new member' onClick={() => setInviteDialogOpen(true)} />
           </ListItem>
         </List>
       </Paper>

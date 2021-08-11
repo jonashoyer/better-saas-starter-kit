@@ -28,6 +28,7 @@ function FormSelect({
         <FormControl error={!!error}>
           <InputLabel>{label}</InputLabel>
           <Select
+            label={label}
             variant='outlined'
             value={value}
             inputRef={ref}

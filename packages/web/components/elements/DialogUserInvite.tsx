@@ -1,43 +1,31 @@
-import * as React from 'react';
+import React from 'react';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { ControllerProps, useForm, Controller, UseFormProps } from 'react-hook-form';
-import { LoadingButton, LoadingButtonProps } from '@material-ui/lab';
+import { useForm } from 'react-hook-form';
+import { LoadingButton } from '@material-ui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import FormTextField from './FormTextField';
-import { MenuItem, Select } from '@material-ui/core';
+import { Box, MenuItem } from '@material-ui/core';
 import FormSelect from './FormSelect';
+import { ProjectRole, useCreateManyUserInviteMutation } from 'types/gql';
 
-export interface DialogTextfieldProps {
-  title: React.ReactNode;
-  content?: React.ReactNode;
-  initalValue?: string;
-  controllerProps?: Partial<Omit<ControllerProps<{ input: string }>, 'name' | 'control'>>;
-  useformProps?: UseFormProps;
-
-  label: string;
-  type?: string;
-
-  cancelText?: string;
-  submitText?: string;
-
+export interface DialogUserInviteProps {
   open: boolean;
-  onSubmit: (input: string) => any;
   onClose?: () => any;
-  loading?: boolean;
-  submitButtonProps?: LoadingButtonProps;
 }
 
-export default function DialogTextfield({ title, content, initalValue, controllerProps, useformProps, label, type, cancelText, submitText, open, onSubmit, onClose, loading, submitButtonProps }: DialogTextfieldProps) {
+export default function DialogUserInvite({ open, onClose }: DialogUserInviteProps) {
 
   const { t } = useTranslation();
+
+  const [createUserInvite, { loading }] = useCreateManyUserInviteMutation();
+
   
-  const { control, handleSubmit, formState: { errors }, reset } = useForm(useformProps);
+  const { control, handleSubmit, formState: { errors }, reset } = useForm();
 
   React.useEffect(() => {
     reset();
@@ -48,38 +36,58 @@ export default function DialogTextfield({ title, content, initalValue, controlle
     onClose();
   };
 
-  const _onSubmit = ({ input }: any) => onSubmit(input);
+  const onSubmit = (e: any) => {
+    e?.preventDefault?.();
+  }
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>{t('dialog:inviteUsers')}</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+      <DialogTitle>{t('dialog:inviteMembers')}</DialogTitle>
       <DialogContent>
-        <DialogContentText>{t('dialog:inviteUsersContent')}</DialogContentText>
-        <form onSubmit={handleSubmit(_onSubmit)}>
+        <DialogContentText>{t('dialog:inviteMembersContent')}</DialogContentText>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <FormTextField
-            label={t('common:email', { count: 'many' })}
-            type={type}
+            label={t('common:email', { count: 10 })}
             autoFocus
             fullWidth
             disabled={loading}
-            name='input'
+            name='emails'
             control={control}
-            defaultValue={initalValue}
-            controllerProps={controllerProps}
+            defaultValue=''
+            margin='normal'
+            multiline
+            minRows={2}
+            type='email'
+            controllerProps={{
+              rules: {
+                pattern: {
+                  value: /^(?!\ )(\ ?([a-z0-9]+(?:[._-][a-z0-9]+)*)@([a-z0-9]+(?:[.-][a-z0-9]+)*\.[a-z]{2,}))+$/,
+                  message: "Entered value does not match email format"
+                }
+              }
+            }}
           />
-          <FormSelect
-            control={control}
-            name='role'
-            label={t('common:role')}
-          >
-            <MenuItem></MenuItem>
-          </FormSelect>
+          <Box sx={{ pt: 1 }}>
+            <FormSelect
+              sx={{
+                minWidth: 128,
+              }}
+              control={control}
+              name='role'
+              label={t('common:role')}
+              defaultValue={ProjectRole.User}
+              >
+              {Object.entries(ProjectRole).map(([key, value]) => (
+                <MenuItem key={value} value={value}>{key}</MenuItem>
+                ))}
+            </FormSelect>
+          </Box>
 
         </form>
       </DialogContent>
       <DialogActions>
-        <Button disabled={loading} onClick={handleClose}>{cancelText ?? t('common:cancel')}</Button>
-        <LoadingButton {...submitButtonProps} loading={loading} disabled={!!errors.input} onClick={handleSubmit(_onSubmit)} variant='contained'>{submitText ?? t('common:submit')}</LoadingButton>
+        <Button disabled={loading} onClick={handleClose}>{t('common:cancel')}</Button>
+        <LoadingButton loading={loading} disabled={!!errors.input} onClick={handleSubmit(onSubmit)} variant='contained'>{t('common:invite')}</LoadingButton>
       </DialogActions>
     </Dialog>
   );
