@@ -77,6 +77,20 @@ model Project {
 
   users          UserProject[]
   paymentMethods PaymentMethod[]
+  userInvites    UserInvite[]
+}
+
+model UserInvite {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  email     String
+  token     String      @unique
+  role      ProjectRole
+  projectId String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, email])
 }
 
 model PaymentMethod {

@@ -11,6 +11,42 @@ export const BaseProjcetFragmentDoc = gql`
   name
 }
     `;
+export const CreateManyUserInviteDocument = gql`
+    mutation CreateManyUserInvite($input: CreateUserInviteInput!) {
+  createManyUserInvite(input: $input) {
+    id
+    role
+    createdAt
+    email
+  }
+}
+    `;
+export type CreateManyUserInviteMutationFn = Apollo.MutationFunction<CreateManyUserInviteMutation, CreateManyUserInviteMutationVariables>;
+
+/**
+ * __useCreateManyUserInviteMutation__
+ *
+ * To run a mutation, you first call `useCreateManyUserInviteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateManyUserInviteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createManyUserInviteMutation, { data, loading, error }] = useCreateManyUserInviteMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateManyUserInviteMutation(baseOptions?: Apollo.MutationHookOptions<CreateManyUserInviteMutation, CreateManyUserInviteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateManyUserInviteMutation, CreateManyUserInviteMutationVariables>(CreateManyUserInviteDocument, options);
+      }
+export type CreateManyUserInviteMutationHookResult = ReturnType<typeof useCreateManyUserInviteMutation>;
+export type CreateManyUserInviteMutationResult = Apollo.MutationResult<CreateManyUserInviteMutation>;
+export type CreateManyUserInviteMutationOptions = Apollo.BaseMutationOptions<CreateManyUserInviteMutation, CreateManyUserInviteMutationVariables>;
 export const CreateProjectDocument = gql`
     mutation CreateProject($input: CreateProjectInput!) {
   createProject(input: $input) {
@@ -47,11 +83,10 @@ export type CreateProjectMutationOptions = Apollo.BaseMutationOptions<CreateProj
 export const CurrentProjectDocument = gql`
     query CurrentProject($projectId: String) {
   currentProject(projectId: $projectId) {
-    id
-    name
+    ...BaseProjcet
   }
 }
-    `;
+    ${BaseProjcetFragmentDoc}`;
 
 /**
  * __useCurrentProjectQuery__
@@ -80,14 +115,66 @@ export function useCurrentProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type CurrentProjectQueryHookResult = ReturnType<typeof useCurrentProjectQuery>;
 export type CurrentProjectLazyQueryHookResult = ReturnType<typeof useCurrentProjectLazyQuery>;
 export type CurrentProjectQueryResult = Apollo.QueryResult<CurrentProjectQuery, CurrentProjectQueryVariables>;
+export const CurrentProject_MembersDocument = gql`
+    query CurrentProject_Members($projectId: String) {
+  currentProject(projectId: $projectId) {
+    ...BaseProjcet
+    users {
+      id
+      createdAt
+      role
+      user {
+        id
+        createdAt
+        name
+        image
+        email
+      }
+    }
+    userInvites {
+      id
+      createdAt
+      role
+      email
+    }
+  }
+}
+    ${BaseProjcetFragmentDoc}`;
+
+/**
+ * __useCurrentProject_MembersQuery__
+ *
+ * To run a query within a React component, call `useCurrentProject_MembersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentProject_MembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCurrentProject_MembersQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useCurrentProject_MembersQuery(baseOptions?: Apollo.QueryHookOptions<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>(CurrentProject_MembersDocument, options);
+      }
+export function useCurrentProject_MembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>(CurrentProject_MembersDocument, options);
+        }
+export type CurrentProject_MembersQueryHookResult = ReturnType<typeof useCurrentProject_MembersQuery>;
+export type CurrentProject_MembersLazyQueryHookResult = ReturnType<typeof useCurrentProject_MembersLazyQuery>;
+export type CurrentProject_MembersQueryResult = Apollo.QueryResult<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>;
 export const DeleteProjectDocument = gql`
     mutation DeleteProject($id: String!) {
   deleteProject(id: $id) {
-    id
-    name
+    ...BaseProjcet
   }
 }
-    `;
+    ${BaseProjcetFragmentDoc}`;
 export type DeleteProjectMutationFn = Apollo.MutationFunction<DeleteProjectMutation, DeleteProjectMutationVariables>;
 
 /**
@@ -114,6 +201,72 @@ export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
 export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
 export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const DeleteUserInviteDocument = gql`
+    mutation DeleteUserInvite($id: String!) {
+  deleteUserInvite(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteUserInviteMutationFn = Apollo.MutationFunction<DeleteUserInviteMutation, DeleteUserInviteMutationVariables>;
+
+/**
+ * __useDeleteUserInviteMutation__
+ *
+ * To run a mutation, you first call `useDeleteUserInviteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteUserInviteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteUserInviteMutation, { data, loading, error }] = useDeleteUserInviteMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteUserInviteMutation(baseOptions?: Apollo.MutationHookOptions<DeleteUserInviteMutation, DeleteUserInviteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteUserInviteMutation, DeleteUserInviteMutationVariables>(DeleteUserInviteDocument, options);
+      }
+export type DeleteUserInviteMutationHookResult = ReturnType<typeof useDeleteUserInviteMutation>;
+export type DeleteUserInviteMutationResult = Apollo.MutationResult<DeleteUserInviteMutation>;
+export type DeleteUserInviteMutationOptions = Apollo.BaseMutationOptions<DeleteUserInviteMutation, DeleteUserInviteMutationVariables>;
+export const DeleteUserProjectDocument = gql`
+    mutation DeleteUserProject($id: String!) {
+  deleteUserProject(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteUserProjectMutationFn = Apollo.MutationFunction<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>;
+
+/**
+ * __useDeleteUserProjectMutation__
+ *
+ * To run a mutation, you first call `useDeleteUserProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteUserProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteUserProjectMutation, { data, loading, error }] = useDeleteUserProjectMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteUserProjectMutation(baseOptions?: Apollo.MutationHookOptions<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>(DeleteUserProjectDocument, options);
+      }
+export type DeleteUserProjectMutationHookResult = ReturnType<typeof useDeleteUserProjectMutation>;
+export type DeleteUserProjectMutationResult = Apollo.MutationResult<DeleteUserProjectMutation>;
+export type DeleteUserProjectMutationOptions = Apollo.BaseMutationOptions<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>;
 export const PingDocument = gql`
     query Ping {
   ping
@@ -214,6 +367,41 @@ export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const UpdateUserProjectDocument = gql`
+    mutation UpdateUserProject($input: UpdateUserProjectInput!) {
+  updateUserProject(input: $input) {
+    id
+    createdAt
+    role
+  }
+}
+    `;
+export type UpdateUserProjectMutationFn = Apollo.MutationFunction<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>;
+
+/**
+ * __useUpdateUserProjectMutation__
+ *
+ * To run a mutation, you first call `useUpdateUserProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateUserProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateUserProjectMutation, { data, loading, error }] = useUpdateUserProjectMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateUserProjectMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>(UpdateUserProjectDocument, options);
+      }
+export type UpdateUserProjectMutationHookResult = ReturnType<typeof useUpdateUserProjectMutation>;
+export type UpdateUserProjectMutationResult = Apollo.MutationResult<UpdateUserProjectMutation>;
+export type UpdateUserProjectMutationOptions = Apollo.BaseMutationOptions<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>;
 export const SelfQueryDocument = gql`
     query SelfQuery {
   self {
@@ -275,6 +463,12 @@ export type CreateProjectInput = {
   name: Scalars['String'];
 };
 
+export type CreateUserInviteInput = {
+  emails: Array<Scalars['String']>;
+  projectId: Scalars['String'];
+  role: ProjectRole;
+};
+
 
 
 
@@ -285,6 +479,10 @@ export type Mutation = {
   createProject?: Maybe<Project>;
   updateProject?: Maybe<Project>;
   deleteProject?: Maybe<Project>;
+  updateUserProject?: Maybe<UserProject>;
+  deleteUserProject?: Maybe<UserProject>;
+  createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
+  deleteUserInvite?: Maybe<UserInvite>;
 };
 
 
@@ -307,6 +505,26 @@ export type MutationUpdateProjectArgs = {
 
 
 export type MutationDeleteProjectArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationUpdateUserProjectArgs = {
+  input: UpdateUserProjectInput;
+};
+
+
+export type MutationDeleteUserProjectArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationCreateManyUserInviteArgs = {
+  input: CreateUserInviteInput;
+};
+
+
+export type MutationDeleteUserInviteArgs = {
   id: Scalars['String'];
 };
 
@@ -340,6 +558,7 @@ export type Project = {
   name: Scalars['String'];
   users: Array<UserProject>;
   paymentMethods: Array<PaymentMethod>;
+  userInvites: Array<UserInvite>;
 };
 
 
@@ -358,6 +577,14 @@ export type ProjectPaymentMethodsArgs = {
   after?: Maybe<PaymentMethodWhereUniqueInput>;
 };
 
+
+export type ProjectUserInvitesArgs = {
+  first?: Maybe<Scalars['Int']>;
+  last?: Maybe<Scalars['Int']>;
+  before?: Maybe<UserInviteWhereUniqueInput>;
+  after?: Maybe<UserInviteWhereUniqueInput>;
+};
+
 export enum ProjectRole {
   Admin = 'ADMIN',
   User = 'USER'
@@ -366,6 +593,7 @@ export enum ProjectRole {
 export type Query = {
   __typename?: 'Query';
   currentProject?: Maybe<Project>;
+  getUserInvites?: Maybe<Array<Maybe<UserInvite>>>;
   ping: Scalars['String'];
   self?: Maybe<User>;
   selfProjects?: Maybe<Array<Maybe<Project>>>;
@@ -376,6 +604,11 @@ export type QueryCurrentProjectArgs = {
   projectId?: Maybe<Scalars['String']>;
 };
 
+
+export type QueryGetUserInvitesArgs = {
+  projectId: Scalars['String'];
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   ping?: Maybe<Scalars['DateTime']>;
@@ -384,6 +617,11 @@ export type Subscription = {
 export type UpdateProjectInput = {
   id: Scalars['String'];
   name?: Maybe<Scalars['String']>;
+};
+
+export type UpdateUserProjectInput = {
+  id: Scalars['String'];
+  role?: Maybe<ProjectRole>;
 };
 
 export type User = {
@@ -403,6 +641,25 @@ export type UserProjectsArgs = {
   last?: Maybe<Scalars['Int']>;
   before?: Maybe<UserProjectWhereUniqueInput>;
   after?: Maybe<UserProjectWhereUniqueInput>;
+};
+
+export type UserInvite = {
+  __typename?: 'UserInvite';
+  id: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  role: ProjectRole;
+  email: Scalars['String'];
+};
+
+export type UserInviteProjectIdEmailCompoundUniqueInput = {
+  projectId: Scalars['String'];
+  email: Scalars['String'];
+};
+
+export type UserInviteWhereUniqueInput = {
+  id?: Maybe<Scalars['String']>;
+  token?: Maybe<Scalars['String']>;
+  projectId_email?: Maybe<UserInviteProjectIdEmailCompoundUniqueInput>;
 };
 
 export type UserProject = {
@@ -429,6 +686,19 @@ export type BaseProjcetFragment = (
   & Pick<Project, 'id' | 'name'>
 );
 
+export type CreateManyUserInviteMutationVariables = Exact<{
+  input: CreateUserInviteInput;
+}>;
+
+
+export type CreateManyUserInviteMutation = (
+  { __typename?: 'Mutation' }
+  & { createManyUserInvite?: Maybe<Array<Maybe<(
+    { __typename?: 'UserInvite' }
+    & Pick<UserInvite, 'id' | 'role' | 'createdAt' | 'email'>
+  )>>> }
+);
+
 export type CreateProjectMutationVariables = Exact<{
   input: CreateProjectInput;
 }>;
@@ -451,7 +721,31 @@ export type CurrentProjectQuery = (
   { __typename?: 'Query' }
   & { currentProject?: Maybe<(
     { __typename?: 'Project' }
-    & Pick<Project, 'id' | 'name'>
+    & BaseProjcetFragment
+  )> }
+);
+
+export type CurrentProject_MembersQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type CurrentProject_MembersQuery = (
+  { __typename?: 'Query' }
+  & { currentProject?: Maybe<(
+    { __typename?: 'Project' }
+    & { users: Array<(
+      { __typename?: 'UserProject' }
+      & Pick<UserProject, 'id' | 'createdAt' | 'role'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'createdAt' | 'name' | 'image' | 'email'>
+      ) }
+    )>, userInvites: Array<(
+      { __typename?: 'UserInvite' }
+      & Pick<UserInvite, 'id' | 'createdAt' | 'role' | 'email'>
+    )> }
+    & BaseProjcetFragment
   )> }
 );
 
@@ -464,7 +758,33 @@ export type DeleteProjectMutation = (
   { __typename?: 'Mutation' }
   & { deleteProject?: Maybe<(
     { __typename?: 'Project' }
-    & Pick<Project, 'id' | 'name'>
+    & BaseProjcetFragment
+  )> }
+);
+
+export type DeleteUserInviteMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteUserInviteMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteUserInvite?: Maybe<(
+    { __typename?: 'UserInvite' }
+    & Pick<UserInvite, 'id'>
+  )> }
+);
+
+export type DeleteUserProjectMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteUserProjectMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteUserProject?: Maybe<(
+    { __typename?: 'UserProject' }
+    & Pick<UserProject, 'id'>
   )> }
 );
 
@@ -497,6 +817,19 @@ export type UpdateProjectMutation = (
   & { updateProject?: Maybe<(
     { __typename?: 'Project' }
     & BaseProjcetFragment
+  )> }
+);
+
+export type UpdateUserProjectMutationVariables = Exact<{
+  input: UpdateUserProjectInput;
+}>;
+
+
+export type UpdateUserProjectMutation = (
+  { __typename?: 'Mutation' }
+  & { updateUserProject?: Maybe<(
+    { __typename?: 'UserProject' }
+    & Pick<UserProject, 'id' | 'createdAt' | 'role'>
   )> }
 );
 

@@ -34,12 +34,30 @@ export interface NexusGenInputs {
   CreateProjectInput: { // input type
     name: string; // String!
   }
+  CreateUserInviteInput: { // input type
+    emails: string[]; // [String!]!
+    projectId: string; // String!
+    role: NexusGenEnums['ProjectRole']; // ProjectRole!
+  }
   PaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
   }
   UpdateProjectInput: { // input type
     id: string; // String!
     name?: string | null; // String
+  }
+  UpdateUserProjectInput: { // input type
+    id: string; // String!
+    role?: NexusGenEnums['ProjectRole'] | null; // ProjectRole
+  }
+  UserInviteProjectIdEmailCompoundUniqueInput: { // input type
+    email: string; // String!
+    projectId: string; // String!
+  }
+  UserInviteWhereUniqueInput: { // input type
+    id?: string | null; // String
+    projectId_email?: NexusGenInputs['UserInviteProjectIdEmailCompoundUniqueInput'] | null; // UserInviteProjectIdEmailCompoundUniqueInput
+    token?: string | null; // String
   }
   UserProjectProjectIdUserIdCompoundUniqueInput: { // input type
     projectId: string; // String!
@@ -77,6 +95,7 @@ export interface NexusGenObjects {
   Project: prisma.Project;
   Query: {};
   User: prisma.User;
+  UserInvite: prisma.UserInvite;
   UserProject: prisma.UserProject;
 }
 
@@ -96,9 +115,13 @@ export interface NexusGenFieldTypes {
   }
   Mutation: { // field return type
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+    createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     createProject: NexusGenRootTypes['Project'] | null; // Project
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
+    deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
+    deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     updateProject: NexusGenRootTypes['Project'] | null; // Project
+    updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
   }
   PaymentMethod: { // field return type
     brand: string; // String!
@@ -116,10 +139,12 @@ export interface NexusGenFieldTypes {
     id: string; // String!
     name: string; // String!
     paymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
+    userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
   }
   Query: { // field return type
     currentProject: NexusGenRootTypes['Project'] | null; // Project
+    getUserInvites: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     ping: string; // String!
     self: NexusGenRootTypes['User'] | null; // User
     selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
@@ -132,6 +157,12 @@ export interface NexusGenFieldTypes {
     image: string | null; // String
     name: string | null; // String
     projects: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
+  }
+  UserInvite: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    email: string; // String!
+    id: string; // String!
+    role: NexusGenEnums['ProjectRole']; // ProjectRole!
   }
   UserProject: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -148,9 +179,13 @@ export interface NexusGenFieldTypeNames {
   }
   Mutation: { // field return type name
     createCheckoutSession: 'CheckoutSession'
+    createManyUserInvite: 'UserInvite'
     createProject: 'Project'
     deleteProject: 'Project'
+    deleteUserInvite: 'UserInvite'
+    deleteUserProject: 'UserProject'
     updateProject: 'Project'
+    updateUserProject: 'UserProject'
   }
   PaymentMethod: { // field return type name
     brand: 'String'
@@ -168,10 +203,12 @@ export interface NexusGenFieldTypeNames {
     id: 'String'
     name: 'String'
     paymentMethods: 'PaymentMethod'
+    userInvites: 'UserInvite'
     users: 'UserProject'
   }
   Query: { // field return type name
     currentProject: 'Project'
+    getUserInvites: 'UserInvite'
     ping: 'String'
     self: 'User'
     selfProjects: 'Project'
@@ -184,6 +221,12 @@ export interface NexusGenFieldTypeNames {
     image: 'String'
     name: 'String'
     projects: 'UserProject'
+  }
+  UserInvite: { // field return type name
+    createdAt: 'DateTime'
+    email: 'String'
+    id: 'String'
+    role: 'ProjectRole'
   }
   UserProject: { // field return type name
     createdAt: 'DateTime'
@@ -202,20 +245,38 @@ export interface NexusGenArgTypes {
       projectId: string; // String!
       quantity: number | null; // Int
     }
+    createManyUserInvite: { // args
+      input: NexusGenInputs['CreateUserInviteInput']; // CreateUserInviteInput!
+    }
     createProject: { // args
       input: NexusGenInputs['CreateProjectInput']; // CreateProjectInput!
     }
     deleteProject: { // args
       id: string; // String!
     }
+    deleteUserInvite: { // args
+      id: string; // String!
+    }
+    deleteUserProject: { // args
+      id: string; // String!
+    }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
+    }
+    updateUserProject: { // args
+      input: NexusGenInputs['UpdateUserProjectInput']; // UpdateUserProjectInput!
     }
   }
   Project: {
     paymentMethods: { // args
       after?: NexusGenInputs['PaymentMethodWhereUniqueInput'] | null; // PaymentMethodWhereUniqueInput
       before?: NexusGenInputs['PaymentMethodWhereUniqueInput'] | null; // PaymentMethodWhereUniqueInput
+      first?: number | null; // Int
+      last?: number | null; // Int
+    }
+    userInvites: { // args
+      after?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput
+      before?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput
       first?: number | null; // Int
       last?: number | null; // Int
     }
@@ -229,6 +290,9 @@ export interface NexusGenArgTypes {
   Query: {
     currentProject: { // args
       projectId?: string | null; // String
+    }
+    getUserInvites: { // args
+      projectId: string; // String!
     }
   }
   User: {

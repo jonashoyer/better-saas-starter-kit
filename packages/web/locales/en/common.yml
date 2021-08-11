@@ -4,3 +4,7 @@ submit: 'Submit'
 save: 'Save'
 create: 'Create'
 name: 'Name'
+remove: 'Remove'
+email:
+- one: 'email'
+  many: 'emails'

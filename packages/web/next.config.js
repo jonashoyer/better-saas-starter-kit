@@ -1,10 +1,11 @@
-const nextTranslate = require('next-translate')
+const nextTranslate = require('next-translate');
+const i18n = require('./i18n');
 
 module.exports = nextTranslate({
   reactStrictMode: true,
   i18n: {
-    locales: ['en'],
-    defaultLocale: 'en',
+    locales: i18n.locales,
+    defaultLocale: i18n.defaultLocale,
   },
   typescript: {
     ignoreBuildErrors: true,

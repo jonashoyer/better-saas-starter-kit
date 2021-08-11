@@ -1,5 +1,5 @@
 import cuid from 'cuid';
-import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
+import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { hasAuth, hasProjectAccess } from './permissions';
 import { Constants } from 'bs-shared-kit';
 
@@ -10,25 +10,9 @@ export const Project = objectType({
     t.model.name();
     t.model.users();
     t.model.paymentMethods();
+    t.model.userInvites();
   },
 });
-
-export const UserProject = objectType({
-  name: 'UserProject',
-  definition(t) {
-    t.model.id();
-    t.model.createdAt();
-    t.model.role();
-    t.model.user();
-    t.model.project();
-  }
-})
-
-export const ProjectRole = enumType({
-  name: 'ProjectRole',
-  members: ['ADMIN', 'USER'],
-})
-
 
 export const CurrentProject = queryField('currentProject', {
   type: 'Project',

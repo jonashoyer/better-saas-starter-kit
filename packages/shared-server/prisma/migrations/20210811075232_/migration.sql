@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER');
+CREATE TYPE "ProjectRole" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
 CREATE TYPE "PaymentMethodImportance" AS ENUM ('PRIMARY', 'BACKUP', 'OTHER');
@@ -28,7 +28,6 @@ CREATE TABLE "Session" (
     "sessionToken" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "metadata" JSONB NOT NULL DEFAULT E'{}',
 
     PRIMARY KEY ("id")
 );
@@ -52,7 +51,7 @@ CREATE TABLE "UserProject" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "userId" TEXT NOT NULL,
     "projectId" TEXT NOT NULL,
-    "role" "UserRole" NOT NULL DEFAULT E'USER',
+    "role" "ProjectRole" NOT NULL DEFAULT E'USER',
 
     PRIMARY KEY ("id")
 );
@@ -64,6 +63,18 @@ CREATE TABLE "Project" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "stripeCustomerId" TEXT NOT NULL,
+
+    PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "UserInvite" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "email" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "role" "ProjectRole" NOT NULL,
+    "projectId" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -140,6 +151,12 @@ CREATE UNIQUE INDEX "UserProject.projectId_userId_unique" ON "UserProject"("proj
 CREATE UNIQUE INDEX "Project.stripeCustomerId_unique" ON "Project"("stripeCustomerId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "UserInvite.token_unique" ON "UserInvite"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserInvite.projectId_email_unique" ON "UserInvite"("projectId", "email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"("token");
 
 -- CreateIndex
@@ -161,7 +178,10 @@ ALTER TABLE "UserProject" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON 
 ALTER TABLE "UserProject" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "UserInvite" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "PaymentMethod" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProductPrice" ADD FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "ProductPrice" ADD FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;

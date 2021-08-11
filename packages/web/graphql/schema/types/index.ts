@@ -20,3 +20,5 @@ export * as Checkout from './Checkout';
 export * as Project from './Project';
 export * as PaymentMethod from './PaymentMethod';
 export * as Mutation from './Mutation';
+export * as UserProject from './UserProject';
+export * as UserInvite from './UserInvite';

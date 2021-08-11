@@ -1,0 +1,23 @@
+query CurrentProject_Members($projectId: String) {
+  currentProject(projectId: $projectId) {
+    ...BaseProjcet
+    users {
+      id
+      createdAt
+      role
+      user {
+        id
+        createdAt
+        name
+        image
+        email
+      }
+    }
+    userInvites {
+      id
+      createdAt
+      role
+      email
+    }
+  }
+}

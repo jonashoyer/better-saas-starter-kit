@@ -4,6 +4,8 @@ deleteProjectContent: 'Once the project is deleted there is no going back! Type 
 projectId: 'Project Id'
 projectSettings: 'Project Settings'
 
+teamMembers: 'Team members'
+
 dangerZone: 'Danger Zone'
 
 deleteThisProject: 'Delete this project!'

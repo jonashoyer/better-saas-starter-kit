@@ -10,6 +10,12 @@ input CreateProjectInput {
   name: String!
 }
 
+input CreateUserInviteInput {
+  emails: [String!]!
+  projectId: String!
+  role: ProjectRole!
+}
+
 scalar Date
 
 """
@@ -26,9 +32,13 @@ scalar Json
 
 type Mutation {
   createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
+  createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
   deleteProject(id: String!): Project
+  deleteUserInvite(id: String!): UserInvite
+  deleteUserProject(id: String!): UserProject
   updateProject(input: UpdateProjectInput!): Project
+  updateUserProject(input: UpdateUserProjectInput!): UserProject
 }
 
 type PaymentMethod {
@@ -58,6 +68,7 @@ type Project {
   id: String!
   name: String!
   paymentMethods(after: PaymentMethodWhereUniqueInput, before: PaymentMethodWhereUniqueInput, first: Int, last: Int): [PaymentMethod!]!
+  userInvites(after: UserInviteWhereUniqueInput, before: UserInviteWhereUniqueInput, first: Int, last: Int): [UserInvite!]!
   users(after: UserProjectWhereUniqueInput, before: UserProjectWhereUniqueInput, first: Int, last: Int): [UserProject!]!
 }
 
@@ -68,6 +79,7 @@ enum ProjectRole {
 
 type Query {
   currentProject(projectId: String): Project
+  getUserInvites(projectId: String!): [UserInvite]
   ping: String!
   self: User
   selfProjects: [Project]
@@ -78,6 +90,11 @@ input UpdateProjectInput {
   name: String
 }
 
+input UpdateUserProjectInput {
+  id: String!
+  role: ProjectRole
+}
+
 type User {
   createdAt: DateTime!
   email: String
@@ -86,6 +103,24 @@ type User {
   image: String
   name: String
   projects(after: UserProjectWhereUniqueInput, before: UserProjectWhereUniqueInput, first: Int, last: Int): [UserProject!]!
+}
+
+type UserInvite {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  role: ProjectRole!
+}
+
+input UserInviteProjectIdEmailCompoundUniqueInput {
+  email: String!
+  projectId: String!
+}
+
+input UserInviteWhereUniqueInput {
+  id: String
+  projectId_email: UserInviteProjectIdEmailCompoundUniqueInput
+  token: String
 }
 
 type UserProject {

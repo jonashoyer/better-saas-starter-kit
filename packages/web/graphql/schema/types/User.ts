@@ -16,8 +16,8 @@ export const User = objectType({
     t.model.createdAt();
     t.model.email({ authorize: isSelf, });
     t.model.emailVerified({ authorize: isSelf });
-    t.model.name({ authorize: isSelf }); // FIXME: In project with
-    t.model.image({ authorize: isSelf });
+    t.model.name(); // FIXME: In project with
+    t.model.image(); // FIXME: In project with
     t.model.projects({ authorize: isSelf });
   },
 });

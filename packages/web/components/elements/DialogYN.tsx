@@ -5,8 +5,15 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import { LoadingButton } from '@material-ui/lab';
+import useTranslation from 'next-translate/useTranslation';
 
 export interface DialogYNProps {
+  open: boolean;
+  onSubmit: () => any;
+  handleClose: () => any;
+  loading?: boolean;
+
   title: React.ReactNode;
   content?: React.ReactNode;
 
@@ -14,26 +21,24 @@ export interface DialogYNProps {
   submitText?: string;
 }
 
-export default function DialogYN({}: DialogYNProps) {
-  const [open, setOpen] = React.useState(false);
+export default function DialogYN({ open, title, content, cancelText, submitText, loading, onSubmit, handleClose }: DialogYNProps) {
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const { t } = useTranslation();
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const onClose = () => {
+    if (loading) return;
+    handleClose();
+  }
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{content}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleClose}>Subscribe</Button>
+        <Button disabled={loading} onClick={onClose}>{cancelText ?? t('common:cancel')}</Button>
+        <LoadingButton variant='contained' loading={loading} onClick={onSubmit}>{submitText ?? t('common:submit')}</LoadingButton>
       </DialogActions>
     </Dialog>
   );

@@ -1,0 +1,8 @@
+mutation CreateManyUserInvite($input: CreateUserInviteInput!) {
+  createManyUserInvite(input: $input) {
+    id
+    role
+    createdAt
+    email
+  }
+}
