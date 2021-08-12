@@ -8,6 +8,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddIcon from '@material-ui/icons/Add';
 import DialogYN from '../elements/DialogYN';
 import DialogUserInvite from '../elements/DialogUserInvite';
+import DialogEditMember from '../elements/DialogEditMember';
 
 export interface ProjectMembersPaperProps {
   project?: CurrentProject_MembersQuery['currentProject'] | Project;
@@ -23,6 +24,7 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
   const [userMenuUserProject, setUserMenuUserProject] = React.useState(null);
   const [deleteInvite, setDeleteInvite] = React.useState(null);
   const [deleteUserProjectId, setDeleteUserProjectId] = React.useState(null);
+  const [editUserProject, setEditUserProject] = React.useState(null);
 
 
   const [deleteUserInvite, { loading: loadingDeleteUserInvite }] = useDeleteUserInviteMutation({
@@ -44,7 +46,19 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
   });
   const [deleteUserProject, { loading: loadingDeleteUserProject }] = useDeleteUserProjectMutation({
     update(cache, { data }) {
-      
+      if (!data.deleteUserProject) return;
+      cache.modify({
+        id: cache.identify(project),
+        fields: {
+          users(existing, { toReference }) {
+            const ref = toReference(data.deleteUserProject);
+            return existing.filter((e: any) => e.__ref !== ref.__ref);
+          }
+        }
+      })
+    },
+    onCompleted() {
+      setDeleteUserProjectId(null);
     }
   });
 
@@ -57,6 +71,11 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
     setUserMenuAnchorEl(null);
     setUserMenuUserProject(null);
   };
+
+  const handleEditMember = () => {
+    setEditUserProject(userMenuUserProject);
+    handleUserMenuClose();
+  }
 
   const handleRemoveMember = () => {
     setDeleteUserProjectId(userMenuUserProject.id);
@@ -72,8 +91,8 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
         open={!!userMenuAnchorEl}
         onClose={handleUserMenuClose}
       >
-        <MenuItem onClick={handleUserMenuClose}>
-          Change role
+        <MenuItem onClick={handleEditMember}>
+          Edit member
         </MenuItem>
         <MenuItem onClick={handleRemoveMember}>
           Remove member
@@ -106,6 +125,12 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
         open={inviteDialogOpen}
         onClose={() => setInviteDialogOpen(false)}
         project={project}
+      />
+
+      <DialogEditMember
+        open={!!editUserProject}
+        userProject={editUserProject}
+        onClose={() => setEditUserProject(null)}
       />
 
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>

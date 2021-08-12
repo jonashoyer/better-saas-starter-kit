@@ -38,8 +38,8 @@ export default function DialogTextfield({ title, content, initalValue, controlle
   const { control, handleSubmit, formState: { errors }, reset } = useForm(useformProps);
 
   React.useEffect(() => {
-    reset();
-  }, [reset, open]);
+    reset(useformProps.defaultValues || { input: '' });
+  }, [reset, open, useformProps.defaultValues]);
 
   const handleClose = () => {
     if (loading) return;

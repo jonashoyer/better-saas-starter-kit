@@ -13,12 +13,12 @@ import { useCreateProjectMutation } from 'types/gql';
 import useProject from '@/hooks/useProject';
 import { useRouter } from 'next/router';
 
-export interface CreateProjectDialogProps {
+export interface DialogCreateProjectProps {
   open: boolean;
   onClose: () => any;
 }
 
-export default function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps) {
+export default function DialogCreateProject({ open, onClose }: DialogCreateProjectProps) {
 
   const router = useRouter();
   const { t } = useTranslation();

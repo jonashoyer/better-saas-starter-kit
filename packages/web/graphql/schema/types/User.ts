@@ -10,11 +10,11 @@ const isSelf = (root: prisma.User, args: any, ctx: Context) => {
 }
 
 export const User = objectType({
-  name: 'User',
+  name: 'User', 
   definition(t) {
     t.model.id();
     t.model.createdAt();
-    t.model.email({ authorize: isSelf, });
+    t.model.email(); // FIXME:
     t.model.emailVerified({ authorize: isSelf });
     t.model.name(); // FIXME: In project with
     t.model.image(); // FIXME: In project with

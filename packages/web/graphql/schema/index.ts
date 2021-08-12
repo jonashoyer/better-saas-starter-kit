@@ -11,7 +11,12 @@ export default NexusSchema.makeSchema({
       experimentalCRUD: true,
     }),
     NexusSchema.declarativeWrappingPlugin(),
-    fieldAuthorizePlugin(),
+    fieldAuthorizePlugin({
+      formatError({ error, info }) {
+        console.error(info);
+        return error;
+      }
+    }),
     nullabilityGuardPlugin({
       onGuarded({
         fallback,
@@ -32,7 +37,7 @@ export default NexusSchema.makeSchema({
         DateTime: () => new Date(0),
         Json: () => null,
         JSONObject: () => {},
-      }
+      },
     })
   ],
   outputs: {

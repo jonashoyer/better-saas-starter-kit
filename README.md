@@ -31,14 +31,13 @@ Monorepo using npm workspace
 - Redis
 
 ### To do list:
- - [ ] Basic project management
- - [ ] Basic user management
+ - [x] Basic project management
+ - [x] Basic user management
  - [ ] Stripe subscription integration
  - [ ] Basic subscription management
  - [ ] Stripe charge integration
  - [ ] Basic charge management
  - [ ] Work quene management
- - [ ] Server caching
  - [ ] Platform admin page
  - [ ] Landing page template
  - [ ] Web app layout template

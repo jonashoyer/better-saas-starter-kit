@@ -3,6 +3,7 @@ cancel: 'Cancel'
 submit: 'Submit'
 save: 'Save'
 create: 'Create'
+update: 'Update'
 name: 'Name'
 remove: 'Remove'
 email:

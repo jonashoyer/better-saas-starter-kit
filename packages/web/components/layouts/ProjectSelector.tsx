@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import AddIcon from '@material-ui/icons/Add';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { useRouter } from "next/router";
-import CreateProjectDialog from "../elements/CreateProjectDialog";
+import DialogCreateProject from "../elements/DialogCreateProject";
 
 interface ProjectSelectorProps {
   projects: ({ id: string, name: string })[];
@@ -39,7 +39,7 @@ const ProjectSelector = ({ projects }: ProjectSelectorProps) => {
 
   return (
     <React.Fragment>
-      <CreateProjectDialog
+      <DialogCreateProject
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
       />
