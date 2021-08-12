@@ -7,8 +7,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { LoadingButton } from '@material-ui/lab';
 import useTranslation from 'next-translate/useTranslation';
+import { DialogProps } from '@material-ui/core';
 
-export interface DialogYNProps {
+export type DialogYNProps = DialogProps & {
   open: boolean;
   onSubmit: () => any;
   handleClose: () => any;
@@ -21,7 +22,7 @@ export interface DialogYNProps {
   submitText?: string;
 }
 
-export default function DialogYN({ open, title, content, cancelText, submitText, loading, onSubmit, handleClose }: DialogYNProps) {
+export default function DialogYN({ open, title, content, cancelText, submitText, loading, onSubmit, handleClose, ...dialogProps }: DialogYNProps) {
 
   const { t } = useTranslation();
 
@@ -31,7 +32,7 @@ export default function DialogYN({ open, title, content, cancelText, submitText,
   }
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog {...dialogProps} open={open} onClose={onClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{content}</DialogContentText>

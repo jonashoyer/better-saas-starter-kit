@@ -1,6 +1,6 @@
 import React from 'react';
 import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography, IconButton, Menu, MenuItem, ListItemIcon } from '@material-ui/core';
-import { CurrentProject_MembersQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation } from 'types/gql';
+import { CurrentProject_MembersQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation, User, SelfQuery } from 'types/gql';
 import useTranslation from 'next-translate/useTranslation';
 import EmailIcon from '@material-ui/icons/Email';
 import CancelIcon from '@material-ui/icons/Cancel';
@@ -11,28 +11,58 @@ import DialogUserInvite from '../elements/DialogUserInvite';
 
 export interface ProjectMembersPaperProps {
   project?: CurrentProject_MembersQuery['currentProject'] | Project;
+  self?: SelfQuery['self'] | User;
 }
 
-const ProjectMembersPaper = ({ project }: ProjectMembersPaperProps) => {
+const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
 
   const { t } = useTranslation();
 
-  const [deleteUserInvite, { loading: loadingDeleteUserInvite }] = useDeleteUserInviteMutation();
-  const [deleteUserProject] = useDeleteUserProjectMutation();
-
   const [inviteDialogOpen, setInviteDialogOpen] = React.useState(false);
-
   const [userMenuAnchorEl, setUserMenuAnchorEl] = React.useState(null);
-  const handleUserMenuClick = (event) => {
+  const [userMenuUserProject, setUserMenuUserProject] = React.useState(null);
+  const [deleteInvite, setDeleteInvite] = React.useState(null);
+  const [deleteUserProjectId, setDeleteUserProjectId] = React.useState(null);
+
+
+  const [deleteUserInvite, { loading: loadingDeleteUserInvite }] = useDeleteUserInviteMutation({
+    update(cache, { data }) {
+      if (!data.deleteUserInvite) return;
+      cache.modify({
+        id: cache.identify(project),
+        fields: {
+          userInvites(existing, { toReference }) {
+            const ref = toReference(data.deleteUserInvite);
+            return existing.filter((e: any) => e.__ref !== ref.__ref);
+          }
+        }
+      })
+    },
+    onCompleted() {
+      setDeleteInvite(null);
+    }
+  });
+  const [deleteUserProject, { loading: loadingDeleteUserProject }] = useDeleteUserProjectMutation({
+    update(cache, { data }) {
+      
+    }
+  });
+
+
+  const handleUserMenuClick = (userProject: any) => (event: any) => {
     setUserMenuAnchorEl(event.currentTarget);
+    setUserMenuUserProject(userProject);
   };
   const handleUserMenuClose = () => {
     setUserMenuAnchorEl(null);
+    setUserMenuUserProject(null);
   };
+
+  const handleRemoveMember = () => {
+    setDeleteUserProjectId(userMenuUserProject.id);
+    handleUserMenuClose();
+  }
   
-
-
-  const [deleteInvite, setDeleteInvite] = React.useState(null);
 
   return (
     <React.Fragment>
@@ -45,24 +75,37 @@ const ProjectMembersPaper = ({ project }: ProjectMembersPaperProps) => {
         <MenuItem onClick={handleUserMenuClose}>
           Change role
         </MenuItem>
-        <MenuItem onClick={handleUserMenuClose} color='error'>
+        <MenuItem onClick={handleRemoveMember}>
           Remove member
         </MenuItem>
       </Menu>
       
       <DialogYN
         open={!!deleteInvite}
+        maxWidth='xs'
         handleClose={() => setDeleteInvite(null)}
-        title={t('dialog:areYouSure')}
+        title={t('dialog:deleteInviteTitle')}
         content={t('dialog:deleteInviteContent')}
         onSubmit={() => deleteUserInvite({ variables: { id: deleteInvite } })}
         loading={loadingDeleteUserInvite}
         submitText={t('common:remove')}
       />
 
+      <DialogYN
+        open={!!deleteUserProjectId}
+        maxWidth='xs'
+        handleClose={() => setDeleteUserProjectId(null)}
+        title={t('dialog:deleteUserProjectTitle')}
+        content={t('dialog:deleteUserProjectContent')}
+        onSubmit={() => deleteUserProject({ variables: { id: deleteUserProjectId } })}
+        loading={loadingDeleteUserProject}
+        submitText={t('common:remove')}
+      />
+
       <DialogUserInvite
         open={inviteDialogOpen}
         onClose={() => setInviteDialogOpen(false)}
+        project={project}
       />
 
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
@@ -75,13 +118,14 @@ const ProjectMembersPaper = ({ project }: ProjectMembersPaperProps) => {
             <ListItem
               key={e.id}
               secondaryAction={
-                <IconButton
+                self.id !== e.user.id
+                && <IconButton
                   edge="end"
                   aria-label="more"
                   aria-controls="user-menu"
                   aria-expanded={!!userMenuAnchorEl ? 'true' : undefined}
                   aria-haspopup="true"
-                  onClick={handleUserMenuClick}
+                  onClick={handleUserMenuClick(e)}
                 >
                   <MoreVertIcon />
                 </IconButton>

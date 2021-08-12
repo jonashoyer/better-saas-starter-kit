@@ -5,7 +5,7 @@ import { Control, Controller, ControllerProps } from "react-hook-form"
 
 export type FormTextFieldProps = TextFieldProps & {
   name: string;
-  control: Control;
+  control: Control<any>;
   defaultValue?: string;
   controllerProps?: Partial<Omit<ControllerProps, 'name' | 'control'>>;
 }
@@ -27,11 +27,11 @@ function FormTextField({
           margin='normal'
           variant='outlined'
           error={!!error}
-          helperText={error ? error.message : null}
           value={value}
           inputRef={ref}
           {...rest}
           {...textFieldProps}
+          helperText={error ? error.message : null}
         />
       )}
       {...controllerProps}

@@ -11,21 +11,37 @@ import useTranslation from 'next-translate/useTranslation';
 import FormTextField from './FormTextField';
 import { Box, MenuItem } from '@material-ui/core';
 import FormSelect from './FormSelect';
-import { ProjectRole, useCreateManyUserInviteMutation } from 'types/gql';
+import { CurrentProject_MembersQuery, Project, ProjectRole, useCreateManyUserInviteMutation } from 'types/gql';
 
 export interface DialogUserInviteProps {
   open: boolean;
   onClose?: () => any;
+  project?: CurrentProject_MembersQuery['currentProject'] | Project;
 }
 
-export default function DialogUserInvite({ open, onClose }: DialogUserInviteProps) {
+export default function DialogUserInvite({ open, onClose, project }: DialogUserInviteProps) {
 
   const { t } = useTranslation();
 
-  const [createUserInvite, { loading }] = useCreateManyUserInviteMutation();
+  const [createUserInvite, { loading }] = useCreateManyUserInviteMutation({
+    update(cache, { data } ) {
+      if (!data.createManyUserInvite) return;
+      cache.modify({
+        id: cache.identify(project),
+        fields: {
+          userInvites(existing, { toReference }) {
+            return [...existing, ...data.createManyUserInvite.map(e => toReference(e))];
+          }
+        }
+      })
+    },
+    onCompleted() {
+      onClose();
+    }
+  });
 
   
-  const { control, handleSubmit, formState: { errors }, reset } = useForm();
+  const { control, handleSubmit, formState: { errors }, reset } = useForm({ defaultValues: { emails: '', role: ProjectRole.User } });
 
   React.useEffect(() => {
     reset();
@@ -36,8 +52,16 @@ export default function DialogUserInvite({ open, onClose }: DialogUserInviteProp
     onClose();
   };
 
-  const onSubmit = (e: any) => {
-    e?.preventDefault?.();
+  const onSubmit = ({ emails, role }: any) => {
+    createUserInvite({
+      variables: {
+        input: {
+          emails: emails.split(' '),
+          projectId: project!.id,
+          role,
+        }
+      }
+    })
   }
 
   return (
@@ -47,19 +71,20 @@ export default function DialogUserInvite({ open, onClose }: DialogUserInviteProp
         <DialogContentText>{t('dialog:inviteMembersContent')}</DialogContentText>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormTextField
-            label={t('common:email', { count: 10 })}
+            label={t('common:email', { count: 2 })}
             autoFocus
             fullWidth
             disabled={loading}
             name='emails'
             control={control}
-            defaultValue=''
             margin='normal'
             multiline
             minRows={2}
             type='email'
+            helperText={t('dialog:inviteMembersHelperText')}
             controllerProps={{
               rules: {
+                required: true,
                 pattern: {
                   value: /^(?!\ )(\ ?([a-z0-9]+(?:[._-][a-z0-9]+)*)@([a-z0-9]+(?:[.-][a-z0-9]+)*\.[a-z]{2,}))+$/,
                   message: "Entered value does not match email format"
@@ -75,10 +100,9 @@ export default function DialogUserInvite({ open, onClose }: DialogUserInviteProp
               control={control}
               name='role'
               label={t('common:role')}
-              defaultValue={ProjectRole.User}
               >
-              {Object.entries(ProjectRole).map(([key, value]) => (
-                <MenuItem key={value} value={value}>{key}</MenuItem>
+                {Object.entries(ProjectRole).map(([key, value]) => (
+                  <MenuItem key={value} value={value}>{key}</MenuItem>
                 ))}
             </FormSelect>
           </Box>
@@ -87,7 +111,7 @@ export default function DialogUserInvite({ open, onClose }: DialogUserInviteProp
       </DialogContent>
       <DialogActions>
         <Button disabled={loading} onClick={handleClose}>{t('common:cancel')}</Button>
-        <LoadingButton loading={loading} disabled={!!errors.input} onClick={handleSubmit(onSubmit)} variant='contained'>{t('common:invite')}</LoadingButton>
+        <LoadingButton loading={loading} disabled={!!errors.emails} onClick={handleSubmit(onSubmit)} variant='contained'>{t('common:invite')}</LoadingButton>
       </DialogActions>
     </Dialog>
   );

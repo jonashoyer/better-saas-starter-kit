@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { getSession } from "next-auth/client";
-import { CurrentProject_MembersDocument, useCurrentProject_MembersQuery,  } from 'types/gql';
+import { CurrentProject_MembersDocument, SelfDocument, useCurrentProject_MembersQuery, useSelfQuery } from 'types/gql';
 import ProductPricingsLayout from '@/components/layouts/ProductPricingsLayout';
 import prisma from '@/utils/prisma';
 import { GetServerSideProps } from 'next';
@@ -18,6 +18,8 @@ import ProjectDangerZonePaper from '@/components/layouts/ProjectDangerZonePaper'
 export default function Home(props: any) {
 
   const [projectId] = useProject();
+
+  const { data: selfData } = useSelfQuery();
 
   const { data: currentProjectData } = useCurrentProject_MembersQuery({
     variables: {
@@ -41,7 +43,7 @@ export default function Home(props: any) {
         </Box>
 
         <ProjectDetailsPaper project={currentProjectData.currentProject} />
-        <ProjectMembersPaper project={currentProjectData.currentProject} />
+        <ProjectMembersPaper project={currentProjectData.currentProject} self={selfData?.self} />
         <ProjectDangerZonePaper project={currentProjectData.currentProject} />
 
       </PageLayout>
@@ -66,6 +68,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   if (session?.user) {
 
     const projectId = ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY];
+
+    await client.query({
+      query: SelfDocument,
+    });
 
     const { data: { currentProject } } = await client.query({
       query: CurrentProject_MembersDocument,

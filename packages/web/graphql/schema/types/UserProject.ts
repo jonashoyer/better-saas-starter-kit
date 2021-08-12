@@ -71,7 +71,9 @@ export const DeleteUserProject = mutationField('deleteUserProject', {
   }),
   async resolve(root, { id }, ctx) {
 
-    if (id === ctx.user.id) {
+    const userProject = await ctx.prisma.userProject.findUnique({ where: { id }, select: { userId: true } });
+
+    if (userProject.userId === ctx.user.id) {
       throw new Error('You cannot remove yourself from a project!');
     }
 

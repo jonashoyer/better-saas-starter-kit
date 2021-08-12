@@ -1,4 +1,4 @@
-query SelfQuery {
+query Self {
   self {
     id
     email

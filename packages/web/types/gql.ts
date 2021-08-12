@@ -334,6 +334,43 @@ export function useSelfProjectsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptio
 export type SelfProjectsQueryHookResult = ReturnType<typeof useSelfProjectsQuery>;
 export type SelfProjectsLazyQueryHookResult = ReturnType<typeof useSelfProjectsLazyQuery>;
 export type SelfProjectsQueryResult = Apollo.QueryResult<SelfProjectsQuery, SelfProjectsQueryVariables>;
+export const SelfDocument = gql`
+    query Self {
+  self {
+    id
+    email
+    emailVerified
+    name
+  }
+}
+    `;
+
+/**
+ * __useSelfQuery__
+ *
+ * To run a query within a React component, call `useSelfQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSelfQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSelfQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSelfQuery(baseOptions?: Apollo.QueryHookOptions<SelfQuery, SelfQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SelfQuery, SelfQueryVariables>(SelfDocument, options);
+      }
+export function useSelfLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQuery, SelfQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SelfQuery, SelfQueryVariables>(SelfDocument, options);
+        }
+export type SelfQueryHookResult = ReturnType<typeof useSelfQuery>;
+export type SelfLazyQueryHookResult = ReturnType<typeof useSelfLazyQuery>;
+export type SelfQueryResult = Apollo.QueryResult<SelfQuery, SelfQueryVariables>;
 export const UpdateProjectDocument = gql`
     mutation UpdateProject($input: UpdateProjectInput!) {
   updateProject(input: $input) {
@@ -402,43 +439,6 @@ export function useUpdateUserProjectMutation(baseOptions?: Apollo.MutationHookOp
 export type UpdateUserProjectMutationHookResult = ReturnType<typeof useUpdateUserProjectMutation>;
 export type UpdateUserProjectMutationResult = Apollo.MutationResult<UpdateUserProjectMutation>;
 export type UpdateUserProjectMutationOptions = Apollo.BaseMutationOptions<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>;
-export const SelfQueryDocument = gql`
-    query SelfQuery {
-  self {
-    id
-    email
-    emailVerified
-    name
-  }
-}
-    `;
-
-/**
- * __useSelfQueryQuery__
- *
- * To run a query within a React component, call `useSelfQueryQuery` and pass it any options that fit your needs.
- * When your component renders, `useSelfQueryQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSelfQueryQuery({
- *   variables: {
- *   },
- * });
- */
-export function useSelfQueryQuery(baseOptions?: Apollo.QueryHookOptions<SelfQueryQuery, SelfQueryQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SelfQueryQuery, SelfQueryQueryVariables>(SelfQueryDocument, options);
-      }
-export function useSelfQueryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQueryQuery, SelfQueryQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SelfQueryQuery, SelfQueryQueryVariables>(SelfQueryDocument, options);
-        }
-export type SelfQueryQueryHookResult = ReturnType<typeof useSelfQueryQuery>;
-export type SelfQueryLazyQueryHookResult = ReturnType<typeof useSelfQueryLazyQuery>;
-export type SelfQueryQueryResult = Apollo.QueryResult<SelfQueryQuery, SelfQueryQueryVariables>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -807,6 +807,17 @@ export type SelfProjectsQuery = (
   )>>> }
 );
 
+export type SelfQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SelfQuery = (
+  { __typename?: 'Query' }
+  & { self?: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'email' | 'emailVerified' | 'name'>
+  )> }
+);
+
 export type UpdateProjectMutationVariables = Exact<{
   input: UpdateProjectInput;
 }>;
@@ -830,16 +841,5 @@ export type UpdateUserProjectMutation = (
   & { updateUserProject?: Maybe<(
     { __typename?: 'UserProject' }
     & Pick<UserProject, 'id' | 'createdAt' | 'role'>
-  )> }
-);
-
-export type SelfQueryQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type SelfQueryQuery = (
-  { __typename?: 'Query' }
-  & { self?: Maybe<(
-    { __typename?: 'User' }
-    & Pick<User, 'id' | 'email' | 'emailVerified' | 'name'>
   )> }
 );

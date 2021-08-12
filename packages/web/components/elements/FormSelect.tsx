@@ -4,7 +4,7 @@ import { Control, Controller, ControllerProps } from "react-hook-form"
 
 export type FormSelectProps = SelectProps & {
   name: string;
-  control: Control;
+  control: Control<any>;
   defaultValue?: string;
   helperText?: string;
   controllerProps?: Partial<Omit<ControllerProps, 'name' | 'control'>>;
