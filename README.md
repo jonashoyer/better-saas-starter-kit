@@ -32,7 +32,7 @@ Monorepo using npm workspace
 
 ### To do list:
  - [x] Basic project management
- - [x] Basic user management
+ - [ ] Basic user management
  - [ ] Stripe subscription integration
  - [ ] Basic subscription management
  - [ ] Stripe charge integration
