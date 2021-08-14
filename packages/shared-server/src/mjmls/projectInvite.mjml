@@ -1,6 +1,6 @@
 <mjml>
   <mj-head>
-    <mj-title>Hello world</mj-title>
+    <mj-title>Welcome</mj-title>
     <mj-font name="Roboto" href="https://fonts.googleapis.com/css?family=Roboto:300,500"></mj-font>
     <mj-attributes>
       <mj-all font-family="Roboto, Helvetica, sans-serif"></mj-all>
@@ -24,7 +24,7 @@
     </mj-section>
     <mj-section>
       <mj-column width="45%">
-        <mj-text align="center" font-weight="500" padding="0px" font-size="18px">{{appName}}</mj-text>
+        <mj-text align="center" font-weight="500" padding="0px" font-size="18px">Better SaaS</mj-text>
         <mj-divider border-width="2px" border-color="#616161"></mj-divider>
       </mj-column>
     </mj-section>

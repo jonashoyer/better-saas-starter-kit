@@ -21,16 +21,16 @@ export type EmailData = {
 } | TemplatedEmailData;
 
 export type QueueManagerType = QueueManagerReturn<{
-  sendEmail: QueueManagerEntity<EmailData[], void, 'sendEmail'>;
+  email: QueueManagerEntity<EmailData[], void, 'send'>;
 }>;
 
 export const createQueueMananger = () => {
   return QueueManager({
     queues: {
-      sendEmail: createQueue<EmailData[], void>(),
+      email: createQueue<EmailData[], void, 'send'>(),
     },
     processors: {
-      async sendEmail(job) {
+      async email(job) {
         const emails = job.data.map((e: any) => {
           if (!e.email.html && !e.template.name) throw new Error('Email is missing html or template name!');
           if (e.email.html) return e.email;

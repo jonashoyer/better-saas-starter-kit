@@ -1,7 +1,7 @@
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from "nexus";
 import { hasProjectAccess, hasUserProjectAccess } from "./permissions";
 import crypto from 'crypto';
-import { sendEmail, generateEmailFromTemplate } from 'bs-shared-server-kit';
+import { getURL } from "@/utils/utils";
 
 export const UserInvite = objectType({
   name: 'UserInvite',
@@ -46,7 +46,7 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
   authorize: hasProjectAccess({ role: 'ADMIN', projectIdFn: (_, { input }) => input.projectId }),
   async resolve(root, { input }, ctx) {
 
-    //TODO: Do email send out!
+    const project = await ctx.prisma.project.findUnique({ where: { id: input.projectId }, select: { name: true } });
 
     const data = input.emails.map(email => ({
       email,
@@ -59,7 +59,23 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
       data,
     });
     
-    // TODO: Send email
+    await ctx.queueManager.queues.email.add(
+      'send',
+      data.map(e => ({
+        email: {
+          from: { email: 'invites@notifications.better-saas.io', name: ctx.user.name ?? project.name },
+          to: { email: e.email },
+          subject: `You’ve been invited to ${project.name}`,
+        },
+        template: {
+          name: 'projectInvite',
+          context: {
+            projectName: project.name,
+            url: `${getURL()}?invite=${e.token}`,
+          }
+        }
+      }))
+    )
 
     return ctx.prisma.userInvite.findMany({
       where: { token: { in: data.map(e => e.token) } },
