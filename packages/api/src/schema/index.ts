@@ -8,6 +8,7 @@ export default NexusSchema.makeSchema({
   plugins: [
     nexusPrisma({
       experimentalCRUD: true,
+      paginationStrategy: 'prisma',
     }),
     NexusSchema.declarativeWrappingPlugin(),
   ],

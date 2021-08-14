@@ -563,26 +563,23 @@ export type Project = {
 
 
 export type ProjectUsersArgs = {
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-  before?: Maybe<UserProjectWhereUniqueInput>;
-  after?: Maybe<UserProjectWhereUniqueInput>;
+  take?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<UserProjectWhereUniqueInput>;
 };
 
 
 export type ProjectPaymentMethodsArgs = {
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-  before?: Maybe<PaymentMethodWhereUniqueInput>;
-  after?: Maybe<PaymentMethodWhereUniqueInput>;
+  take?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<PaymentMethodWhereUniqueInput>;
 };
 
 
 export type ProjectUserInvitesArgs = {
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-  before?: Maybe<UserInviteWhereUniqueInput>;
-  after?: Maybe<UserInviteWhereUniqueInput>;
+  take?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<UserInviteWhereUniqueInput>;
 };
 
 export enum ProjectRole {
@@ -637,10 +634,9 @@ export type User = {
 
 
 export type UserProjectsArgs = {
-  first?: Maybe<Scalars['Int']>;
-  last?: Maybe<Scalars['Int']>;
-  before?: Maybe<UserProjectWhereUniqueInput>;
-  after?: Maybe<UserProjectWhereUniqueInput>;
+  take?: Maybe<Scalars['Int']>;
+  skip?: Maybe<Scalars['Int']>;
+  cursor?: Maybe<UserProjectWhereUniqueInput>;
 };
 
 export type UserInvite = {

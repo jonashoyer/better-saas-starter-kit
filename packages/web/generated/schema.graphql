@@ -67,9 +67,9 @@ input PaymentMethodWhereUniqueInput {
 type Project {
   id: String!
   name: String!
-  paymentMethods(after: PaymentMethodWhereUniqueInput, before: PaymentMethodWhereUniqueInput, first: Int, last: Int): [PaymentMethod!]!
-  userInvites(after: UserInviteWhereUniqueInput, before: UserInviteWhereUniqueInput, first: Int, last: Int): [UserInvite!]!
-  users(after: UserProjectWhereUniqueInput, before: UserProjectWhereUniqueInput, first: Int, last: Int): [UserProject!]!
+  paymentMethods(cursor: PaymentMethodWhereUniqueInput, skip: Int, take: Int): [PaymentMethod!]!
+  userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
+  users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }
 
 enum ProjectRole {
@@ -102,7 +102,7 @@ type User {
   id: String!
   image: String
   name: String
-  projects(after: UserProjectWhereUniqueInput, before: UserProjectWhereUniqueInput, first: Int, last: Int): [UserProject!]!
+  projects(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }
 
 type UserInvite {

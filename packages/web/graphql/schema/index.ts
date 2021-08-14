@@ -1,5 +1,4 @@
 import * as NexusSchema from 'nexus';
-import { fieldAuthorizePlugin, nullabilityGuardPlugin } from 'nexus';
 import { nexusPrisma } from 'nexus-plugin-prisma';
 import * as path from 'path';
 import * as types from './types';
@@ -9,15 +8,16 @@ export default NexusSchema.makeSchema({
   plugins: [
     nexusPrisma({
       experimentalCRUD: true,
+      paginationStrategy: 'prisma',
     }),
     NexusSchema.declarativeWrappingPlugin(),
-    fieldAuthorizePlugin({
+    NexusSchema.fieldAuthorizePlugin({
       formatError({ error, info }) {
         console.error(info);
         return error;
       }
     }),
-    nullabilityGuardPlugin({
+    NexusSchema.nullabilityGuardPlugin({
       onGuarded({
         fallback,
         ctx,

@@ -269,22 +269,19 @@ export interface NexusGenArgTypes {
   }
   Project: {
     paymentMethods: { // args
-      after?: NexusGenInputs['PaymentMethodWhereUniqueInput'] | null; // PaymentMethodWhereUniqueInput
-      before?: NexusGenInputs['PaymentMethodWhereUniqueInput'] | null; // PaymentMethodWhereUniqueInput
-      first?: number | null; // Int
-      last?: number | null; // Int
+      cursor?: NexusGenInputs['PaymentMethodWhereUniqueInput'] | null; // PaymentMethodWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
     }
     userInvites: { // args
-      after?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput
-      before?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput
-      first?: number | null; // Int
-      last?: number | null; // Int
+      cursor?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
     }
     users: { // args
-      after?: NexusGenInputs['UserProjectWhereUniqueInput'] | null; // UserProjectWhereUniqueInput
-      before?: NexusGenInputs['UserProjectWhereUniqueInput'] | null; // UserProjectWhereUniqueInput
-      first?: number | null; // Int
-      last?: number | null; // Int
+      cursor?: NexusGenInputs['UserProjectWhereUniqueInput'] | null; // UserProjectWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
     }
   }
   Query: {
@@ -297,10 +294,9 @@ export interface NexusGenArgTypes {
   }
   User: {
     projects: { // args
-      after?: NexusGenInputs['UserProjectWhereUniqueInput'] | null; // UserProjectWhereUniqueInput
-      before?: NexusGenInputs['UserProjectWhereUniqueInput'] | null; // UserProjectWhereUniqueInput
-      first?: number | null; // Int
-      last?: number | null; // Int
+      cursor?: NexusGenInputs['UserProjectWhereUniqueInput'] | null; // UserProjectWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
     }
   }
 }
