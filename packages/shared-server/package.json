@@ -23,6 +23,6 @@
     "mjml": "^4.10.2",
     "node-mailjet": "^3.3.4",
     "nodemailer": "^6.6.3",
-    "stripe": "^8.165.0"
+    "stripe": "^8.169.0"
   }
 }

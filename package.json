@@ -9,9 +9,10 @@
     "node": "16.5.0"
   },
   "scripts": {
+    "reinstall": "rm -rf module_name && npm i",
     "dev": "npm-run-all -l -p -r *:dev",
     "watch": "npm-run-all -l -p -r *:watch",
-    "generate": "npm-run-all -p -r *:generate",
+    "generate": "npm-run-all -r *:generate",
     "build": "npm-run-all -p -r *:build",
     "web:dev": "npm run dev -w bs-web-kit",
     "api:dev": "npm run dev -w bs-api-kit",
