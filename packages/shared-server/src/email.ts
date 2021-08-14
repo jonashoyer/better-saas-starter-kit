@@ -6,6 +6,7 @@ import { compile } from 'handlebars';
 import { Email } from 'node-mailjet';
 import { MailService } from '@sendgrid/mail';
 import { Transporter } from 'nodemailer';
+import { asArray } from 'bs-shared-kit';
 
 export const generateEmailFromTemplate = (templateName: string, options: { context: any, handlebarsOptions: RuntimeOptions, mjmlOption: MJMLParsingOptions}) => {
   const p = path.join(__dirname, 'mjmls', `${templateName}.mjml`);
@@ -28,60 +29,69 @@ export interface EmailOptions {
   html: string;
 }
 
-export const mailjetSendEmail = async (options: EmailOptions) => {
+export type SMTPProvider = 'MAILJET' | 'SENDGRID' | 'NODEMAILER';
+
+export const sendEmail = (smtp: SMTPProvider, options: EmailOptions | EmailOptions[]) => {
+  const payload = asArray(options);
+  switch(smtp) {
+    case 'MAILJET':
+      return mailjetSendEmail(payload);
+    case 'SENDGRID':
+      return sendgridSendEmail(payload);
+    case 'NODEMAILER':
+      return smtpSendEmail(payload);
+  }
+}
+
+
+export const mailjetSendEmail = async (options: EmailOptions[]) => {
   const mailjet = await getMailjet();
   return mailjet
     .post('send', { version: 'v3.1' })
     .request({
-      Messages: [{
+      Messages: options.map(e => ([{
         From: {
-          Email: options.from.email,
-          Name: options.from.name,
+          Email: e.from.email,
+          Name: e.from.name,
         },
         To: [{
-          Email: options.to.email,
-          Name: options.to.name,
+          Email: e.to.email,
+          Name: e.to.name,
         }],
-        Subject: options.subject,
-        TextPart: options.text,
-        HTMLPart: options.html,
-      }]
+        Subject: e.subject,
+        TextPart: e.text,
+        HTMLPart: e.html,
+      }]))
     })
 }
 
-export const sendgridSendEmail = async (options: EmailOptions) => {
+export const sendgridSendEmail = async (options: EmailOptions[]) => {
   const sgMail = await getSendgrid();
   return sgMail
-    .send({
-      from: options.from,
-      to: options.to,
-      html: options.html,
-      subject: options.subject,
-      text: options.text,
-    });
+    .send(options.map(e => ({
+      from: e.from,
+      to: e.to,
+      html: e.html,
+      subject: e.subject,
+      text: e.text,
+    })))
 }
 
-export const smtpSendEmail = async (options: EmailOptions) => {
+export const smtpSendEmail = async (options: EmailOptions[]) => {
   const nodemailer = await getNodemailer();
-  return nodemailer.sendMail({
-    from: options.from.name ? { address: options.from.email, name: options.from.name } : options.from.email,
-    to: options.to.name ? { address: options.to.email, name: options.to.name } : options.to.email,
-    subject: options.subject,
-    text: options.text,
-    html: options.html,
-  })
+  return Promise.all(
+    options.map(e => 
+      nodemailer.sendMail({
+        from: e.from.name ? { address: e.from.email, name: e.from.name } : e.from.email,
+        to: e.to.name ? { address: e.to.email, name: e.to.name } : e.to.email,
+        subject: e.subject,
+        text: e.text,
+        html: e.html,
+      })
+    )
+  )
 }
 
-export const sendEmail = (smtp: 'MAILJET' | 'SENDGRID' | 'NODEMAILER', options: EmailOptions) => {
-  switch(smtp) {
-    case 'MAILJET':
-      return mailjetSendEmail(options);
-    case 'SENDGRID':
-      return sendgridSendEmail(options);
-    case 'NODEMAILER':
-      return smtpSendEmail(options);
-  }
-}
 
 let _mailjet: Email.Client;
 export const getMailjet = async () => {
