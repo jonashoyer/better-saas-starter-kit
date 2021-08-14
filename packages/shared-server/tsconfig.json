@@ -11,7 +11,7 @@
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "target": "es5",
+    "target": "es6",
     "module": "CommonJS",
     "esModuleInterop": true,
     "experimentalDecorators": true,

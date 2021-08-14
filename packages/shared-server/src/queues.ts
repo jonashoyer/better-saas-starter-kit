@@ -1,23 +1,46 @@
-import { QueueManagerEntity } from "./QueueManager";
-import { PubSubTriggers } from "./PubSubTriggers";
+import { QueueManagerEntity, QueueManagerReturn } from "./QueueManager";
 import { QueueManager } from "./QueueManager";
-import { RedisPubSub } from 'graphql-redis-subscriptions';
+import { EmailOptions, generateEmailFromTemplate, sendEmail, SMTPProvider } from "./email";
 
-export function T<T = any, R = any, N extends string = string>(args?: QueueManagerEntity<T, R, N>): QueueManagerEntity<T, R, N> {
+const defaultSMTPProvider: SMTPProvider = 'MAILJET';
+
+export function createQueue<T = any, R = any, N extends string = string>(args?: QueueManagerEntity<T, R, N>): QueueManagerEntity<T, R, N> {
   return args ?? {};
 }
 
-export const queues = {
-  ping: T<null, void>(),
+export interface TemplatedEmailData {
+  email: Omit<EmailOptions, 'html'>;
+  template: {
+    name: string;
+    context?: Record<string, any>;
+  }
 }
 
-export const createDefaultProcessors = (pubsub: RedisPubSub) => ({
-  ping: async () => { pubsub.publish(PubSubTriggers.Ping, Date.now()) }
-})
+export type EmailData = {
+  email: EmailOptions;
+} | TemplatedEmailData;
 
-export const defaultQueueMananger = (pubsub: RedisPubSub) => {
+export type QueueManagerType = QueueManagerReturn<{
+  sendEmail: QueueManagerEntity<EmailData[], void, 'sendEmail'>;
+}>;
+
+export const createQueueMananger = () => {
   return QueueManager({
-    queues,
-    processors: createDefaultProcessors(pubsub),
+    queues: {
+      sendEmail: createQueue<EmailData[], void>(),
+    },
+    processors: {
+      async sendEmail(job) {
+        const emails = job.data.map((e: any) => {
+          if (!e.email.html && !e.template.name) throw new Error('Email is missing html or template name!');
+          if (e.email.html) return e.email;
+          return {
+            ...e.email,
+            html: generateEmailFromTemplate(e.template.name, { context: e.template.context }),
+          }
+        })
+        await sendEmail(defaultSMTPProvider, emails);
+      },
+    },
   })
 }

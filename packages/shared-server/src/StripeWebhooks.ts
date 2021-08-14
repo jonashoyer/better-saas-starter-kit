@@ -12,16 +12,6 @@ export const config = {
   }
 };
 
-async function buffer(readable: string[] | Buffer[]) {
-  const chunks = [];
-  for await (const chunk of readable) {
-    chunks.push(
-      typeof chunk === "string" ? Buffer.from(chunk) : chunk
-    );
-  }
-  return Buffer.concat(chunks);
-}
-
 async function reqToBuffer(req: NextApiRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: any = [];

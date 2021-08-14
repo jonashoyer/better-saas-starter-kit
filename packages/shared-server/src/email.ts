@@ -8,12 +8,14 @@ import { MailService } from '@sendgrid/mail';
 import { Transporter } from 'nodemailer';
 import { asArray } from 'bs-shared-kit';
 
-export const generateEmailFromTemplate = (templateName: string, options: { context: any, handlebarsOptions: RuntimeOptions, mjmlOption: MJMLParsingOptions}) => {
+export const generateEmailFromTemplate = (templateName: string, options: { context?: any, handlebarsOptions?: RuntimeOptions, mjmlOption?: MJMLParsingOptions}) => {
   const p = path.join(__dirname, 'mjmls', `${templateName}.mjml`);
   if (!fs.existsSync(p)) new Error(`Email template was not found! (${templateName})`);
   const content = fs.readFileSync(p, 'utf8');
   const compiled = compile(content)(options.context, options.handlebarsOptions);
-  return mjml2html(compiled, options.mjmlOption);
+  const { html, errors } = mjml2html(compiled, options.mjmlOption);
+  if (errors) throw errors;
+  return html;
 }
 
 export interface EmailRecipient {
@@ -25,7 +27,7 @@ export interface EmailOptions {
   from: EmailRecipient;
   to: EmailRecipient;
   subject: string;
-  text: string;
+  text?: string;
   html: string;
 }
 

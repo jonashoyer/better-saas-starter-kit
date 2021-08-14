@@ -6,7 +6,7 @@ import Stripe from 'stripe'
 // TODO: https://stripe.com/docs/billing/subscriptions/metered
 // TODO: https://stripe.com/docs/payments/save-and-reuse?platform=web
 
-const secondsToDate = (sec: number) => {
+export const secondsToDate = (sec: number) => {
   var t = new Date('1970-01-01T00:30:00Z'); // Unix epoch start.
   t.setSeconds(sec);
   return t;

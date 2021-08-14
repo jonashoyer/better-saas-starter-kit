@@ -1,6 +1,7 @@
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from "nexus";
 import { hasProjectAccess, hasUserProjectAccess } from "./permissions";
 import crypto from 'crypto';
+import { sendEmail, generateEmailFromTemplate } from 'bs-shared-server-kit';
 
 export const UserInvite = objectType({
   name: 'UserInvite',
@@ -57,6 +58,8 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
     await ctx.prisma.userInvite.createMany({
       data,
     });
+    
+    // TODO: Send email
 
     return ctx.prisma.userInvite.findMany({
       where: { token: { in: data.map(e => e.token) } },
