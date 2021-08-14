@@ -12,6 +12,8 @@ import RedisStore from "rate-limit-redis";
 import { NodeEnv } from 'bs-shared-kit';
 import { createRedisClient } from 'bs-shared-server-kit';
 import { NODE_ENV, PORT } from './config';
+import cookieParser from 'cookie-parser';
+import bullboardRoute from './routes/bullboard';
 
 (async function () {
   
@@ -31,6 +33,10 @@ import { NODE_ENV, PORT } from './config';
     windowMs: 60000,
   }))
   if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+
+  app.use(cookieParser());
+
+  app.use('/admin', bullboardRoute);
 
   const apollo = new ApolloServer({
     schema,
