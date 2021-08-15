@@ -37,9 +37,10 @@ type Mutation {
   deleteProject(id: String!): Project
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
+  sendVerifyEmail(email: String!): StatusResponse
   updateProject(input: UpdateProjectInput!): Project
   updateUserProject(input: UpdateUserProjectInput!): UserProject
-  verifyEmail(email: String!): StatusResponse
+  verifyEmail(token: String!): User
 }
 
 type PaymentMethod {

@@ -125,9 +125,10 @@ export interface NexusGenFieldTypes {
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     updateProject: NexusGenRootTypes['Project'] | null; // Project
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
-    verifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
+    verifyEmail: NexusGenRootTypes['User'] | null; // User
   }
   PaymentMethod: { // field return type
     brand: string; // String!
@@ -197,9 +198,10 @@ export interface NexusGenFieldTypeNames {
     deleteProject: 'Project'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
+    sendVerifyEmail: 'StatusResponse'
     updateProject: 'Project'
     updateUserProject: 'UserProject'
-    verifyEmail: 'StatusResponse'
+    verifyEmail: 'User'
   }
   PaymentMethod: { // field return type name
     brand: 'String'
@@ -281,6 +283,9 @@ export interface NexusGenArgTypes {
     deleteUserProject: { // args
       id: string; // String!
     }
+    sendVerifyEmail: { // args
+      email: string; // String!
+    }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
     }
@@ -288,7 +293,7 @@ export interface NexusGenArgTypes {
       input: NexusGenInputs['UpdateUserProjectInput']; // UpdateUserProjectInput!
     }
     verifyEmail: { // args
-      email: string; // String!
+      token: string; // String!
     }
   }
   Project: {

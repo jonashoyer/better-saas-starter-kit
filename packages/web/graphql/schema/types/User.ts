@@ -107,10 +107,22 @@ export const VerifiyEmail = mutationField('verifyEmail', {
 
     if (!verificationEmail) throw new Error('Bad token!');
 
-    const account = await ctx.prisma.account.findUnique({
-      where: { id: }
-    })
-    
+    const accounts = await ctx.prisma.account.findMany({
+      where: {
+        userId: ctx.user.id,
+      }
+    });
 
+    if (accounts.length == 0) throw new Error('User has no account linked!');
+    if (accounts.length > 1) throw new Error('User has multiple account linked already!');
+
+    if (!accounts.some(e => e.id == verificationEmail.accountId)) throw new Error('Verification not intended for this user!');
+    
+    const user = await ctx.prisma.user.update({
+      where: { id: accounts[0].id },
+      data: { email: verificationEmail.email, emailVerified: new Date() },
+    })
+
+    return user;
   }
 })
