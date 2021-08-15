@@ -33,6 +33,7 @@ Monorepo using npm workspace
 ### To do list:
  - [x] Basic project management
  - [ ] Basic user management
+ - [ ] Better error handling
  - [ ] Stripe subscription integration
  - [ ] Basic subscription management
  - [ ] Stripe charge integration
@@ -49,6 +50,7 @@ Monorepo using npm workspace
 
 ### Bugs
   - [ ] Old project id in cookies
+  - [ ] Auth missing account linking
 
 #### Shared environment variables
 - REDIS_URL

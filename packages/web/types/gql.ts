@@ -475,6 +475,7 @@ export type CreateUserInviteInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  verifyEmail?: Maybe<StatusResponse>;
   createCheckoutSession?: Maybe<CheckoutSession>;
   createProject?: Maybe<Project>;
   updateProject?: Maybe<Project>;
@@ -483,6 +484,11 @@ export type Mutation = {
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   deleteUserInvite?: Maybe<UserInvite>;
+};
+
+
+export type MutationVerifyEmailArgs = {
+  email: Scalars['String'];
 };
 
 
@@ -606,6 +612,12 @@ export type QueryGetUserInvitesArgs = {
   projectId: Scalars['String'];
 };
 
+export type StatusResponse = {
+  __typename?: 'StatusResponse';
+  ok?: Maybe<Scalars['Boolean']>;
+  message?: Maybe<Scalars['String']>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   ping?: Maybe<Scalars['DateTime']>;
@@ -675,6 +687,11 @@ export type UserProjectProjectIdUserIdCompoundUniqueInput = {
 export type UserProjectWhereUniqueInput = {
   id?: Maybe<Scalars['String']>;
   projectId_userId?: Maybe<UserProjectProjectIdUserIdCompoundUniqueInput>;
+};
+
+export type VerificationEmail = {
+  __typename?: 'VerificationEmail';
+  id: Scalars['String'];
 };
 
 export type BaseProjcetFragment = (

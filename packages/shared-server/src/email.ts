@@ -8,8 +8,8 @@ import { MailService } from '@sendgrid/mail';
 import { Transporter } from 'nodemailer';
 import { asArray } from 'bs-shared-kit';
 
-export const generateEmailFromTemplate = (templateName: string, options: { context?: any, handlebarsOptions?: RuntimeOptions, mjmlOption?: MJMLParsingOptions}) => {
-  const p = path.join(__dirname, 'mjmls', `${templateName}.mjml`);
+export const generateEmailFromTemplate = (templateName: string, options: { language?: string, context?: any, handlebarsOptions?: RuntimeOptions, mjmlOption?: MJMLParsingOptions}) => {
+  const p = path.join(__dirname, 'mjmls', `${templateName}.${options.language ?? 'en'}.mjml`);
   if (!fs.existsSync(p)) new Error(`Email template was not found! (${templateName})`);
   const content = fs.readFileSync(p, 'utf8');
   const compiled = compile(content)(options.context, options.handlebarsOptions);
@@ -116,6 +116,7 @@ export const getNodemailer = async () => {
     .createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT ?? 587),
+      secure: process.env.SMTP_SECURE == 'true',
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,

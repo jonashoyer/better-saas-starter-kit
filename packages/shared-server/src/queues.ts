@@ -2,7 +2,7 @@ import { QueueManagerEntity, QueueManagerReturn } from "./QueueManager";
 import { QueueManager } from "./QueueManager";
 import { EmailOptions, generateEmailFromTemplate, sendEmail, SMTPProvider } from "./email";
 
-const defaultSMTPProvider: SMTPProvider = 'MAILJET';
+const defaultSMTPProvider: SMTPProvider = 'NODEMAILER';
 
 export function createQueue<T = any, R = any, N extends string = string>(args?: QueueManagerEntity<T, R, N>): QueueManagerEntity<T, R, N> {
   return args ?? {};
@@ -12,6 +12,7 @@ export interface TemplatedEmailData {
   email: Omit<EmailOptions, 'html'>;
   template: {
     name: string;
+    language?: string;
     context?: Record<string, any>;
   }
 }

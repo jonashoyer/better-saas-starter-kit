@@ -1,6 +1,6 @@
 import cuid from 'cuid';
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
-import { hasAuth, hasProjectAccess } from './permissions';
+import { requireAuth, requireProjectAccess } from './permissions';
 import { Constants } from 'bs-shared-kit';
 
 export const Project = objectType({
@@ -16,7 +16,7 @@ export const Project = objectType({
 
 export const CurrentProject = queryField('currentProject', {
   type: 'Project',
-  authorize: hasProjectAccess({
+  authorize: requireProjectAccess({
     nullable: true,
     projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY],
   }),
@@ -45,7 +45,7 @@ export const CurrentProject = queryField('currentProject', {
 export const SelfProjects = queryField('selfProjects', {
   type: 'Project',
   list: true,
-  authorize: hasAuth,
+  authorize: requireAuth,
   async resolve(root, args, ctx) {
 
     const userProjects = await ctx.prisma.userProject.findMany({
@@ -68,7 +68,7 @@ export const CreateProjectInput = inputObjectType({
 
 export const CreateProject = mutationField('createProject', {
   type: 'Project',
-  authorize: hasAuth,
+  authorize: requireAuth,
   args: {
     input: arg({ type: CreateProjectInput, required: true })
   },
@@ -124,7 +124,7 @@ export const UpdateProject = mutationField('updateProject', {
   args: {
     input: arg({ type: UpdateProjectInput, required: true })
   },
-  authorize: hasProjectAccess({
+  authorize: requireProjectAccess({
     projectIdFn: (_, { input }) => input.id,
     role: 'ADMIN',
   }),
@@ -143,7 +143,7 @@ export const DeleteProject = mutationField('deleteProject', {
   args: {
     id: stringArg({ required: true }),
   },
-  authorize: hasProjectAccess({
+  authorize: requireProjectAccess({
     projectIdFn: (_, { id }) => id,
     role: 'ADMIN',
   }),

@@ -1,0 +1,70 @@
+<mjml>
+  <mj-head>
+    <mj-title>Welcome</mj-title>
+    <mj-font name="Roboto" href="https://fonts.googleapis.com/css?family=Roboto:300,500"></mj-font>
+    <mj-attributes>
+      <mj-all font-family="Roboto, Helvetica, sans-serif"></mj-all>
+      <mj-text font-weight="300" font-size="16px" color="#616161" line-height="24px"></mj-text>
+      <mj-section padding="0px"></mj-section>
+    </mj-attributes>
+  </mj-head>
+  <mj-body>
+    <mj-section padding="20px 0">
+      <mj-column width="40%">
+        <mj-image align="left" width="150px" href="https://recast.ai?ref=newsletter" src="https://cdn.recast.ai/newsletter/recast-ai-01.png"></mj-image>
+      </mj-column>
+      <mj-column width="60%">
+        <mj-text font-size="10px" align='right'>Welcome to the future!</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="100%">
+        <mj-text align="center">Make it easy with app!</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="45%">
+        <mj-text align="center" font-weight="500" padding="0px" font-size="18px">Better SaaS</mj-text>
+        <mj-divider border-width="2px" border-color="#616161"></mj-divider>
+      </mj-column>
+    </mj-section>
+    <mj-section padding-top="30px">
+      <mj-column width="100%">
+        <mj-text>
+          <p>Hello hello!</p>
+          <p>Please verify your email!</p>
+        </mj-text>
+        <mj-button href="{{url}}">
+          Verify email
+        </mj-button>>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column width="65%">
+        <mj-image align="left" width="150px" href="https://recast.ai?ref=newsletter" src="https://cdn.recast.ai/newsletter/recast-ai-01.png"></mj-image>
+      </mj-column>
+      <mj-column width="35%">
+        <mj-table>
+          <tr style="list-style: none;line-height:1">
+            <td> <a href="https://twitter.com/RecastAI">
+                <img width="25" src="https://cdn.recast.ai/newsletter/twitter.png" />
+              </a> </td>
+            <td> <a href="https://www.facebook.com/recastAI">
+                <img width="25" src="https://cdn.recast.ai/newsletter/facebook.png" />
+              </a> </td>
+            <td> <a href="https://medium.com/@RecastAI">
+                <img width="25" src="https://cdn.recast.ai/newsletter/medium.png" />
+              </a> </td>
+            <td> <a href="https://www.youtube.com/channel/UCA0UZlR8crpgwFiVaSTbVWw">
+                <img width="25" src="https://cdn.recast.ai/newsletter/youtube.png" />
+              </a> </td>
+            <td> <a href="https://plus.google.com/u/0/+RecastAi">
+                <img width="25" src="https://cdn.recast.ai/newsletter/google%2B.png" />
+              </a> </td>
+          </tr>
+        </mj-table>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

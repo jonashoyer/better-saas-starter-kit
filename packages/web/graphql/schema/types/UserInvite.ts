@@ -1,5 +1,5 @@
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from "nexus";
-import { hasProjectAccess, hasUserProjectAccess } from "./permissions";
+import { requireProjectAccess, hasUserProjectAccess } from "./permissions";
 import crypto from 'crypto';
 import { getURL } from "@/utils/utils";
 
@@ -29,7 +29,7 @@ export const GetUserInvites  = queryField('getUserInvites', {
   args: {
     projectId: stringArg({ required: true }),
   },
-  authorize: hasProjectAccess({ role: 'ADMIN', projectIdFn: (root, { projectId }) => projectId }),
+  authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (root, { projectId }) => projectId }),
   async resolve(root, { projectId }, ctx) {
     return ctx.prisma.userInvite.findMany({
       where: { projectId },
@@ -43,7 +43,7 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
   args: {
     input: arg({ type: CreateUserInviteInput, required: true }),
   },
-  authorize: hasProjectAccess({ role: 'ADMIN', projectIdFn: (_, { input }) => input.projectId }),
+  authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, { input }) => input.projectId }),
   async resolve(root, { input }, ctx) {
 
     const project = await ctx.prisma.project.findUnique({ where: { id: input.projectId }, select: { name: true } });
@@ -93,7 +93,7 @@ export const DeleteUserInvite = mutationField('deleteUserInvite', {
   async resolve(root, { id }, ctx) {
   
     const userInvite = await ctx.prisma.userInvite.findUnique({
-      where: { id }
+      where: { id },
     })
 
     if (!(await hasUserProjectAccess(ctx.prisma, ctx.user.id, userInvite.projectId, 'ADMIN'))) {

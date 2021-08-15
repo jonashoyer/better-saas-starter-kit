@@ -189,7 +189,8 @@ export const PrismaAdapter: Adapter<
           })
         },
 
-        async createSession(user) {
+        async createSession(user, ...rest) {
+          console.log(user, rest);
           const session = await prisma.session.create({
             data: {
               userId: user.id,

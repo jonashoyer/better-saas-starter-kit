@@ -5,6 +5,7 @@ import { ContextFunction } from 'apollo-server-core'
 import { getSession } from 'next-auth/client';
 import Stripe from 'stripe';
 import { IncomingMessage, OutgoingMessage } from 'http';
+import { Session } from '@/pages/api/auth/[...nextauth]';
 
 export const stripe = createStripe();
 export const prisma = new PrismaClient();
@@ -20,6 +21,7 @@ export type Context = {
   stripe: Stripe;
   getStripeHandler: () => StripeHandler;
   user?: User;
+  session?: Session;
 };
 
 export const createContext: ContextFunction<any> = async (ctx)  => {
@@ -34,5 +36,6 @@ export const createContext: ContextFunction<any> = async (ctx)  => {
     stripe,
     getStripeHandler: () => new StripeHandler(stripe, prisma),
     user: session?.user,
+    session,
   }
 }

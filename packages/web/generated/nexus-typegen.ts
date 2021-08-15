@@ -94,9 +94,14 @@ export interface NexusGenObjects {
   PaymentMethod: prisma.PaymentMethod;
   Project: prisma.Project;
   Query: {};
+  StatusResponse: { // root type
+    message?: string | null; // String
+    ok?: boolean | null; // Boolean
+  }
   User: prisma.User;
   UserInvite: prisma.UserInvite;
   UserProject: prisma.UserProject;
+  VerificationEmail: prisma.VerificationEmail;
 }
 
 export interface NexusGenInterfaces {
@@ -122,6 +127,7 @@ export interface NexusGenFieldTypes {
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     updateProject: NexusGenRootTypes['Project'] | null; // Project
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    verifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
   }
   PaymentMethod: { // field return type
     brand: string; // String!
@@ -149,6 +155,10 @@ export interface NexusGenFieldTypes {
     self: NexusGenRootTypes['User'] | null; // User
     selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
   }
+  StatusResponse: { // field return type
+    message: string | null; // String
+    ok: boolean | null; // Boolean
+  }
   User: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     email: string | null; // String
@@ -171,6 +181,9 @@ export interface NexusGenFieldTypes {
     role: NexusGenEnums['ProjectRole']; // ProjectRole!
     user: NexusGenRootTypes['User']; // User!
   }
+  VerificationEmail: { // field return type
+    id: string; // String!
+  }
 }
 
 export interface NexusGenFieldTypeNames {
@@ -186,6 +199,7 @@ export interface NexusGenFieldTypeNames {
     deleteUserProject: 'UserProject'
     updateProject: 'Project'
     updateUserProject: 'UserProject'
+    verifyEmail: 'StatusResponse'
   }
   PaymentMethod: { // field return type name
     brand: 'String'
@@ -213,6 +227,10 @@ export interface NexusGenFieldTypeNames {
     self: 'User'
     selfProjects: 'Project'
   }
+  StatusResponse: { // field return type name
+    message: 'String'
+    ok: 'Boolean'
+  }
   User: { // field return type name
     createdAt: 'DateTime'
     email: 'String'
@@ -234,6 +252,9 @@ export interface NexusGenFieldTypeNames {
     project: 'Project'
     role: 'ProjectRole'
     user: 'User'
+  }
+  VerificationEmail: { // field return type name
+    id: 'String'
   }
 }
 
@@ -265,6 +286,9 @@ export interface NexusGenArgTypes {
     }
     updateUserProject: { // args
       input: NexusGenInputs['UpdateUserProjectInput']; // UpdateUserProjectInput!
+    }
+    verifyEmail: { // args
+      email: string; // String!
     }
   }
   Project: {
