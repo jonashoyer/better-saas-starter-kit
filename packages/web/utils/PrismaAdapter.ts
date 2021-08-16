@@ -190,7 +190,6 @@ export const PrismaAdapter: Adapter<
         },
 
         async createSession(user, ...rest) {
-          console.log(user, rest);
           const session = await prisma.session.create({
             data: {
               userId: user.id,
@@ -244,7 +243,7 @@ export const PrismaAdapter: Adapter<
           await prisma.verificationRequest.create({
             data: {
               identifier,
-              token: randomBytes(32).toString("hex"),
+              token,
               expires: new Date(Date.now() + provider.maxAge * 1000),
             },
           })

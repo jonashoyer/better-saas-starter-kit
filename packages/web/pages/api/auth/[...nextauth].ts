@@ -7,27 +7,6 @@ import { PrismaAdapter } from "@/utils/PrismaAdapter"
 const prismaAdapter = PrismaAdapter(prisma);
 
 export default NextAuth({
-  // Used to debug https://github.com/nextauthjs/next-auth/issues/1664
-  // cookies: {
-  //   csrfToken: {
-  //     name: 'next-auth.csrf-token',
-  //     options: {
-  //       httpOnly: true,
-  //       sameSite: 'none',
-  //       path: '/',
-  //       secure: true
-  //     }
-  //   },
-  //   pkceCodeVerifier: {
-  //     name: 'next-auth.pkce.code_verifier',
-  //     options: {
-  //       httpOnly: true,
-  //       sameSite: 'none',
-  //       path: '/',
-  //       secure: true
-  //     }
-  //   }
-  // },
   providers: [
     Providers.Email({
       server: process.env.EMAIL_SERVER,
@@ -40,7 +19,7 @@ export default NextAuth({
     Providers.GitHub({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
-      scope: 'user:email, read:user'
+      scope: 'user:email read:user'
     }),
   ],
   debug: false,
