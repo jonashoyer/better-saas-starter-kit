@@ -404,6 +404,40 @@ export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const UpdateUserDocument = gql`
+    mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    id
+    name
+  }
+}
+    `;
+export type UpdateUserMutationFn = Apollo.MutationFunction<UpdateUserMutation, UpdateUserMutationVariables>;
+
+/**
+ * __useUpdateUserMutation__
+ *
+ * To run a mutation, you first call `useUpdateUserMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateUserMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateUserMutation, { data, loading, error }] = useUpdateUserMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateUserMutation(baseOptions?: Apollo.MutationHookOptions<UpdateUserMutation, UpdateUserMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateUserMutation, UpdateUserMutationVariables>(UpdateUserDocument, options);
+      }
+export type UpdateUserMutationHookResult = ReturnType<typeof useUpdateUserMutation>;
+export type UpdateUserMutationResult = Apollo.MutationResult<UpdateUserMutation>;
+export type UpdateUserMutationOptions = Apollo.BaseMutationOptions<UpdateUserMutation, UpdateUserMutationVariables>;
 export const UpdateUserProjectDocument = gql`
     mutation UpdateUserProject($input: UpdateUserProjectInput!) {
   updateUserProject(input: $input) {
@@ -475,7 +509,9 @@ export type CreateUserInviteInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  verifyEmail?: Maybe<StatusResponse>;
+  updateUser?: Maybe<User>;
+  sendVerifyEmail?: Maybe<StatusResponse>;
+  verifyEmail?: Maybe<User>;
   createCheckoutSession?: Maybe<CheckoutSession>;
   createProject?: Maybe<Project>;
   updateProject?: Maybe<Project>;
@@ -487,8 +523,18 @@ export type Mutation = {
 };
 
 
-export type MutationVerifyEmailArgs = {
+export type MutationUpdateUserArgs = {
+  input: UpdateUserInput;
+};
+
+
+export type MutationSendVerifyEmailArgs = {
   email: Scalars['String'];
+};
+
+
+export type MutationVerifyEmailArgs = {
+  token: Scalars['String'];
 };
 
 
@@ -624,6 +670,11 @@ export type Subscription = {
 };
 
 export type UpdateProjectInput = {
+  id: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
+};
+
+export type UpdateUserInput = {
   id: Scalars['String'];
   name?: Maybe<Scalars['String']>;
 };
@@ -841,6 +892,19 @@ export type UpdateProjectMutation = (
   & { updateProject?: Maybe<(
     { __typename?: 'Project' }
     & BaseProjcetFragment
+  )> }
+);
+
+export type UpdateUserMutationVariables = Exact<{
+  input: UpdateUserInput;
+}>;
+
+
+export type UpdateUserMutation = (
+  { __typename?: 'Mutation' }
+  & { updateUser?: Maybe<(
+    { __typename?: 'User' }
+    & Pick<User, 'id' | 'name'>
   )> }
 );
 

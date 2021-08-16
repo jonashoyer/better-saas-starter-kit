@@ -4,6 +4,7 @@ submit: 'Submit'
 save: 'Save'
 create: 'Create'
 update: 'Update'
+close: 'Close'
 name: 'Name'
 remove: 'Remove'
 email:
@@ -11,3 +12,7 @@ email:
   other: 'Emails'
 role: 'Role'
 invite: 'Invite'
+logout: 'Logout'
+login: 'Login'
+
+accountSettings: 'Account Settings'

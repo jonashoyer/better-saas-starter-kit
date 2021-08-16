@@ -39,6 +39,7 @@ type Mutation {
   deleteUserProject(id: String!): UserProject
   sendVerifyEmail(email: String!): StatusResponse
   updateProject(input: UpdateProjectInput!): Project
+  updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
   verifyEmail(token: String!): User
 }
@@ -93,6 +94,11 @@ type StatusResponse {
 }
 
 input UpdateProjectInput {
+  id: String!
+  name: String
+}
+
+input UpdateUserInput {
   id: String!
   name: String
 }

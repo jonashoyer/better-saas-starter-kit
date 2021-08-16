@@ -1,7 +1,7 @@
 import { Context } from '@/graphql/context';
 import * as prisma from '@prisma/client';
 import ms from 'ms';
-import { mutationField, objectType, queryField, stringArg } from 'nexus';
+import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { requireAuth } from './permissions';
 import crypto from 'crypto';
 import { getURL } from '@/utils/utils';
@@ -32,6 +32,33 @@ export const UserSelf = queryField('self', {
   resolve: async (parent, args, ctx) => {
     return ctx.user;
   },
+})
+
+export const UpdateUserInput = inputObjectType({
+  name: 'UpdateUserInput',
+  definition(t) {
+    t.string('id', { required: true });
+    t.string('name');
+  }
+})
+
+export const UpdateUser = mutationField('updateUser', {
+  type: 'User',
+  authorize: requireAuth,
+  args: {
+    input: arg({ type: UpdateUserInput, required: true }),
+  },
+  async resolve(root, args, ctx) {
+    if (args.input.id != ctx.user.id) throw new Error('Not allowed resource!');
+    const user = await ctx.prisma.user.update({
+      where: { id: args.input.id },
+      data: {
+        name: args.input.name,
+      }
+    })
+
+    return user;
+  }
 })
 
 

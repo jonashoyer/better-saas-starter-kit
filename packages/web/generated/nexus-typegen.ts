@@ -46,6 +46,10 @@ export interface NexusGenInputs {
     id: string; // String!
     name?: string | null; // String
   }
+  UpdateUserInput: { // input type
+    id: string; // String!
+    name?: string | null; // String
+  }
   UpdateUserProjectInput: { // input type
     id: string; // String!
     role?: NexusGenEnums['ProjectRole'] | null; // ProjectRole
@@ -127,6 +131,7 @@ export interface NexusGenFieldTypes {
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     updateProject: NexusGenRootTypes['Project'] | null; // Project
+    updateUser: NexusGenRootTypes['User'] | null; // User
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     verifyEmail: NexusGenRootTypes['User'] | null; // User
   }
@@ -200,6 +205,7 @@ export interface NexusGenFieldTypeNames {
     deleteUserProject: 'UserProject'
     sendVerifyEmail: 'StatusResponse'
     updateProject: 'Project'
+    updateUser: 'User'
     updateUserProject: 'UserProject'
     verifyEmail: 'User'
   }
@@ -288,6 +294,9 @@ export interface NexusGenArgTypes {
     }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
+    }
+    updateUser: { // args
+      input: NexusGenInputs['UpdateUserInput']; // UpdateUserInput!
     }
     updateUserProject: { // args
       input: NexusGenInputs['UpdateUserProjectInput']; // UpdateUserProjectInput!
