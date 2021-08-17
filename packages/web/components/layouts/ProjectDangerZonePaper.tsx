@@ -1,10 +1,13 @@
 import useProject from '@/hooks/useProject';
+import dynamic from 'next/dynamic';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { CurrentProject_MembersQuery, Project, useDeleteProjectMutation } from 'types/gql';
-import DialogTextfield from '../elements/DialogTextfield';
+import Lazy from '../elements/Lazy';
+
+const LazyDialogTextfield = dynamic(() => import('../elements/DialogTextfield'));
 
 export interface ProjectDangerZonePaperProps {
   project?: CurrentProject_MembersQuery['currentProject'] | Project;
@@ -33,7 +36,8 @@ const ProjectDangerZonePaper = ({ project }: ProjectDangerZonePaperProps) => {
   return (
     <React.Fragment>
 
-      <DialogTextfield
+      <Lazy
+        Component={LazyDialogTextfield}
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
         loading={deleteLoading}

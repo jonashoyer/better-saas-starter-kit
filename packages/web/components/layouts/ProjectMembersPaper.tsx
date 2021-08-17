@@ -1,4 +1,5 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography, IconButton, Menu, MenuItem, ListItemIcon } from '@material-ui/core';
 import { CurrentProject_MembersQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation, User, SelfQuery } from 'types/gql';
 import useTranslation from 'next-translate/useTranslation';
@@ -6,14 +7,16 @@ import EmailIcon from '@material-ui/icons/Email';
 import CancelIcon from '@material-ui/icons/Cancel';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddIcon from '@material-ui/icons/Add';
-import DialogYN from '../elements/DialogYN';
-import DialogUserInvite from '../elements/DialogUserInvite';
-import DialogEditMember from '../elements/DialogEditMember';
+import Lazy from '../elements/Lazy';
 
 export interface ProjectMembersPaperProps {
   project?: CurrentProject_MembersQuery['currentProject'] | Project;
   self?: SelfQuery['self'] | User;
 }
+
+const LazyDialogYN = dynamic(() => import('../elements/DialogYN'));
+const LazyDialogUserInvite = dynamic(() => import('../elements/DialogUserInvite'));
+const LazyDialogEditMember = dynamic(() => import('../elements/DialogEditMember'));
 
 const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
 
@@ -98,8 +101,8 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
           Remove member
         </MenuItem>
       </Menu>
-      
-      <DialogYN
+      <Lazy
+        Component={LazyDialogYN}
         open={!!deleteInvite}
         maxWidth='xs'
         handleClose={() => setDeleteInvite(null)}
@@ -109,8 +112,8 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
         loading={loadingDeleteUserInvite}
         submitText={t('common:remove')}
       />
-
-      <DialogYN
+      <Lazy
+        Component={LazyDialogYN}
         open={!!deleteUserProjectId}
         maxWidth='xs'
         handleClose={() => setDeleteUserProjectId(null)}
@@ -120,14 +123,14 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
         loading={loadingDeleteUserProject}
         submitText={t('common:remove')}
       />
-
-      <DialogUserInvite
+      <Lazy
+        Component={LazyDialogUserInvite}
         open={inviteDialogOpen}
         onClose={() => setInviteDialogOpen(false)}
         project={project}
       />
-
-      <DialogEditMember
+      <Lazy
+        Component={LazyDialogEditMember}
         open={!!editUserProject}
         userProject={editUserProject}
         onClose={() => setEditUserProject(null)}
