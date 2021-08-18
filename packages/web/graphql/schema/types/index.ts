@@ -14,11 +14,12 @@ export const DateTimeScalar = scalarType({
   asNexusMethod: 'Date',
 })
 
+export * as Mutation from './Mutation';
+export * as Query from './Query';
 export * as User from './User';
 export * as Ping from './Ping';
 export * as Checkout from './Checkout';
 export * as Project from './Project';
 export * as PaymentMethod from './PaymentMethod';
-export * as Mutation from './Mutation';
 export * as UserProject from './UserProject';
 export * as UserInvite from './UserInvite';

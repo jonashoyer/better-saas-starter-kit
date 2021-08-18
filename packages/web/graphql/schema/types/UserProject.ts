@@ -1,5 +1,6 @@
 import { Context } from "@/graphql/context";
 import * as prisma from '@prisma/client';
+import { UserInputError } from "apollo-server-micro";
 import { arg, enumType, inputObjectType, mutationField, objectType, stringArg } from "nexus";
 import { hasUserProjectAccess } from "./permissions";
 
@@ -48,7 +49,7 @@ export const UpdateUserProject = mutationField('updateUserProject', {
   }),
   async resolve(root, { input }, ctx) {
     if (input.id === ctx.user.id) {
-      if (input.role) throw new Error('You cannot set your own project role!');
+      if (input.role) throw new UserInputError('You cannot set your own project role!');
     }
     
     const userProject = await ctx.prisma.userProject.update({
@@ -74,7 +75,7 @@ export const DeleteUserProject = mutationField('deleteUserProject', {
     const userProject = await ctx.prisma.userProject.findUnique({ where: { id }, select: { userId: true } });
 
     if (userProject.userId === ctx.user.id) {
-      throw new Error('You cannot remove yourself from a project!');
+      throw new UserInputError('You cannot remove yourself from a project!');
     }
 
     return ctx.prisma.userProject.delete({

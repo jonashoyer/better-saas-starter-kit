@@ -2,6 +2,7 @@ import { Context } from '@/graphql/context';
 import * as prisma from '@prisma/client';
 import ms from 'ms';
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
+import { ForbiddenError } from 'apollo-server-micro';
 import { requireAuth } from './permissions';
 import crypto from 'crypto';
 import { getURL } from '@/utils/utils';
@@ -49,7 +50,7 @@ export const UpdateUser = mutationField('updateUser', {
     input: arg({ type: UpdateUserInput, required: true }),
   },
   async resolve(root, args, ctx) {
-    if (args.input.id != ctx.user.id) throw new Error('Not allowed resource!');
+    if (args.input.id != ctx.user.id) throw new ForbiddenError('Not allowed resource!');
     const user = await ctx.prisma.user.update({
       where: { id: args.input.id },
       data: {
@@ -77,7 +78,7 @@ export const SendVerifyEmail = mutationField('sendVerifyEmail', {
   authorize: requireAuth,
   async resolve(root, { email }, ctx) {
     
-    if (ctx.user.emailVerified) throw new Error('Email already verified!');
+    if (ctx.user.emailVerified) throw new ForbiddenError('Email already verified!');
 
     const accounts = await ctx.prisma.account.findMany({
       where: {
@@ -85,8 +86,8 @@ export const SendVerifyEmail = mutationField('sendVerifyEmail', {
       }
     });
 
-    if (accounts.length == 0) throw new Error('User has no account linked!');
-    if (accounts.length > 1) throw new Error('User has multiple account linked already!');
+    if (accounts.length == 0) throw new ForbiddenError('User has no account linked!');
+    if (accounts.length > 1) throw new ForbiddenError('User has multiple account linked already!');
 
     const verificationEmail = await ctx.prisma.verificationEmail.create({
       data: {
@@ -132,7 +133,7 @@ export const VerifiyEmail = mutationField('verifyEmail', {
       where: { token },
     });
 
-    if (!verificationEmail) throw new Error('Bad token!');
+    if (!verificationEmail) throw new ForbiddenError('Bad token!');
 
     const accounts = await ctx.prisma.account.findMany({
       where: {
@@ -140,10 +141,10 @@ export const VerifiyEmail = mutationField('verifyEmail', {
       }
     });
 
-    if (accounts.length == 0) throw new Error('User has no account linked!');
-    if (accounts.length > 1) throw new Error('User has multiple account linked already!');
+    if (accounts.length == 0) throw new ForbiddenError('User has no account linked!');
+    if (accounts.length > 1) throw new ForbiddenError('User has multiple account linked already!');
 
-    if (!accounts.some(e => e.id == verificationEmail.accountId)) throw new Error('Verification not intended for this user!');
+    if (!accounts.some(e => e.id == verificationEmail.accountId)) throw new ForbiddenError('Verification not intended for this user!');
     
     const user = await ctx.prisma.user.update({
       where: { id: accounts[0].id },

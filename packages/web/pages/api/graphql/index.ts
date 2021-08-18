@@ -18,6 +18,9 @@ const apolloServer = new ApolloServer({
   schema,
   context: createContext,
   validationRules: [depthLimit(4)],
+  formatError(err) {
+    return err;
+  }
 });
 
 export const config = {
