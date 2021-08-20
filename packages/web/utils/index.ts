@@ -1,4 +1,5 @@
-  
+import { Prisma, Product } from '@prisma/client';
+
 export const getURL = () => {
   const url =
     process?.env?.URL && process.env.URL !== ''
@@ -19,3 +20,9 @@ export const postData = async ({ url, token, data = {} }: { url: string, token: 
 
   return res.json();
 };
+
+export const isJSONValueObject = (jsonValue: Prisma.JsonValue): jsonValue is Prisma.JsonObject => {
+  if (typeof jsonValue != 'object') return false;
+  if (Array.isArray(jsonValue)) return false;
+  return true;
+}

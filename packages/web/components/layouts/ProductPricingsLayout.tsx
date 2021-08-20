@@ -14,7 +14,6 @@ const ProductPricingsLayout = ({ products }: ProductPricingsLayoutProps) => {
 
   return (
     <Box>
-
       <Box sx={{ display: 'flex', gap: 2 }}>
         {products.sort((a, b) => (a.prices.find(priceFindFn).unitAmount ?? Infinity) - (b.prices.find(priceFindFn).unitAmount ?? Infinity) ).map(e => {
           return <ProductPricing key={e.id} product={e} priceFindFn={priceFindFn} />

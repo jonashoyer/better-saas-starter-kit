@@ -56,7 +56,6 @@ export class StripeHandler {
       active: product.active,
       type: product.metadata?.type,
       name: product.name,
-      description: product.description ?? null,
       image: product.images?.[0] ?? null,
       metadata: product.metadata,
     };
@@ -71,12 +70,11 @@ export class StripeHandler {
   };
 
   upsertPriceRecord (price: Stripe.Price) {
-    const priceData: any = {
+    const priceData = {
       id: price.id,
       productId: typeof price.product == 'string' ? price.product : price.product.id,
       active: price.active,
       currency: price.currency,
-      description: price.nickname,
       type: price.type,
       unitAmount: price.unit_amount,
       interval: price.recurring?.interval ?? null,

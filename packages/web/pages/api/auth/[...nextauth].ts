@@ -1,7 +1,7 @@
-import prisma from "@/utils/prisma";
+import prisma from "utils/prisma";
 import NextAuth, { DefaultSession } from "next-auth"
 import Providers from 'next-auth/providers'
-import { PrismaAdapter } from "@/utils/PrismaAdapter"
+import { PrismaAdapter } from "utils/PrismaAdapter"
 
 
 const prismaAdapter = PrismaAdapter(prisma);

@@ -2,6 +2,9 @@
 CREATE TYPE "ProjectRole" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
+CREATE TYPE "SubscriptionPlan" AS ENUM ('FREE', 'BASIC', 'PREMIUM');
+
+-- CreateEnum
 CREATE TYPE "PaymentMethodImportance" AS ENUM ('PRIMARY', 'BACKUP', 'OTHER');
 
 -- CreateTable
@@ -63,6 +66,7 @@ CREATE TABLE "Project" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "stripeCustomerId" TEXT NOT NULL,
+    "subscriptionPlan" "SubscriptionPlan" NOT NULL DEFAULT E'FREE',
 
     PRIMARY KEY ("id")
 );
@@ -103,6 +107,18 @@ CREATE TABLE "VerificationRequest" (
     "expires" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "VerificationEmail" (
+    "id" TEXT NOT NULL,
+    "accountId" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY ("id")
 );
@@ -163,6 +179,15 @@ CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"(
 CREATE UNIQUE INDEX "VerificationRequest.identifier_token_unique" ON "VerificationRequest"("identifier", "token");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "VerificationEmail.token_unique" ON "VerificationEmail"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VerificationEmail.accountId_token_unique" ON "VerificationEmail"("accountId", "token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VerificationEmail_accountId_unique" ON "VerificationEmail"("accountId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Product.type_unique" ON "Product"("type");
 
 -- AddForeignKey
@@ -182,6 +207,9 @@ ALTER TABLE "UserInvite" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id"
 
 -- AddForeignKey
 ALTER TABLE "PaymentMethod" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "VerificationEmail" ADD FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProductPrice" ADD FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;

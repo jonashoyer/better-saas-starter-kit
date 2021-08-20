@@ -93,6 +93,12 @@ type StatusResponse {
   ok: Boolean
 }
 
+enum SubscriptionPlan {
+  BASIC
+  FREE
+  PREMIUM
+}
+
 input UpdateProjectInput {
   id: String!
   name: String

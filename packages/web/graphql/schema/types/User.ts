@@ -1,11 +1,11 @@
-import { Context } from '@/graphql/context';
+import { Context } from 'graphql/context';
 import * as prisma from '@prisma/client';
 import ms from 'ms';
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { ForbiddenError } from 'apollo-server-micro';
 import { requireAuth } from './permissions';
 import crypto from 'crypto';
-import { getURL } from '@/utils/utils';
+import { getURL } from 'utils';
 
 const isSelf = (root: prisma.User, args: any, ctx: Context) => {
   if (!ctx.user?.id) return false;

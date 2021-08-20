@@ -76,6 +76,7 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   PaymentMethodImportance: prisma.PaymentMethodImportance
   ProjectRole: prisma.ProjectRole
+  SubscriptionPlan: prisma.SubscriptionPlan
 }
 
 export interface NexusGenScalars {

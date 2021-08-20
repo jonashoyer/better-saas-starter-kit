@@ -1,5 +1,5 @@
 import cuid from 'cuid';
-import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
+import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { requireAuth, requireProjectAccess } from './permissions';
 import { Constants } from 'bs-shared-kit';
 
@@ -9,10 +9,16 @@ export const Project = objectType({
     t.model.id();
     t.model.name();
     t.model.users();
+    t.model.subscriptionPlan();
     t.model.paymentMethods();
     t.model.userInvites();
   },
 });
+
+export const SubscriptionPlan = enumType({
+  name: 'SubscriptionPlan',
+  members: ['FREE', 'BASIC', 'PREMIUM'],
+})
 
 export const CurrentProject = queryField('currentProject', {
   type: 'Project',

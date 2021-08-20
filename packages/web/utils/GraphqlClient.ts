@@ -6,7 +6,7 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { signOut } from 'next-auth/client';
 import { GRAPHQL_ENDPOINT, GRAPHQL_WEBSOCKET_ENDPOINT } from '../config';
-import { getURL } from './utils';
+import { getURL } from '.';
 
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 

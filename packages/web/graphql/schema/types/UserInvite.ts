@@ -1,7 +1,7 @@
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from "nexus";
 import { requireProjectAccess, hasUserProjectAccess } from "./permissions";
 import crypto from 'crypto';
-import { getURL } from "@/utils/utils";
+import { getURL } from "utils";
 
 export const UserInvite = objectType({
   name: 'UserInvite',

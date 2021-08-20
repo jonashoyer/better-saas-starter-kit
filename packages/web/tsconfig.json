@@ -22,13 +22,7 @@
     "plugins": [{ "name": "nexus/typescript-language-service" }],
     "baseUrl": ".",
     "paths": {
-      "@/hooks/*": ["hooks/*"],
-      "@/components/*": ["components/*"],
-      "@/utils/*": ["utils/*"],
-      "@/assets/*": ["assets/*"],
-      "@/prisma/*": ["prisma/*"],
-      "@/pages/*": ["pages/*"],
-      "@/graphql/*": ["graphql/*"],
+      "@/": ["/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

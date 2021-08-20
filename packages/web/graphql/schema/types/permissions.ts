@@ -1,4 +1,4 @@
-import { Context } from "@/graphql/context";
+import { Context } from "graphql/context";
 import * as prisma from '@prisma/client';
 import { fieldAuthorizePluginCore } from "nexus";
 

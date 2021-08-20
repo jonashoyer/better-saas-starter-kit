@@ -26,7 +26,7 @@ export default function DialogAccountSettings({ open,  handleClose }: DialogAcco
   const [updateUser, { loading: updateUserLoading }] = useUpdateUserMutation();
 
   React.useEffect(() => {
-    setName(selfData.self?.name ?? '');
+    setName(selfData?.self?.name ?? '');
   }, [selfData]);
 
 
@@ -40,7 +40,7 @@ export default function DialogAccountSettings({ open,  handleClose }: DialogAcco
     updateUser({
       variables: {
         input: {
-          id: selfData.self.id,
+          id: selfData?.self.id,
           name,
         }
       }
@@ -68,7 +68,7 @@ export default function DialogAccountSettings({ open,  handleClose }: DialogAcco
                   loading={updateUserLoading}
                   variant='outlined'
                   onClick={onNameSave}
-                  disabled={name == selfData.self.name}
+                  disabled={name == selfData?.self?.name}
                 >
                   {t('common:save')}
                 </LoadingButton>

@@ -1,4 +1,4 @@
-import { Context } from "@/graphql/context";
+import { Context } from "graphql/context";
 import * as prisma from '@prisma/client';
 import { UserInputError } from "apollo-server-micro";
 import { arg, enumType, inputObjectType, mutationField, objectType, stringArg } from "nexus";

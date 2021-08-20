@@ -1,6 +1,6 @@
 import { arg, intArg, mutationField, objectType, stringArg } from 'nexus';
 import { AuthenticationError, UserInputError } from 'apollo-server-micro';
-import { getURL } from '@/utils/utils';
+import { getURL } from 'utils';
 
 export const CheckoutSession = objectType({
   name: "CheckoutSession",

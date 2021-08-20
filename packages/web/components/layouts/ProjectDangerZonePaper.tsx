@@ -1,4 +1,4 @@
-import useProject from '@/hooks/useProject';
+import useProject from 'hooks/useProject';
 import dynamic from 'next/dynamic';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';

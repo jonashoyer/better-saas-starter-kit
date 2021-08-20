@@ -4,7 +4,7 @@ module.exports = {
   pages: {
     '*': ['common', 'dialog'],
     '/': ['home', 'pricing'],
-    '/settings': ['settings'],
+    '/settings': ['settings', 'pricing'],
   },
   async loadLocaleFrom(lang, ns) {
     return import(`./locales/${lang}/${ns}.yml`).then((m) => m.default)

@@ -2,18 +2,19 @@ import React from 'react';
 import Head from 'next/head';
 import { getSession } from "next-auth/client";
 import { CurrentProject_MembersDocument, SelfDocument, useCurrentProject_MembersQuery, useSelfQuery } from 'types/gql';
-import ProductPricingsLayout from '@/components/layouts/ProductPricingsLayout';
-import prisma from '@/utils/prisma';
+import ProductPricingsLayout from 'components/layouts/ProductPricingsLayout';
+import prisma from 'utils/prisma';
 import { GetServerSideProps } from 'next';
-import { initializeApollo } from '@/utils/GraphqlClient';
+import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'bs-shared-kit';
-import { setCookie } from '@/utils/cookies';
-import useProject from '@/hooks/useProject';
-import PageLayout from '@/components/layouts/PageLayout';
-import ProjectDetailsPaper from '@/components/layouts/ProjectDetailsPaper';
-import ProjectMembersPaper from '@/components/layouts/ProjectMembersPaper';
+import { setCookie } from 'utils/cookies';
+import useProject from 'hooks/useProject';
+import PageLayout from 'components/layouts/PageLayout';
+import ProjectDetailsPaper from 'components/layouts/ProjectDetailsPaper';
+import ProjectMembersPaper from 'components/layouts/ProjectMembersPaper';
 import { Box } from '@material-ui/core';
-import ProjectDangerZonePaper from '@/components/layouts/ProjectDangerZonePaper';
+import ProjectDangerZonePaper from 'components/layouts/ProjectDangerZonePaper';
+import ProjectPlanPaper from 'components/layouts/ProjectPlanPaper';
 
 export default function Home(props: any) {
 
@@ -38,12 +39,9 @@ export default function Home(props: any) {
 
       <PageLayout padded>
 
-        <Box sx={{ py: 1 }}>
-          <ProductPricingsLayout products={props.products} />
-        </Box>
-
         <ProjectDetailsPaper project={currentProjectData.currentProject} />
         <ProjectMembersPaper project={currentProjectData.currentProject} self={selfData?.self} />
+        <ProjectPlanPaper products={props.products} />
         <ProjectDangerZonePaper project={currentProjectData.currentProject} />
 
       </PageLayout>

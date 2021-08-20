@@ -669,6 +669,12 @@ export type Subscription = {
   ping?: Maybe<Scalars['DateTime']>;
 };
 
+export enum SubscriptionPlan {
+  Free = 'FREE',
+  Basic = 'BASIC',
+  Premium = 'PREMIUM'
+}
+
 export type UpdateProjectInput = {
   id: Scalars['String'];
   name?: Maybe<Scalars['String']>;

@@ -5,7 +5,7 @@ import depthLimit from 'graphql-depth-limit';
 import { RequestHandler } from 'micro'
 import { NextApiHandler } from "next";
 import Cors from 'cors';
-import initMiddleware from "@/utils/init-middleware";
+import initMiddleware from "utils/init-middleware";
 
 const cors = initMiddleware(
   Cors({

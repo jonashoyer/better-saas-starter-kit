@@ -5,7 +5,7 @@ import { ContextFunction } from 'apollo-server-core'
 import { getSession } from 'next-auth/client';
 import Stripe from 'stripe';
 import { IncomingMessage, OutgoingMessage } from 'http';
-import { Session } from '@/pages/api/auth/[...nextauth]';
+import { Session } from 'pages/api/auth/[...nextauth]';
 
 export const stripe = createStripe();
 export const prisma = new PrismaClient();

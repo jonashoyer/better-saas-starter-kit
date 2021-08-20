@@ -16,3 +16,5 @@ logout: 'Logout'
 login: 'Login'
 
 accountSettings: 'Account Settings'
+
+plan: 'Plan'

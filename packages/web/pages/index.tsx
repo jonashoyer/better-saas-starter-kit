@@ -4,16 +4,16 @@ import PageLayout from '../components/layouts/PageLayout';
 import { useSession, signIn, signOut, getSession  } from "next-auth/client";
 import { Box, Button, Typography } from '@material-ui/core';
 import { CurrentProjectDocument, SelfProjectsDocument, useCurrentProjectQuery, useSelfProjectsQuery } from 'types/gql';
-import ProductPricingsLayout from '@/components/layouts/ProductPricingsLayout';
-import prisma from '@/utils/prisma';
+import ProductPricingsLayout from 'components/layouts/ProductPricingsLayout';
+import prisma from 'utils/prisma';
 import { GetServerSideProps } from 'next';
-import ProjectSelector from '@/components/layouts/ProjectSelector';
-import { initializeApollo } from '@/utils/GraphqlClient';
+import ProjectSelector from 'mponents/layouts/ProjectSelector';
+import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'bs-shared-kit';
-import { setCookie } from '@/utils/cookies';
-import useProject from '@/hooks/useProject';
+import { setCookie } from 'utils/cookies';
+import useProject from 'hooks/useProject';
 
-// FIXME: Cookie project is deleted it should fallback  
+// FIXME: Cookie project is deleted it should fallback
 
 export default function Home(props: any) {
 

@@ -10,7 +10,7 @@ import { LoadingButton } from '@material-ui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import FormTextField from './FormTextField';
 import { useCreateProjectMutation } from 'types/gql';
-import useProject from '@/hooks/useProject';
+import useProject from 'hooks/useProject';
 import { useRouter } from 'next/router';
 
 export interface DialogCreateProjectProps {
