@@ -45,6 +45,12 @@ export class StripeHandler {
   createUsageRecord(subscriptionItemId: string, params: Stripe.UsageRecordCreateParams, options?: Stripe.RequestOptions) {
     return this.stripe.subscriptionItems.createUsageRecord(subscriptionItemId, params, options);
   }
+  fetchProductList() {
+    return this.stripe.products.list({
+      active: true,
+      expand: ['data.prices'],
+    })
+  }
 
   upsertProductRecord (product: Stripe.Product) {
     if (!product.metadata?.type) {
