@@ -152,6 +152,7 @@ export interface NexusGenFieldTypes {
     id: string; // String!
     name: string; // String!
     paymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
+    subscriptionPlan: NexusGenEnums['SubscriptionPlan']; // SubscriptionPlan!
     userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
   }
@@ -226,6 +227,7 @@ export interface NexusGenFieldTypeNames {
     id: 'String'
     name: 'String'
     paymentMethods: 'PaymentMethod'
+    subscriptionPlan: 'SubscriptionPlan'
     userInvites: 'UserInvite'
     users: 'UserProject'
   }

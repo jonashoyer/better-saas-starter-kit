@@ -7,7 +7,7 @@ import { CurrentProjectDocument, SelfProjectsDocument, useCurrentProjectQuery, u
 import ProductPricingsLayout from 'components/layouts/ProductPricingsLayout';
 import prisma from 'utils/prisma';
 import { GetServerSideProps } from 'next';
-import ProjectSelector from 'mponents/layouts/ProjectSelector';
+import ProjectSelector from 'components/layouts/ProjectSelector';
 import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'bs-shared-kit';
 import { setCookie } from 'utils/cookies';

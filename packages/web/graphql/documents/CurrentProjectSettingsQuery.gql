@@ -1,6 +1,7 @@
-query CurrentProject_Members($projectId: String) {
+query CurrentProjectSettings($projectId: String) {
   currentProject(projectId: $projectId) {
     ...BaseProjcet
+    subscriptionPlan
     users {
       id
       createdAt
@@ -18,6 +19,17 @@ query CurrentProject_Members($projectId: String) {
       createdAt
       role
       email
+    }
+    paymentMethods {
+      id
+      createdAt
+      brand
+      last4
+      expMonth
+      expYear
+      type
+      importance
+      updatedAt
     }
   }
 }

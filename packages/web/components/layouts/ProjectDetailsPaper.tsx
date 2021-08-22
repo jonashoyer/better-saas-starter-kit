@@ -2,10 +2,10 @@ import { Paper, TextField, Typography } from '@material-ui/core';
 import { LoadingButton } from '@material-ui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
-import { CurrentProject_MembersQuery, Project, useUpdateProjectMutation } from 'types/gql';
+import { CurrentProjectSettingsQuery, Project, useUpdateProjectMutation } from 'types/gql';
 
 export interface ProjectDetailsPaperProps {
-  project?: CurrentProject_MembersQuery['currentProject'] |  Project;
+  project?: CurrentProjectSettingsQuery['currentProject'] |  Project;
 }
 
 const noop = () => {};
@@ -32,7 +32,7 @@ const ProjectDetailsPaper = ({ project }: ProjectDetailsPaperProps) => {
   return (
     <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
 
-        <Typography variant='h6' gutterBottom>{t('settings:projectSettings')}</Typography>
+        <Typography variant='h6' gutterBottom>{t('common:project')}</Typography>
 
         <TextField
           size='small'

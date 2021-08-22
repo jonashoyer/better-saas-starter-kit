@@ -1,16 +1,21 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';
 import { Product, ProductPrice } from '@prisma/client';
 import { formatCurrency } from '../../../shared/lib';
-import DialogChangePlan from '../elements/DialogChangePlan';
 import { isJSONValueObject } from 'utils';
+import Lazy from 'components/elements/Lazy';
+import { CurrentProjectSettingsQuery, Project } from 'types/gql';
+
+const LazyDialogChangePlan = dynamic(() => import('../elements/DialogChangePlan'));
 
 interface ProjectPlanPaperProps {
+  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
   products: (Product & { prices: ProductPrice[] })[];
 }
 
-const ProjectPlanPaper = ({ products }: ProjectPlanPaperProps) => {
+const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
 
   const { t, lang } = useTranslation();
   const priceFindFn = e => e.interval == 'month';
@@ -22,19 +27,30 @@ const ProjectPlanPaper = ({ products }: ProjectPlanPaperProps) => {
 
   return (
     <React.Fragment>
-      <DialogChangePlan
+      <Lazy
+        Component={LazyDialogChangePlan}
         open={!!changePlan}
         handleClose={() => setChangePlan(null)}
+        project={project}
+        products={products}
+        targetProduct={changePlan}
       />
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant='h6'>{t('common:plan')}</Typography>
         </Box>
         <Box>
-          {sortedProducts.map(e => {
+          {sortedProducts.map((e, i) => {
             const price = e.prices.find(priceFindFn);
+            const isUsedProduct = e.type == project.subscriptionPlan;
+            
             const isFeatured = isJSONValueObject(e.metadata) && !!e.metadata.featured;
-            const itemSx = isFeatured ? { border: '1px solid', borderRadius: 2, borderColor: t => `${t.palette.primary.main}88` } : { borderBottom: '1px solid #eee' };
+
+            const next = sortedProducts[i + 1];
+            const isFeaturedNear = isFeatured || (next && isJSONValueObject(next.metadata) && !!next.metadata.featured);
+
+            const itemSx = isFeatured ? { border: '1px solid', borderRadius: 2, borderColor: t => `${t.palette.primary.main}88` } : (isFeaturedNear ? {} : { borderBottom: '1px solid #eee' });
+
             return (
               <Box key={e.id} sx={{ py: 1.5, px: 2, display: 'flex', justifyContent: 'space-between', ...itemSx }}>
                 <Box sx={{ pr: 1 }}>
@@ -45,10 +61,10 @@ const ProjectPlanPaper = ({ products }: ProjectPlanPaperProps) => {
                 <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
                   <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
-                    <Typography variant='caption' color='textSecondary'>per {price.intervalCount != 1 && price.intervalCount} {price.interval}{price.intervalCount != 1 && 's'}</Typography>
+                    <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
                   </Box>
                   <Box>
-                    <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setChangePlan(e)}>Switch</Button>
+                    <Button sx={{ minWidth: 92 }} disabled={isUsedProduct} variant='outlined' onClick={() => setChangePlan(e)}>{isUsedProduct ? t('pricing:current') : t('pricing:switch')}</Button>
                   </Box>
                 </Box>
               </Box>

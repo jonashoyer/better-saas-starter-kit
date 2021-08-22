@@ -1,3 +1,29 @@
 free_description: "No, just no..."
 basic_description: "This is pretty basic, you can do better... Try premium!"
 premium_description: "This is a lot better!"
+perMember: 'per member'
+
+current: 'Current'
+switch: 'Switch'
+
+day:
+  one: 'day'
+  other: 'days'
+week:
+  one: 'week'
+  other: 'weeks'
+month:
+  one: 'month'
+  other: 'months'
+year:
+  one: 'year'
+  other: 'years'
+
+changePlanTitle: 'Changing plan'
+changePlanContent: 'You are about to change your plan!'
+changePlanConfirm: 'Change plan'
+
+currentPlan: "Your current plan is {{plan}}"
+switchPlan: "The plan you are switch to is {{plan}}"
+
+billingText: "With the {{plan}} plan you will be charged:"

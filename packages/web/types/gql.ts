@@ -84,6 +84,7 @@ export const CurrentProjectDocument = gql`
     query CurrentProject($projectId: String) {
   currentProject(projectId: $projectId) {
     ...BaseProjcet
+    subscriptionPlan
   }
 }
     ${BaseProjcetFragmentDoc}`;
@@ -115,10 +116,11 @@ export function useCurrentProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOpt
 export type CurrentProjectQueryHookResult = ReturnType<typeof useCurrentProjectQuery>;
 export type CurrentProjectLazyQueryHookResult = ReturnType<typeof useCurrentProjectLazyQuery>;
 export type CurrentProjectQueryResult = Apollo.QueryResult<CurrentProjectQuery, CurrentProjectQueryVariables>;
-export const CurrentProject_MembersDocument = gql`
-    query CurrentProject_Members($projectId: String) {
+export const CurrentProjectSettingsDocument = gql`
+    query CurrentProjectSettings($projectId: String) {
   currentProject(projectId: $projectId) {
     ...BaseProjcet
+    subscriptionPlan
     users {
       id
       createdAt
@@ -137,37 +139,48 @@ export const CurrentProject_MembersDocument = gql`
       role
       email
     }
+    paymentMethods {
+      id
+      createdAt
+      brand
+      last4
+      expMonth
+      expYear
+      type
+      importance
+      updatedAt
+    }
   }
 }
     ${BaseProjcetFragmentDoc}`;
 
 /**
- * __useCurrentProject_MembersQuery__
+ * __useCurrentProjectSettingsQuery__
  *
- * To run a query within a React component, call `useCurrentProject_MembersQuery` and pass it any options that fit your needs.
- * When your component renders, `useCurrentProject_MembersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useCurrentProjectSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentProjectSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useCurrentProject_MembersQuery({
+ * const { data, loading, error } = useCurrentProjectSettingsQuery({
  *   variables: {
  *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useCurrentProject_MembersQuery(baseOptions?: Apollo.QueryHookOptions<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>) {
+export function useCurrentProjectSettingsQuery(baseOptions?: Apollo.QueryHookOptions<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>(CurrentProject_MembersDocument, options);
+        return Apollo.useQuery<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>(CurrentProjectSettingsDocument, options);
       }
-export function useCurrentProject_MembersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>) {
+export function useCurrentProjectSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>(CurrentProject_MembersDocument, options);
+          return Apollo.useLazyQuery<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>(CurrentProjectSettingsDocument, options);
         }
-export type CurrentProject_MembersQueryHookResult = ReturnType<typeof useCurrentProject_MembersQuery>;
-export type CurrentProject_MembersLazyQueryHookResult = ReturnType<typeof useCurrentProject_MembersLazyQuery>;
-export type CurrentProject_MembersQueryResult = Apollo.QueryResult<CurrentProject_MembersQuery, CurrentProject_MembersQueryVariables>;
+export type CurrentProjectSettingsQueryHookResult = ReturnType<typeof useCurrentProjectSettingsQuery>;
+export type CurrentProjectSettingsLazyQueryHookResult = ReturnType<typeof useCurrentProjectSettingsLazyQuery>;
+export type CurrentProjectSettingsQueryResult = Apollo.QueryResult<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>;
 export const DeleteProjectDocument = gql`
     mutation DeleteProject($id: String!) {
   deleteProject(id: $id) {
@@ -609,6 +622,7 @@ export type Project = {
   id: Scalars['String'];
   name: Scalars['String'];
   users: Array<UserProject>;
+  subscriptionPlan: SubscriptionPlan;
   paymentMethods: Array<PaymentMethod>;
   userInvites: Array<UserInvite>;
 };
@@ -791,19 +805,21 @@ export type CurrentProjectQuery = (
   { __typename?: 'Query' }
   & { currentProject?: Maybe<(
     { __typename?: 'Project' }
+    & Pick<Project, 'subscriptionPlan'>
     & BaseProjcetFragment
   )> }
 );
 
-export type CurrentProject_MembersQueryVariables = Exact<{
+export type CurrentProjectSettingsQueryVariables = Exact<{
   projectId?: Maybe<Scalars['String']>;
 }>;
 
 
-export type CurrentProject_MembersQuery = (
+export type CurrentProjectSettingsQuery = (
   { __typename?: 'Query' }
   & { currentProject?: Maybe<(
     { __typename?: 'Project' }
+    & Pick<Project, 'subscriptionPlan'>
     & { users: Array<(
       { __typename?: 'UserProject' }
       & Pick<UserProject, 'id' | 'createdAt' | 'role'>
@@ -814,6 +830,9 @@ export type CurrentProject_MembersQuery = (
     )>, userInvites: Array<(
       { __typename?: 'UserInvite' }
       & Pick<UserInvite, 'id' | 'createdAt' | 'role' | 'email'>
+    )>, paymentMethods: Array<(
+      { __typename?: 'PaymentMethod' }
+      & Pick<PaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'updatedAt'>
     )> }
     & BaseProjcetFragment
   )> }

@@ -71,6 +71,7 @@ type Project {
   id: String!
   name: String!
   paymentMethods(cursor: PaymentMethodWhereUniqueInput, skip: Int, take: Int): [PaymentMethod!]!
+  subscriptionPlan: SubscriptionPlan!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
   users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }

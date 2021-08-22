@@ -1,8 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { getSession } from "next-auth/client";
-import { CurrentProject_MembersDocument, SelfDocument, useCurrentProject_MembersQuery, useSelfQuery } from 'types/gql';
-import ProductPricingsLayout from 'components/layouts/ProductPricingsLayout';
+import { CurrentProjectSettingsDocument, SelfDocument, useCurrentProjectSettingsQuery, useSelfQuery } from 'types/gql';
 import prisma from 'utils/prisma';
 import { GetServerSideProps } from 'next';
 import { initializeApollo } from 'utils/GraphqlClient';
@@ -12,9 +11,9 @@ import useProject from 'hooks/useProject';
 import PageLayout from 'components/layouts/PageLayout';
 import ProjectDetailsPaper from 'components/layouts/ProjectDetailsPaper';
 import ProjectMembersPaper from 'components/layouts/ProjectMembersPaper';
-import { Box } from '@material-ui/core';
 import ProjectDangerZonePaper from 'components/layouts/ProjectDangerZonePaper';
 import ProjectPlanPaper from 'components/layouts/ProjectPlanPaper';
+import ProjectPaymentMethodPaper from 'components/layouts/ProjectPaymentMethodPaper';
 
 export default function Home(props: any) {
 
@@ -22,7 +21,7 @@ export default function Home(props: any) {
 
   const { data: selfData } = useSelfQuery();
 
-  const { data: currentProjectData } = useCurrentProject_MembersQuery({
+  const { data: currentProjectData } = useCurrentProjectSettingsQuery({
     variables: {
       projectId,
     },
@@ -41,7 +40,8 @@ export default function Home(props: any) {
 
         <ProjectDetailsPaper project={currentProjectData.currentProject} />
         <ProjectMembersPaper project={currentProjectData.currentProject} self={selfData?.self} />
-        <ProjectPlanPaper products={props.products} />
+        <ProjectPlanPaper project={currentProjectData.currentProject} products={props.products} />
+        <ProjectPaymentMethodPaper project={currentProjectData.currentProject} />
         <ProjectDangerZonePaper project={currentProjectData.currentProject} />
 
       </PageLayout>
@@ -72,7 +72,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     });
 
     const { data: { currentProject } } = await client.query({
-      query: CurrentProject_MembersDocument,
+      query: CurrentProjectSettingsDocument,
       variables: {
         projectId,
       },

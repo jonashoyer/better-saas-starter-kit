@@ -18,3 +18,8 @@ login: 'Login'
 accountSettings: 'Account Settings'
 
 plan: 'Plan'
+
+project: 'Project'
+member:
+  one: 'Member'
+  other: 'Members'
