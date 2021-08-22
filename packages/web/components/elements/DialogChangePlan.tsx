@@ -6,14 +6,14 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import useTranslation from 'next-translate/useTranslation';
 import { Product, ProductPrice } from '@prisma/client';
-import { CurrentProject_MembersQuery, Project } from 'types/gql';
+import { CurrentProjectSettingsQuery, Project } from 'types/gql';
 import { formatCurrency } from '../../../shared/lib';
 import { Box, DialogContentText, Typography } from '@material-ui/core';
 
 export type DialogChangePlanProps = {
   open: boolean;
   handleClose: () => any;
-  project?: CurrentProject_MembersQuery['currentProject'] | Project;
+  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
   products: (Product & { prices: ProductPrice[] })[];
   targetProduct?: (Product & { prices: ProductPrice[] });
 }

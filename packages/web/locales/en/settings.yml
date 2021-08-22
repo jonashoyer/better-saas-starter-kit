@@ -9,4 +9,5 @@ dangerZone: 'Danger Zone'
 
 deleteThisProject: 'Delete this project!'
 
-paymentMethod: 'Payment method'
+paymentMethods: 'Payment methods'
+addPaymentMethod: 'Add payment method'

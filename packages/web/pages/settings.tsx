@@ -14,8 +14,12 @@ import ProjectMembersPaper from 'components/layouts/ProjectMembersPaper';
 import ProjectDangerZonePaper from 'components/layouts/ProjectDangerZonePaper';
 import ProjectPlanPaper from 'components/layouts/ProjectPlanPaper';
 import ProjectPaymentMethodPaper from 'components/layouts/ProjectPaymentMethodPaper';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 
-export default function Home(props: any) {
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+
+export default function Settings(props: any) {
 
   const [projectId] = useProject();
 
@@ -28,7 +32,7 @@ export default function Home(props: any) {
   });
 
   return (
-    <React.Fragment>
+    <Elements stripe={stripePromise}>
 
       <Head>
         <title>APP</title>
@@ -45,7 +49,7 @@ export default function Home(props: any) {
         <ProjectDangerZonePaper project={currentProjectData.currentProject} />
 
       </PageLayout>
-    </React.Fragment>
+    </Elements>
   )
 }
 

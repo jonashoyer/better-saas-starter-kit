@@ -8,6 +8,7 @@ import { ApolloProvider } from '@apollo/client';
 import { Provider as NextAuthProvider } from 'next-auth/client'
 import { ProjectValueProvider } from 'hooks/useProject';
 
+
 function MyApp({ Component, pageProps }: AppProps) {
 
   React.useEffect(() => {
@@ -21,19 +22,21 @@ function MyApp({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps.initialApolloState);
 
   return (
-    <NextAuthProvider options={{
-      clientMaxAge: 60 * 30,
-      keepAlive: 60 * 60,
-    }} session={pageProps.session}>
-      <ApolloProvider client={apolloClient}>
-
-        <ThemeProvider theme={theme}>
-          <ProjectValueProvider initialValue={pageProps.projectId}>
-            <CssBaseline />
-            <Component {...pageProps} />
-          </ProjectValueProvider>
-        </ThemeProvider>
-      </ApolloProvider>
+    <NextAuthProvider
+      options={{
+        clientMaxAge: 60 * 30,
+        keepAlive: 60 * 60,
+      }}
+      session={pageProps.session}
+    >
+        <ApolloProvider client={apolloClient}>
+          <ThemeProvider theme={theme}>
+            <ProjectValueProvider initialValue={pageProps.projectId}>
+              <CssBaseline />
+              <Component {...pageProps} />
+            </ProjectValueProvider>
+          </ThemeProvider>
+        </ApolloProvider>
     </NextAuthProvider>
   );
 }
