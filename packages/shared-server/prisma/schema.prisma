@@ -76,16 +76,18 @@ enum SubscriptionPlan {
 }
 
 model Project {
-  id               String   @id @default(cuid())
-  name             String
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  stripeCustomerId String   @unique
-  subscriptionPlan SubscriptionPlan   @default(FREE)
+  id                   String           @id @default(cuid())
+  name                 String
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  stripeCustomerId     String           @unique
+  stripeSubscriptionId String           @unique
+  subscriptionPlan     SubscriptionPlan @default(FREE)
 
   users          UserProject[]
   paymentMethods PaymentMethod[]
   userInvites    UserInvite[]
+  invoices       Invoice[]
 }
 
 model UserInvite {
@@ -105,6 +107,8 @@ model PaymentMethod {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  stripePaymentMethodId String @unique
 
   brand    String
   last4    String
@@ -173,4 +177,47 @@ model ProductPrice {
   metadata        Json
 
   product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+enum InvoiceStatus {
+  DELETED
+  DRAFT
+  OPEN
+  PAID
+  UNCOLLECTIBLE
+  VOID
+}
+
+enum InvoiceBillingReason {
+  AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE
+  MANUAL
+  QUOTE_ACCEPT
+  SUBSCRIPTION
+  SUBSCRIPTION_CREATE
+  SUBSCRIPTION_CYCLE
+  SUBSCRIPTION_THRESHOLD
+  SUBSCRIPTION_UPDATE
+  UPCOMING
+}
+
+model Invoice {
+  id              String                @id @default(cuid())
+  stripeInvoiceId String                @unique
+  created         DateTime
+  dueDate         DateTime?
+  status          InvoiceStatus
+  amountDue       Int
+  amountPaid      Int
+  amountRemaining Int
+  billingReason   InvoiceBillingReason?
+  invoicePdf      String?
+  periodStart     DateTime
+  periodEnd       DateTime
+  receiptNumber   String?
+  subtotal        Int
+  tax             Int?
+  total           Int
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }

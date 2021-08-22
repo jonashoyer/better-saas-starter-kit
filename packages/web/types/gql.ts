@@ -529,6 +529,7 @@ export type Mutation = {
   createProject?: Maybe<Project>;
   updateProject?: Maybe<Project>;
   deleteProject?: Maybe<Project>;
+  createSetupIntent?: Maybe<SetupIntent>;
   updateUserProject?: Maybe<UserProject>;
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
@@ -574,6 +575,11 @@ export type MutationDeleteProjectArgs = {
 };
 
 
+export type MutationCreateSetupIntentArgs = {
+  projectId: Scalars['String'];
+};
+
+
 export type MutationUpdateUserProjectArgs = {
   input: UpdateUserProjectInput;
 };
@@ -615,6 +621,7 @@ export enum PaymentMethodImportance {
 
 export type PaymentMethodWhereUniqueInput = {
   id?: Maybe<Scalars['String']>;
+  stripePaymentMethodId?: Maybe<Scalars['String']>;
 };
 
 export type Project = {
@@ -670,6 +677,11 @@ export type QueryCurrentProjectArgs = {
 
 export type QueryGetUserInvitesArgs = {
   projectId: Scalars['String'];
+};
+
+export type SetupIntent = {
+  __typename?: 'SetupIntent';
+  clientSecret: Scalars['String'];
 };
 
 export type StatusResponse = {

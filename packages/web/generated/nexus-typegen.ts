@@ -41,6 +41,7 @@ export interface NexusGenInputs {
   }
   PaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
+    stripePaymentMethodId?: string | null; // String
   }
   UpdateProjectInput: { // input type
     id: string; // String!
@@ -74,9 +75,12 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  InvoiceBillingReason: prisma.InvoiceBillingReason
+  InvoiceStatus: prisma.InvoiceStatus
   PaymentMethodImportance: prisma.PaymentMethodImportance
   ProjectRole: prisma.ProjectRole
   SubscriptionPlan: prisma.SubscriptionPlan
+  SubscriptionStatus: "ACTIVE" | "CANCELED" | "INCOMPLETE" | "INCOMPLETE_EXPIRED" | "PAST_DUE" | "TRIALING" | "UNPAID"
 }
 
 export interface NexusGenScalars {
@@ -92,16 +96,29 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  BillingInfomation: { // root type
+    currentPrice: string; // String!
+    currentQuantity: number; // Int!
+  }
   CheckoutSession: { // root type
     sessionId?: string | null; // String
   }
+  Invoice: prisma.Invoice;
   Mutation: {};
   PaymentMethod: prisma.PaymentMethod;
   Project: prisma.Project;
   Query: {};
+  SetupIntent: { // root type
+    clientSecret: string; // String!
+  }
   StatusResponse: { // root type
     message?: string | null; // String
     ok?: boolean | null; // Boolean
+  }
+  Subscription: { // root type
+    status: NexusGenEnums['SubscriptionStatus']; // SubscriptionStatus!
+    stripeSubscriptionId: string; // String!
+    trialEnd?: NexusGenScalars['Date'] | null; // Date
   }
   User: prisma.User;
   UserInvite: prisma.UserInvite;
@@ -120,6 +137,10 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  BillingInfomation: { // field return type
+    currentPrice: string; // String!
+    currentQuantity: number; // Int!
+  }
   CheckoutSession: { // field return type
     sessionId: string | null; // String
   }
@@ -127,11 +148,14 @@ export interface NexusGenFieldTypes {
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
     createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     createProject: NexusGenRootTypes['Project'] | null; // Project
+    createSetupIntent: NexusGenRootTypes['SetupIntent'] | null; // SetupIntent
+    createSubscription: NexusGenRootTypes['Subscription'] | null; // Subscription
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     updateProject: NexusGenRootTypes['Project'] | null; // Project
+    updateSubscription: NexusGenRootTypes['Subscription'] | null; // Subscription
     updateUser: NexusGenRootTypes['User'] | null; // User
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     verifyEmail: NexusGenRootTypes['User'] | null; // User
@@ -158,14 +182,23 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     currentProject: NexusGenRootTypes['Project'] | null; // Project
+    getBillingInfomation: NexusGenRootTypes['BillingInfomation'] | null; // BillingInfomation
     getUserInvites: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     ping: string; // String!
     self: NexusGenRootTypes['User'] | null; // User
     selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
   }
+  SetupIntent: { // field return type
+    clientSecret: string; // String!
+  }
   StatusResponse: { // field return type
     message: string | null; // String
     ok: boolean | null; // Boolean
+  }
+  Subscription: { // field return type
+    status: NexusGenEnums['SubscriptionStatus']; // SubscriptionStatus!
+    stripeSubscriptionId: string; // String!
+    trialEnd: NexusGenScalars['Date'] | null; // Date
   }
   User: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -195,6 +228,10 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  BillingInfomation: { // field return type name
+    currentPrice: 'String'
+    currentQuantity: 'Int'
+  }
   CheckoutSession: { // field return type name
     sessionId: 'String'
   }
@@ -202,11 +239,14 @@ export interface NexusGenFieldTypeNames {
     createCheckoutSession: 'CheckoutSession'
     createManyUserInvite: 'UserInvite'
     createProject: 'Project'
+    createSetupIntent: 'SetupIntent'
+    createSubscription: 'Subscription'
     deleteProject: 'Project'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
     sendVerifyEmail: 'StatusResponse'
     updateProject: 'Project'
+    updateSubscription: 'Subscription'
     updateUser: 'User'
     updateUserProject: 'UserProject'
     verifyEmail: 'User'
@@ -233,14 +273,23 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     currentProject: 'Project'
+    getBillingInfomation: 'BillingInfomation'
     getUserInvites: 'UserInvite'
     ping: 'String'
     self: 'User'
     selfProjects: 'Project'
   }
+  SetupIntent: { // field return type name
+    clientSecret: 'String'
+  }
   StatusResponse: { // field return type name
     message: 'String'
     ok: 'Boolean'
+  }
+  Subscription: { // field return type name
+    status: 'SubscriptionStatus'
+    stripeSubscriptionId: 'String'
+    trialEnd: 'Date'
   }
   User: { // field return type name
     createdAt: 'DateTime'
@@ -283,6 +332,14 @@ export interface NexusGenArgTypes {
     createProject: { // args
       input: NexusGenInputs['CreateProjectInput']; // CreateProjectInput!
     }
+    createSetupIntent: { // args
+      projectId: string; // String!
+    }
+    createSubscription: { // args
+      priceId: string; // String!
+      projectId: string; // String!
+      quantity: number; // Int!
+    }
     deleteProject: { // args
       id: string; // String!
     }
@@ -297,6 +354,11 @@ export interface NexusGenArgTypes {
     }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
+    }
+    updateSubscription: { // args
+      priceId?: string | null; // String
+      projectId: string; // String!
+      quantity?: number | null; // Int
     }
     updateUser: { // args
       input: NexusGenInputs['UpdateUserInput']; // UpdateUserInput!
@@ -328,6 +390,9 @@ export interface NexusGenArgTypes {
   Query: {
     currentProject: { // args
       projectId?: string | null; // String
+    }
+    getBillingInfomation: { // args
+      subscriptionId: string; // String!
     }
     getUserInvites: { // args
       projectId: string; // String!

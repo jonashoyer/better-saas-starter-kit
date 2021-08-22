@@ -45,10 +45,13 @@ export const CreateSetupIntent = mutationField('createSetupIntent', {
       }
     })
 
-    const intent =  await ctx.stripe.setupIntents.create({
+    const intent = await ctx.stripe.setupIntents.create({
       customer: project.stripeCustomerId,
     });
 
-    return intent;
+
+    return {
+      clientSecret: intent.client_secret,
+    };
   }
 })
