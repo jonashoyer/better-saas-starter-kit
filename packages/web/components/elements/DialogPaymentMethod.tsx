@@ -15,6 +15,7 @@ export type DialogPaymentMethodProps = {
 
 // https://stripe.com/docs/stripe-js/react
 // https://codesandbox.io/s/react-stripe-js-card-detailed-omfb3?file=/src/App.js
+// https://github.com/stripe-samples/subscription-use-cases
 
 export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymentMethodProps) {
 
