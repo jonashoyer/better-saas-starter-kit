@@ -80,7 +80,7 @@ const formatStripeInvoice = (s: Stripe.Invoice) => ({
   subtotal: s.subtotal,
   tax: s.tax,
   total: s.total,
-  projectId: '1',
+  projectId: 'unset',
 })
 
 export const getBillingInfomation = queryField('getBillingInfomation', {

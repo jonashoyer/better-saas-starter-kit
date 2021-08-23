@@ -12,6 +12,7 @@ import FormTextField from './FormTextField';
 import { useForm } from 'react-hook-form';
 import { Box } from '@material-ui/core';
 import StripeCardElement from './StripeCardElement';
+import FormAutocompleteTextField from './FormAutocompleteTextField';
 
 export type DialogPaymentMethodProps = {
   open: boolean;
@@ -26,11 +27,22 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
 
   const { t, lang } = useTranslation();
 
+  const [countryCodes, setCountryCodes] = React.useState(null);
+
   const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm({ criteriaMode: 'firstError', mode: 'all' });
   
   React.useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setCountryCodes(null);
+      return;
+    }
     reset();
+    import('utils/countryCodes.json').then(codes =>
+      setCountryCodes(
+        Object.entries(codes).map(([code, label]) => ({ code, label }))
+        )
+      );
+
   }, [reset, open]);
 
   const [projectId] = useProject();
@@ -86,13 +98,9 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
           card: elements.getElement(CardElement),
           billing_details: {
             address: {
-              line1: data.addressLine1,
-              line2: data.addressLine2,
-              city: data.city,
-              postal_code: data.postalCode,
-              // country:
+              country: data.country,
             },
-            name: data.cardholderName,
+            name: data.fullName,
           },
         },
       }
@@ -109,8 +117,9 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
     console.log('[PaymentMethod]', payload.setupIntent);
   };
 
-  const loading = processing || createSetupIntentLoading;
+  console.log(countryCodes);
 
+  const loading = processing || createSetupIntentLoading;  
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
@@ -123,13 +132,13 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
           />
           <Box sx={{ pt: 2 }}>
             <FormTextField
-              label={t('pricing:cardholderName')}
+              label={t('pricing:fullName')}
               autoFocus
               fullWidth
               size='small'
               margin='dense'
               disabled={loading}
-              name='cardholderName'
+              name='fullName'
               control={control}
               defaultValue=''
               controllerProps={{
@@ -139,70 +148,26 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
                 }
               }}
             />
-            <FormTextField
-              label={t('pricing:addressLine1')}
-              fullWidth
-              size='small'
-              margin='dense'
-              disabled={loading}
-              name='addressLine1'
+            <FormAutocompleteTextField
               control={control}
-              defaultValue=''
-              controllerProps={{
-                rules: {
-                  required: true,
-                  minLength: 3,
-                }
-              }}
+              name='country'
+              label='Country'
+              options={countryCodes ?? []}
+              autoHighlight
+              required
+              getOptionLabel={(option: any) => option?.label ?? ''}
+              renderOption={(props, option: any) => (
+                <Box
+                  component="li"
+                  sx={{ fontSize: 15, '& > span': { mr: '10px', fontSize: 18 } }}
+                  {...props}
+                >
+                  <span>{countryToFlag(option.code)}</span>
+                  {option.code} {option.label}
+                </Box>
+              )}
             />
-            <FormTextField
-              label={t('pricing:addressLine2')}
-              fullWidth
-              size='small'
-              margin='dense'
-              disabled={loading}
-              name='addressLine2'
-              control={control}
-              defaultValue=''
-            />
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <FormTextField
-                sx={{ flex: '1 1 66%' }}
-                label={t('pricing:city')}
-                fullWidth
-                size='small'
-                margin='dense'
-                disabled={loading}
-                name='city'
-                control={control}
-                defaultValue=''
-                controllerProps={{
-                  rules: {
-                    required: true,
-                  }
-                }}
-              />
-              <FormTextField
-                sx={{ flex: '0 1 33%' }}
-                label={t('pricing:postalCode')}
-                fullWidth
-                size='small'
-                margin='dense'
-                disabled={loading}
-                name='postalCode'
-                control={control}
-                defaultValue=''
-                controllerProps={{
-                  rules: {
-                    required: true,
-                    pattern: {
-                      value: /^\d+$/g,
-                      message: "Invalid postal code",
-                    }
-                  }
-                }}
-              />
-            </Box>
+            
           </Box>
         </DialogContent>
         <DialogActions>
@@ -212,4 +177,85 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
       </form>
     </Dialog>
   );
+}
+
+const BillingAddressForm = ({ loading, control }) => {
+  const { t } = useTranslation();
+
+  return (
+    <React.Fragment>
+      <FormTextField
+        label={t('pricing:addressLine1')}
+        fullWidth
+        size='small'
+        margin='dense'
+        disabled={loading}
+        name='addressLine1'
+        control={control}
+        defaultValue=''
+        controllerProps={{
+          rules: {
+            required: true,
+            minLength: 3,
+          }
+        }}
+      />
+      <FormTextField
+        label={t('pricing:addressLine2')}
+        fullWidth
+        size='small'
+        margin='dense'
+        disabled={loading}
+        name='addressLine2'
+        control={control}
+        defaultValue=''
+      />
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <FormTextField
+          sx={{ flex: '1 1 66%' }}
+          label={t('pricing:city')}
+          fullWidth
+          size='small'
+          margin='dense'
+          disabled={loading}
+          name='city'
+          control={control}
+          defaultValue=''
+          controllerProps={{
+            rules: {
+              required: true,
+            }
+          }}
+        />
+        <FormTextField
+          sx={{ flex: '0 1 33%' }}
+          label={t('pricing:postalCode')}
+          fullWidth
+          size='small'
+          margin='dense'
+          disabled={loading}
+          name='postalCode'
+          control={control}
+          defaultValue=''
+          controllerProps={{
+            rules: {
+              required: true,
+              pattern: {
+                value: /^\d+$/g,
+                message: "Invalid postal code",
+              }
+            }
+          }}
+        />
+      </Box>
+    </React.Fragment>
+  )
+}
+
+function countryToFlag(isoCode) {
+  return typeof String.fromCodePoint !== 'undefined'
+    ? isoCode
+        .toUpperCase()
+        .replace(/./g, (char) => String.fromCodePoint(char.charCodeAt(0) + 127397))
+    : isoCode;
 }

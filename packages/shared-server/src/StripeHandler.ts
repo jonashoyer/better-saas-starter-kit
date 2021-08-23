@@ -48,7 +48,12 @@ export class StripeHandler {
   fetchProductList() {
     return this.stripe.products.list({
       active: true,
-      expand: ['data.prices'],
+      expand: ['data.price'],
+    })
+  }
+  fetchPriceList() {
+    return this.stripe.prices.list({
+      active: true,
     })
   }
 
