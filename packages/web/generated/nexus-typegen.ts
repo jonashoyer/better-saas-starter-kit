@@ -99,6 +99,8 @@ export interface NexusGenObjects {
   BillingInfomation: { // root type
     currentPrice: string; // String!
     currentQuantity: number; // Int!
+    latestInvoice: NexusGenRootTypes['Invoice']; // Invoice!
+    upcomingInvoice: NexusGenRootTypes['Invoice']; // Invoice!
   }
   CheckoutSession: { // root type
     sessionId?: string | null; // String
@@ -140,9 +142,29 @@ export interface NexusGenFieldTypes {
   BillingInfomation: { // field return type
     currentPrice: string; // String!
     currentQuantity: number; // Int!
+    latestInvoice: NexusGenRootTypes['Invoice']; // Invoice!
+    upcomingInvoice: NexusGenRootTypes['Invoice']; // Invoice!
   }
   CheckoutSession: { // field return type
     sessionId: string | null; // String
+  }
+  Invoice: { // field return type
+    amountDue: number; // Int!
+    amountPaid: number; // Int!
+    amountRemaining: number; // Int!
+    billingReason: NexusGenEnums['InvoiceBillingReason'] | null; // InvoiceBillingReason
+    created: NexusGenScalars['DateTime']; // DateTime!
+    dueDate: NexusGenScalars['DateTime'] | null; // DateTime
+    id: string; // String!
+    invoicePdf: string | null; // String
+    periodEnd: NexusGenScalars['DateTime']; // DateTime!
+    periodStart: NexusGenScalars['DateTime']; // DateTime!
+    receiptNumber: string | null; // String
+    status: NexusGenEnums['InvoiceStatus']; // InvoiceStatus!
+    stripeInvoiceId: string; // String!
+    subtotal: number; // Int!
+    tax: number | null; // Int
+    total: number; // Int!
   }
   Mutation: { // field return type
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
@@ -231,9 +253,29 @@ export interface NexusGenFieldTypeNames {
   BillingInfomation: { // field return type name
     currentPrice: 'String'
     currentQuantity: 'Int'
+    latestInvoice: 'Invoice'
+    upcomingInvoice: 'Invoice'
   }
   CheckoutSession: { // field return type name
     sessionId: 'String'
+  }
+  Invoice: { // field return type name
+    amountDue: 'Int'
+    amountPaid: 'Int'
+    amountRemaining: 'Int'
+    billingReason: 'InvoiceBillingReason'
+    created: 'DateTime'
+    dueDate: 'DateTime'
+    id: 'String'
+    invoicePdf: 'String'
+    periodEnd: 'DateTime'
+    periodStart: 'DateTime'
+    receiptNumber: 'String'
+    status: 'InvoiceStatus'
+    stripeInvoiceId: 'String'
+    subtotal: 'Int'
+    tax: 'Int'
+    total: 'Int'
   }
   Mutation: { // field return type name
     createCheckoutSession: 'CheckoutSession'

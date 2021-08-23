@@ -1,5 +1,4 @@
 import { enumType, intArg, mutationField, objectType, queryField, stringArg } from 'nexus';
-import { resolve } from 'path/posix';
 import Stripe from 'stripe';
 import { PaymentMethodImportance } from 'types/gql';
 import { secondsToDate } from '../../../../shared-server/lib';
@@ -30,7 +29,7 @@ export const InvoiceStatus = enumType({
 export const InvoiceBillingReason = enumType({
   name: 'InvoiceBillingReason',
   members: [
-    'DAUTOMATIC_PENDING_INVOICE_ITEM_INVOICE',
+    'AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE',
     'MANUAL',
     'QUOTE_ACCEPT',
     'SUBSCRIPTION',
@@ -64,17 +63,16 @@ export const Invoice = objectType({
   }
 })
 
-// TODO: Add invoice to prisma
-
-const createStripeInvoice = (s: Stripe.Invoice) => ({
+const formatStripeInvoice = (s: Stripe.Invoice) => ({
+  id: 'unset',
   stripeInvoiceId: s.id,
   created: secondsToDate(s.created),
   dueDate: s.due_date && secondsToDate(s.due_date),
-  status: s.status.toUpperCase(),
+  status: s.status.toUpperCase() as any,
   amountDue: s.amount_due,
   amountPaid: s.amount_paid,
   amountRemaining: s.amount_remaining,
-  billingReason: s.billing_reason,
+  billingReason: s.billing_reason as any,
   invoicePdf: s.invoice_pdf,
   periodStart: secondsToDate(s.period_start),
   periodEnd: secondsToDate(s.period_end),
@@ -82,6 +80,7 @@ const createStripeInvoice = (s: Stripe.Invoice) => ({
   subtotal: s.subtotal,
   tax: s.tax,
   total: s.total,
+  projectId: '1',
 })
 
 export const getBillingInfomation = queryField('getBillingInfomation', {
@@ -109,8 +108,8 @@ export const getBillingInfomation = queryField('getBillingInfomation', {
     return {
       currentPrice: item.price.id,
       currentQuantity: item.quantity,
-      latestInvoice: subscription.latest_invoice,
-      upcomingInvoice: upcoming_invoice,
+      latestInvoice: formatStripeInvoice(subscription.latest_invoice as Stripe.Invoice),
+      upcomingInvoice: formatStripeInvoice(upcoming_invoice),
     };
   }
 })

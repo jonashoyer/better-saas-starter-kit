@@ -27,3 +27,9 @@ currentPlan: "Your current plan is {{plan}}"
 switchPlan: "The plan you are switch to is {{plan}}"
 
 billingText: "With the {{plan}} plan you will be charged:"
+
+cardholderName: 'Cardholder name'
+addressLine1: 'Address line 1'
+addressLine2: 'Address line 2'
+postalCode: 'Postal code'
+city: 'City'

@@ -1,0 +1,5 @@
+mutation CreateSetupIntent($projectId: String!) {
+  createSetupIntent(projectId: $projectId) {
+    clientSecret
+  }
+}

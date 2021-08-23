@@ -6,7 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { ControllerProps, useForm, Controller, UseFormProps } from 'react-hook-form';
+import { ControllerProps, useForm, UseFormProps } from 'react-hook-form';
 import { LoadingButton, LoadingButtonProps } from '@material-ui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import FormTextField from './FormTextField';

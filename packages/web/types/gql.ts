@@ -80,6 +80,39 @@ export function useCreateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type CreateProjectMutationHookResult = ReturnType<typeof useCreateProjectMutation>;
 export type CreateProjectMutationResult = Apollo.MutationResult<CreateProjectMutation>;
 export type CreateProjectMutationOptions = Apollo.BaseMutationOptions<CreateProjectMutation, CreateProjectMutationVariables>;
+export const CreateSetupIntentDocument = gql`
+    mutation CreateSetupIntent($projectId: String!) {
+  createSetupIntent(projectId: $projectId) {
+    clientSecret
+  }
+}
+    `;
+export type CreateSetupIntentMutationFn = Apollo.MutationFunction<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>;
+
+/**
+ * __useCreateSetupIntentMutation__
+ *
+ * To run a mutation, you first call `useCreateSetupIntentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateSetupIntentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createSetupIntentMutation, { data, loading, error }] = useCreateSetupIntentMutation({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useCreateSetupIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>(CreateSetupIntentDocument, options);
+      }
+export type CreateSetupIntentMutationHookResult = ReturnType<typeof useCreateSetupIntentMutation>;
+export type CreateSetupIntentMutationResult = Apollo.MutationResult<CreateSetupIntentMutation>;
+export type CreateSetupIntentMutationOptions = Apollo.BaseMutationOptions<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>;
 export const CurrentProjectDocument = gql`
     query CurrentProject($projectId: String) {
   currentProject(projectId: $projectId) {
@@ -501,6 +534,14 @@ export type Scalars = {
   Json: any;
 };
 
+export type BillingInfomation = {
+  __typename?: 'BillingInfomation';
+  currentPrice: Scalars['String'];
+  currentQuantity: Scalars['Int'];
+  latestInvoice: Invoice;
+  upcomingInvoice: Invoice;
+};
+
 export type CheckoutSession = {
   __typename?: 'CheckoutSession';
   sessionId?: Maybe<Scalars['String']>;
@@ -518,6 +559,47 @@ export type CreateUserInviteInput = {
 
 
 
+export type Invoice = {
+  __typename?: 'Invoice';
+  id: Scalars['String'];
+  stripeInvoiceId: Scalars['String'];
+  created: Scalars['DateTime'];
+  dueDate?: Maybe<Scalars['DateTime']>;
+  status: InvoiceStatus;
+  amountDue: Scalars['Int'];
+  amountPaid: Scalars['Int'];
+  amountRemaining: Scalars['Int'];
+  billingReason?: Maybe<InvoiceBillingReason>;
+  invoicePdf?: Maybe<Scalars['String']>;
+  periodStart: Scalars['DateTime'];
+  periodEnd: Scalars['DateTime'];
+  receiptNumber?: Maybe<Scalars['String']>;
+  subtotal: Scalars['Int'];
+  tax?: Maybe<Scalars['Int']>;
+  total: Scalars['Int'];
+};
+
+export enum InvoiceBillingReason {
+  AutomaticPendingInvoiceItemInvoice = 'AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE',
+  Manual = 'MANUAL',
+  QuoteAccept = 'QUOTE_ACCEPT',
+  Subscription = 'SUBSCRIPTION',
+  SubscriptionCreate = 'SUBSCRIPTION_CREATE',
+  SubscriptionCycle = 'SUBSCRIPTION_CYCLE',
+  SubscriptionThreshold = 'SUBSCRIPTION_THRESHOLD',
+  SubscriptionUpdate = 'SUBSCRIPTION_UPDATE',
+  Upcoming = 'UPCOMING'
+}
+
+export enum InvoiceStatus {
+  Deleted = 'DELETED',
+  Draft = 'DRAFT',
+  Open = 'OPEN',
+  Paid = 'PAID',
+  Uncollectible = 'UNCOLLECTIBLE',
+  Void = 'VOID'
+}
+
 
 
 export type Mutation = {
@@ -534,6 +616,8 @@ export type Mutation = {
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   deleteUserInvite?: Maybe<UserInvite>;
+  createSubscription?: Maybe<Subscription>;
+  updateSubscription?: Maybe<Subscription>;
 };
 
 
@@ -597,6 +681,20 @@ export type MutationCreateManyUserInviteArgs = {
 
 export type MutationDeleteUserInviteArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationCreateSubscriptionArgs = {
+  projectId: Scalars['String'];
+  priceId: Scalars['String'];
+  quantity: Scalars['Int'];
+};
+
+
+export type MutationUpdateSubscriptionArgs = {
+  projectId: Scalars['String'];
+  priceId?: Maybe<Scalars['String']>;
+  quantity?: Maybe<Scalars['Int']>;
 };
 
 export type PaymentMethod = {
@@ -663,6 +761,7 @@ export enum ProjectRole {
 export type Query = {
   __typename?: 'Query';
   currentProject?: Maybe<Project>;
+  getBillingInfomation?: Maybe<BillingInfomation>;
   getUserInvites?: Maybe<Array<Maybe<UserInvite>>>;
   ping: Scalars['String'];
   self?: Maybe<User>;
@@ -672,6 +771,11 @@ export type Query = {
 
 export type QueryCurrentProjectArgs = {
   projectId?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryGetBillingInfomationArgs = {
+  subscriptionId: Scalars['String'];
 };
 
 
@@ -693,12 +797,25 @@ export type StatusResponse = {
 export type Subscription = {
   __typename?: 'Subscription';
   ping?: Maybe<Scalars['DateTime']>;
+  status: SubscriptionStatus;
+  stripeSubscriptionId: Scalars['String'];
+  trialEnd?: Maybe<Scalars['Date']>;
 };
 
 export enum SubscriptionPlan {
   Free = 'FREE',
   Basic = 'BASIC',
   Premium = 'PREMIUM'
+}
+
+export enum SubscriptionStatus {
+  Active = 'ACTIVE',
+  Canceled = 'CANCELED',
+  Incomplete = 'INCOMPLETE',
+  IncompleteExpired = 'INCOMPLETE_EXPIRED',
+  PastDue = 'PAST_DUE',
+  Trialing = 'TRIALING',
+  Unpaid = 'UNPAID'
 }
 
 export type UpdateProjectInput = {
@@ -805,6 +922,19 @@ export type CreateProjectMutation = (
   & { createProject?: Maybe<(
     { __typename?: 'Project' }
     & BaseProjcetFragment
+  )> }
+);
+
+export type CreateSetupIntentMutationVariables = Exact<{
+  projectId: Scalars['String'];
+}>;
+
+
+export type CreateSetupIntentMutation = (
+  { __typename?: 'Mutation' }
+  & { createSetupIntent?: Maybe<(
+    { __typename?: 'SetupIntent' }
+    & Pick<SetupIntent, 'clientSecret'>
   )> }
 );
 

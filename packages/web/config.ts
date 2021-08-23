@@ -6,3 +6,5 @@ export const GRAPHQL_ENDPOINT =  withLocalStorage('GRAPHQL_ENDPOINT', process.en
 export const GRAPHQL_WEBSOCKET_ENDPOINT = withLocalStorage('GRAPHQL_WEBSOCKET_ENDPOINT', process.env.NEXT_PUBLIC_GRAPHQL_WEBSOCKET_ENDPOINT!);
 
 export const USE_DEBUG = withLocalStorage('DEBUG', 'false') == 'true';
+
+export const DEFAULT_SUBSCRIPTION_PRICE_ID = process.env.DEFAULT_SUBSCRIPTION_PRICE_ID;

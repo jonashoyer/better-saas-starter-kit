@@ -7,6 +7,7 @@ import { createStripe, StripeHandler } from 'bs-shared-server-kit';
 import { NextApiRequest } from "next";
 import cuid from 'cuid';
 import argon2 from 'argon2';
+import { DEFAULT_SUBSCRIPTION_PRICE_ID } from "config";
 
 const GENERATE_ACCESS_TOKEN = true;
 
@@ -43,14 +44,16 @@ export const PrismaAdapter: Adapter<
         const name = profile.name || profile.email?.split('@')[0] || 'Unnamed';
         const firstName = name.split(' ')[0];
 
-        const handler = new StripeHandler(createStripe(), prisma);
-        const stripeCustomer = await handler.createCustomer({
+        const stripe = new StripeHandler(createStripe(), prisma);
+        const stripeCustomer = await stripe.createCustomer({
           name,
           email: profile.email,
           metadata: {
             projectId,
           },
         });
+
+        const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID);
 
         try {
 
@@ -59,6 +62,8 @@ export const PrismaAdapter: Adapter<
             id: projectId,
             name: `${firstName}'s Project`,
             stripeCustomerId: stripeCustomer.id,
+            stripeSubscriptionId: stripeSubscription.id,
+            subscriptionPlan: stripeSubscription.metadata.type as any,
             users: {
               create: {
                 role: 'ADMIN',
@@ -87,7 +92,7 @@ export const PrismaAdapter: Adapter<
           user: project.users[0].user,
         }
       } catch (err) {
-        await handler.deleteCustomer(stripeCustomer.id);
+        await stripe.deleteCustomer(stripeCustomer.id);
         throw new err;
       }
     }

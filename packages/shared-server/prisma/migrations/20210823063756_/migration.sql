@@ -7,6 +7,12 @@ CREATE TYPE "SubscriptionPlan" AS ENUM ('FREE', 'BASIC', 'PREMIUM');
 -- CreateEnum
 CREATE TYPE "PaymentMethodImportance" AS ENUM ('PRIMARY', 'BACKUP', 'OTHER');
 
+-- CreateEnum
+CREATE TYPE "InvoiceStatus" AS ENUM ('DELETED', 'DRAFT', 'OPEN', 'PAID', 'UNCOLLECTIBLE', 'VOID');
+
+-- CreateEnum
+CREATE TYPE "InvoiceBillingReason" AS ENUM ('AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE', 'MANUAL', 'QUOTE_ACCEPT', 'SUBSCRIPTION', 'SUBSCRIPTION_CREATE', 'SUBSCRIPTION_CYCLE', 'SUBSCRIPTION_THRESHOLD', 'SUBSCRIPTION_UPDATE', 'UPCOMING');
+
 -- CreateTable
 CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
@@ -66,6 +72,7 @@ CREATE TABLE "Project" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "stripeCustomerId" TEXT NOT NULL,
+    "stripeSubscriptionId" TEXT NOT NULL,
     "subscriptionPlan" "SubscriptionPlan" NOT NULL DEFAULT E'FREE',
 
     PRIMARY KEY ("id")
@@ -88,6 +95,7 @@ CREATE TABLE "PaymentMethod" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "stripePaymentMethodId" TEXT NOT NULL,
     "brand" TEXT NOT NULL,
     "last4" TEXT NOT NULL,
     "expMonth" INTEGER NOT NULL,
@@ -151,6 +159,29 @@ CREATE TABLE "ProductPrice" (
     PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Invoice" (
+    "id" TEXT NOT NULL,
+    "stripeInvoiceId" TEXT NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL,
+    "dueDate" TIMESTAMP(3),
+    "status" "InvoiceStatus" NOT NULL,
+    "amountDue" INTEGER NOT NULL,
+    "amountPaid" INTEGER NOT NULL,
+    "amountRemaining" INTEGER NOT NULL,
+    "billingReason" "InvoiceBillingReason",
+    "invoicePdf" TEXT,
+    "periodStart" TIMESTAMP(3) NOT NULL,
+    "periodEnd" TIMESTAMP(3) NOT NULL,
+    "receiptNumber" TEXT,
+    "subtotal" INTEGER NOT NULL,
+    "tax" INTEGER,
+    "total" INTEGER NOT NULL,
+    "projectId" TEXT NOT NULL,
+
+    PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account.providerId_providerAccountId_unique" ON "Account"("providerId", "providerAccountId");
 
@@ -167,10 +198,16 @@ CREATE UNIQUE INDEX "UserProject.projectId_userId_unique" ON "UserProject"("proj
 CREATE UNIQUE INDEX "Project.stripeCustomerId_unique" ON "Project"("stripeCustomerId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Project.stripeSubscriptionId_unique" ON "Project"("stripeSubscriptionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "UserInvite.token_unique" ON "UserInvite"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserInvite.projectId_email_unique" ON "UserInvite"("projectId", "email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PaymentMethod.stripePaymentMethodId_unique" ON "PaymentMethod"("stripePaymentMethodId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"("token");
@@ -189,6 +226,9 @@ CREATE UNIQUE INDEX "VerificationEmail_accountId_unique" ON "VerificationEmail"(
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Product.type_unique" ON "Product"("type");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Invoice.stripeInvoiceId_unique" ON "Invoice"("stripeInvoiceId");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -213,3 +253,6 @@ ALTER TABLE "VerificationEmail" ADD FOREIGN KEY ("accountId") REFERENCES "Accoun
 
 -- AddForeignKey
 ALTER TABLE "ProductPrice" ADD FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Invoice" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;

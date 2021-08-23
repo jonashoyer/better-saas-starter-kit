@@ -96,6 +96,16 @@ export class StripeHandler {
     })
   };
 
+  createSubscription(customerId: string, priceId: string) {
+    return this.stripe.subscriptions.create({
+      customer: customerId,
+      items: [{
+        price: priceId,
+      }],
+      payment_behavior: 'allow_incomplete',
+    });
+  }
+
   /**
    * Copies the billing details from the payment method to the customer object.
    */
@@ -223,6 +233,7 @@ export class StripeHandler {
     const paymentMethodData = {
       id: paymentMethod.id,
       type: paymentMethod.type,
+      stripePaymentMethodId: paymentMethod.id,
 
       brand: paymentMethod.card.brand,
       last4: paymentMethod.card.last4,

@@ -5,6 +5,8 @@
 type BillingInfomation {
   currentPrice: String!
   currentQuantity: Int!
+  latestInvoice: Invoice!
+  upcomingInvoice: Invoice!
 }
 
 type CheckoutSession {
@@ -28,10 +30,27 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
-type Invoice
+type Invoice {
+  amountDue: Int!
+  amountPaid: Int!
+  amountRemaining: Int!
+  billingReason: InvoiceBillingReason
+  created: DateTime!
+  dueDate: DateTime
+  id: String!
+  invoicePdf: String
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  receiptNumber: String
+  status: InvoiceStatus!
+  stripeInvoiceId: String!
+  subtotal: Int!
+  tax: Int
+  total: Int!
+}
 
 enum InvoiceBillingReason {
-  DAUTOMATIC_PENDING_INVOICE_ITEM_INVOICE
+  AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE
   MANUAL
   QUOTE_ACCEPT
   SUBSCRIPTION
