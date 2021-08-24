@@ -2,6 +2,7 @@ import cuid from 'cuid';
 import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { requireAuth, requireProjectAccess } from './permissions';
 import { Constants } from 'bs-shared-kit';
+import { DEFAULT_SUBSCRIPTION_PRICE_ID } from 'config';
 
 export const Project = objectType({
   name: 'Project',
@@ -93,12 +94,15 @@ export const CreateProject = mutationField('createProject', {
       },
     });
 
+    const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID);
+
     try {
       const project = await ctx.prisma.project.create({
         data: {
           ...input,
           id: projectId,
           stripeCustomerId: stripeCustomer.id,
+          stripeSubscriptionId: stripeSubscription.id,
           users: {
             create: {
               role: 'ADMIN',

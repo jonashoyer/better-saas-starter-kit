@@ -17,7 +17,7 @@
     "web:dev": "npm run dev -w bs-web-kit",
     "api:dev": "npm run dev -w bs-api-kit",
     "prisma:generate": "npx prisma generate --schema packages/shared-server/prisma/schema.prisma",
-    "prisma:migrate": "npx prisma migrate dev --schema packages/shared-server/prisma/schema.prisma",
+    "prisma:dev": "npx prisma migrate dev --schema packages/shared-server/prisma/schema.prisma",
     "prisma:reset": "npx prisma migrate reset --schema packages/shared-server/prisma/schema.prisma",
     "prisma:deploy": "npx prisma migrate deploy --schema packages/shared-server/prisma/schema.prisma",
     "prisma:format": "npx prisma format --schema packages/shared-server/prisma/schema.prisma",

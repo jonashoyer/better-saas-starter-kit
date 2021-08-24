@@ -9,6 +9,12 @@ type BillingInfomation {
   upcomingInvoice: Invoice!
 }
 
+type BillingSubscription {
+  status: SubscriptionStatus!
+  stripeSubscriptionId: String!
+  trialEnd: Date
+}
+
 type CheckoutSession {
   sessionId: String
 }
@@ -43,7 +49,6 @@ type Invoice {
   periodStart: DateTime!
   receiptNumber: String
   status: InvoiceStatus!
-  stripeInvoiceId: String!
   subtotal: Int!
   tax: Int
   total: Int!
@@ -82,13 +87,13 @@ type Mutation {
   createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
   createSetupIntent(projectId: String!): SetupIntent
-  createSubscription(priceId: String!, projectId: String!, quantity: Int!): Subscription
+  createSubscription(priceId: String!, projectId: String!, quantity: Int!): BillingSubscription
   deleteProject(id: String!): Project
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
   sendVerifyEmail(email: String!): StatusResponse
   updateProject(input: UpdateProjectInput!): Project
-  updateSubscription(priceId: String, projectId: String!, quantity: Int): Subscription
+  updateSubscription(priceId: String, projectId: String!, quantity: Int): BillingSubscription
   updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
   verifyEmail(token: String!): User
@@ -115,7 +120,6 @@ enum PaymentMethodImportance {
 
 input PaymentMethodWhereUniqueInput {
   id: String
-  stripePaymentMethodId: String
 }
 
 type Project {
@@ -148,12 +152,6 @@ type SetupIntent {
 type StatusResponse {
   message: String
   ok: Boolean
-}
-
-type Subscription {
-  status: SubscriptionStatus!
-  stripeSubscriptionId: String!
-  trialEnd: Date
 }
 
 enum SubscriptionPlan {

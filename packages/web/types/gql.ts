@@ -542,6 +542,13 @@ export type BillingInfomation = {
   upcomingInvoice: Invoice;
 };
 
+export type BillingSubscription = {
+  __typename?: 'BillingSubscription';
+  stripeSubscriptionId: Scalars['String'];
+  status: SubscriptionStatus;
+  trialEnd?: Maybe<Scalars['Date']>;
+};
+
 export type CheckoutSession = {
   __typename?: 'CheckoutSession';
   sessionId?: Maybe<Scalars['String']>;
@@ -562,7 +569,6 @@ export type CreateUserInviteInput = {
 export type Invoice = {
   __typename?: 'Invoice';
   id: Scalars['String'];
-  stripeInvoiceId: Scalars['String'];
   created: Scalars['DateTime'];
   dueDate?: Maybe<Scalars['DateTime']>;
   status: InvoiceStatus;
@@ -616,8 +622,8 @@ export type Mutation = {
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   deleteUserInvite?: Maybe<UserInvite>;
-  createSubscription?: Maybe<Subscription>;
-  updateSubscription?: Maybe<Subscription>;
+  createSubscription?: Maybe<BillingSubscription>;
+  updateSubscription?: Maybe<BillingSubscription>;
 };
 
 
@@ -797,9 +803,6 @@ export type StatusResponse = {
 export type Subscription = {
   __typename?: 'Subscription';
   ping?: Maybe<Scalars['DateTime']>;
-  status: SubscriptionStatus;
-  stripeSubscriptionId: Scalars['String'];
-  trialEnd?: Maybe<Scalars['Date']>;
 };
 
 export enum SubscriptionPlan {

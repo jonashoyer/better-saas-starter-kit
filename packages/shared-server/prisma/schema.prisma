@@ -104,11 +104,9 @@ model UserInvite {
 }
 
 model PaymentMethod {
-  id        String   @id @default(cuid())
+  id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  stripePaymentMethodId String @unique
 
   brand    String
   last4    String
@@ -201,8 +199,7 @@ enum InvoiceBillingReason {
 }
 
 model Invoice {
-  id              String                @id @default(cuid())
-  stripeInvoiceId String                @unique
+  id              String                @id
   created         DateTime
   dueDate         DateTime?
   status          InvoiceStatus

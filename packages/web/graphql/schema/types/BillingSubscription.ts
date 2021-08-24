@@ -45,7 +45,6 @@ export const Invoice = objectType({
   name: 'Invoice',
   definition(t) {
     t.model.id();
-    t.model.stripeInvoiceId();
     t.model.created();
     t.model.dueDate();
     t.model.status();
@@ -65,7 +64,6 @@ export const Invoice = objectType({
 
 const formatStripeInvoice = (s: Stripe.Invoice) => ({
   id: 'unset',
-  stripeInvoiceId: s.id,
   created: secondsToDate(s.created),
   dueDate: s.due_date && secondsToDate(s.due_date),
   status: s.status.toUpperCase() as any,
@@ -127,8 +125,8 @@ export const SubscriptionStatus = enumType({
   ]
 })
 
-export const Subscription = objectType({
-  name: 'Subscription',
+export const BillingSubscription = objectType({
+  name: 'BillingSubscription',
   definition(t) {
     t.string('stripeSubscriptionId', { required: true });
     t.field('status', { type: SubscriptionStatus, required: true });
@@ -143,7 +141,7 @@ const formatStripeSubscription = (s: Stripe.Subscription) => ({
 })
 
 export const createSubscription = mutationField('createSubscription', {
-  type: Subscription,
+  type: BillingSubscription,
   args: {
     projectId: stringArg({ required: true }),
     priceId: stringArg({ required: true }),
@@ -166,7 +164,7 @@ export const createSubscription = mutationField('createSubscription', {
       return r;
     }, null)
 
-    await ctx.stripe.paymentMethods.attach(paymentMethod.stripePaymentMethodId, {
+    await ctx.stripe.paymentMethods.attach(paymentMethod.id, {
       customer: project.stripeCustomerId,
     });
 
@@ -174,7 +172,7 @@ export const createSubscription = mutationField('createSubscription', {
       project.stripeCustomerId,
       {
         invoice_settings: {
-          default_payment_method: paymentMethod.stripePaymentMethodId,
+          default_payment_method: paymentMethod.id,
         },
       }
     );
@@ -193,7 +191,7 @@ export const createSubscription = mutationField('createSubscription', {
 })
 
 export const updateSubscription = mutationField('updateSubscription', {
-  type: Subscription,
+  type: BillingSubscription,
   args: {
     projectId: stringArg({ required: true }),
     priceId: stringArg(),

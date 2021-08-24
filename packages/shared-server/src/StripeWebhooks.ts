@@ -40,6 +40,7 @@ const relevantEvents = new Set([
   'customer.subscription.deleted',
   'invoice.paid',
   'invoice.payment_failed',
+  'payment_method.attached',
 ]);
 
 export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): NextApiHandler => async (req, res) => {
@@ -105,6 +106,9 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
           break;
         case 'invoice.payment_failed':
           //TODO: 
+          break;
+        case 'payment_method.attached':
+          console.log('payment_method.attached', obj);
           break;
         default:
           throw new Error('Unhandled relevant event!');

@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { Box } from '@material-ui/core';
 import StripeCardElement from './StripeCardElement';
 import FormAutocompleteTextField from './FormAutocompleteTextField';
+import countryCodes from 'utils/countryCodes.json';
 
 export type DialogPaymentMethodProps = {
   open: boolean;
@@ -22,27 +23,24 @@ export type DialogPaymentMethodProps = {
 // https://stripe.com/docs/stripe-js/react
 // https://codesandbox.io/s/react-stripe-js-card-detailed-omfb3?file=/src/App.js
 // https://github.com/stripe-samples/subscription-use-cases
+// https://stripe.com/docs/payments/save-and-reuse
 
 export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymentMethodProps) {
 
   const { t, lang } = useTranslation();
 
-  const [countryCodes, setCountryCodes] = React.useState(null);
-
   const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm({ criteriaMode: 'firstError', mode: 'all' });
+
+  const [error, setError] = React.useState(null);
+  const [cardComplete, setCardComplete] = React.useState(false);
+  const [processing, setProcessing] = React.useState(false);
   
   React.useEffect(() => {
-    if (!open) {
-      setCountryCodes(null);
-      return;
-    }
+    if (!open) return;
     reset();
-    import('utils/countryCodes.json').then(codes =>
-      setCountryCodes(
-        Object.entries(codes).map(([code, label]) => ({ code, label }))
-        )
-      );
-
+    setCardComplete(false);
+    setProcessing(false);
+    setError(null);
   }, [reset, open]);
 
   const [projectId] = useProject();
@@ -52,18 +50,14 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
 
   const [clientSecret, setClientSecret] = React.useState(null);
 
-  const [createSetupIntent, { called, loading: createSetupIntentLoading }] = useCreateSetupIntentMutation({
+  const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateSetupIntentMutation({
     variables: {
       projectId,
     }
   })
 
-  const [error, setError] = React.useState(null);
-  const [cardComplete, setCardComplete] = React.useState(false);
-  const [processing, setProcessing] = React.useState(false);
-
   React.useEffect(() => {
-    if (called) return;
+    if (clientSecret) return;
     createSetupIntent().then(({ data }) => {
       setClientSecret(data.createSetupIntent.clientSecret);
     }).catch(err => {
@@ -71,7 +65,7 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
       console.error(err);
     })
 
-  }, [createSetupIntent, called]);
+  }, [clientSecret, createSetupIntent]);
 
   const confirmCardSetup = async (data) => {
 
@@ -98,7 +92,7 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
           card: elements.getElement(CardElement),
           billing_details: {
             address: {
-              country: data.country,
+              country: data.country.code,
             },
             name: data.fullName,
           },
@@ -117,10 +111,9 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
     console.log('[PaymentMethod]', payload.setupIntent);
   };
 
-  console.log(countryCodes);
-
   const loading = processing || createSetupIntentLoading;  
 
+  // TODO: Add spinner overlay
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
       <DialogTitle>{t('settings:addPaymentMethod')}</DialogTitle>
@@ -151,19 +144,19 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
             <FormAutocompleteTextField
               control={control}
               name='country'
-              label='Country'
-              options={countryCodes ?? []}
+              options={countryCodes}
               autoHighlight
-              required
-              getOptionLabel={(option: any) => option?.label ?? ''}
+              textFieldProps={{
+                label: 'Country'
+              }}
+              getOptionLabel={(option) => option.label}
               renderOption={(props, option: any) => (
                 <Box
                   component="li"
                   sx={{ fontSize: 15, '& > span': { mr: '10px', fontSize: 18 } }}
                   {...props}
                 >
-                  <span>{countryToFlag(option.code)}</span>
-                  {option.code} {option.label}
+                  <span>{countryToFlag(option.code)}</span> {option.label}
                 </Box>
               )}
             />

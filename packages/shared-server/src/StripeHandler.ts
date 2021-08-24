@@ -223,31 +223,87 @@ export class StripeHandler {
     })
   }
 
-
-  upsertPaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
+  // {
+  //   id: 'pm_1JS1kLKwqn1NB0NWRazyyf3W',
+  //   object: 'payment_method',
+  //   billing_details: {
+  //     address: {
+  //       city: null,
+  //       country: 'DK',
+  //       line1: null,
+  //       line2: null,
+  //       postal_code: null,
+  //       state: null
+  //     },
+  //     email: null,
+  //     name: 'JJJ',
+  //     phone: null
+  //   },
+  //   card: {
+  //     brand: 'visa',
+  //     checks: {
+  //       address_line1_check: null,
+  //       address_postal_code_check: null,
+  //       cvc_check: 'pass'
+  //     },
+  //     country: 'US',
+  //     exp_month: 4,
+  //     exp_year: 2024,
+  //     fingerprint: 'xVJAF5umqYGteAdp',
+  //     funding: 'credit',
+  //     generated_from: null,
+  //     last4: '4242',
+  //     networks: { available: [Array], preferred: null },
+  //     three_d_secure_usage: { supported: true },
+  //     wallet: null
+  //   },
+  //   created: 1629819665,
+  //   customer: 'cus_K5iO5vQ10q6MAw',
+  //   livemode: false,
+  //   metadata: {},
+  //   type: 'card'
+  // }
+  async upsertPaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
     if (!paymentMethod.card) {
       throw new Error('Payment method must be of type card!');
     }
-    if (!paymentMethod.metadata?.importance) {
-      throw new Error(`Missing metadata field 'importance'!`);
-    }
-    if (!paymentMethod.metadata?.projectId) {
-      throw new Error(`Missing metadata field 'projectId'!`);
+
+    const stripeCustomerId = typeof paymentMethod.customer == 'string' ? paymentMethod.customer : paymentMethod.customer?.id;
+    if (!stripeCustomerId) throw new Error('No Customer attach to payment method!');
+    const project = await this.prisma.project.findUnique({
+      where: { stripeCustomerId },
+      include: {
+        paymentMethods: true,
+      }
+    });
+
+    if (!project) throw new Error('Project not found from stripe customer!');
+
+    const getImportance = () => {
+      if (paymentMethod.metadata?.importance) {
+        const importance = paymentMethod.metadata.importance as PaymentMethodImportance;
+        if (importance == PaymentMethodImportance.PRIMARY && !project.paymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
+        if ((importance == PaymentMethodImportance.PRIMARY || importance == PaymentMethodImportance.BACKUP) && !project.paymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
+        return PaymentMethodImportance.OTHER;
+      }
+
+      if (!project.paymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
+      if (!project.paymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
+      return PaymentMethodImportance.OTHER;
     }
 
     const paymentMethodData = {
       id: paymentMethod.id,
       type: paymentMethod.type,
-      stripePaymentMethodId: paymentMethod.id,
 
       brand: paymentMethod.card.brand,
       last4: paymentMethod.card.last4,
       expMonth: paymentMethod.card.exp_month,
       expYear: paymentMethod.card.exp_year,
 
-      importance: paymentMethod.metadata.importance as PaymentMethodImportance,
+      importance: getImportance(),
       project: {
-        connect: { id: paymentMethod.metadata.projectId },
+        connect: { id: project.id },
       },
     };
 

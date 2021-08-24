@@ -49,5 +49,5 @@ const prisma = new PrismaClient();
   });
 
   console.log('done');
-
+  process.exit();
 })();

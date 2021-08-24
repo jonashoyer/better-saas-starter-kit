@@ -95,7 +95,6 @@ CREATE TABLE "PaymentMethod" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "stripePaymentMethodId" TEXT NOT NULL,
     "brand" TEXT NOT NULL,
     "last4" TEXT NOT NULL,
     "expMonth" INTEGER NOT NULL,
@@ -162,7 +161,6 @@ CREATE TABLE "ProductPrice" (
 -- CreateTable
 CREATE TABLE "Invoice" (
     "id" TEXT NOT NULL,
-    "stripeInvoiceId" TEXT NOT NULL,
     "created" TIMESTAMP(3) NOT NULL,
     "dueDate" TIMESTAMP(3),
     "status" "InvoiceStatus" NOT NULL,
@@ -207,9 +205,6 @@ CREATE UNIQUE INDEX "UserInvite.token_unique" ON "UserInvite"("token");
 CREATE UNIQUE INDEX "UserInvite.projectId_email_unique" ON "UserInvite"("projectId", "email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PaymentMethod.stripePaymentMethodId_unique" ON "PaymentMethod"("stripePaymentMethodId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"("token");
 
 -- CreateIndex
@@ -226,9 +221,6 @@ CREATE UNIQUE INDEX "VerificationEmail_accountId_unique" ON "VerificationEmail"(
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Product.type_unique" ON "Product"("type");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Invoice.stripeInvoiceId_unique" ON "Invoice"("stripeInvoiceId");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
