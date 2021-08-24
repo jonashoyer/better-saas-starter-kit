@@ -1,3 +1,4 @@
+import { capitalize } from '@material-ui/core';
 import { Prisma, Product } from '@prisma/client';
 
 export const getURL = () => {
@@ -26,3 +27,5 @@ export const isJSONValueObject = (jsonValue: Prisma.JsonValue): jsonValue is Pri
   if (Array.isArray(jsonValue)) return false;
   return true;
 }
+
+export const snakeToReadable = (str: string) => capitalize(str.toLowerCase().replace(/_/g, ' '));

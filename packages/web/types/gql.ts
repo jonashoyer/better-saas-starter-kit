@@ -11,6 +11,19 @@ export const BaseProjcetFragmentDoc = gql`
   name
 }
     `;
+export const BasePaymenthMethodFragmentDoc = gql`
+    fragment BasePaymenthMethod on PaymentMethod {
+  id
+  createdAt
+  brand
+  last4
+  expMonth
+  expYear
+  type
+  importance
+  updatedAt
+}
+    `;
 export const CreateManyUserInviteDocument = gql`
     mutation CreateManyUserInvite($input: CreateUserInviteInput!) {
   createManyUserInvite(input: $input) {
@@ -173,19 +186,12 @@ export const CurrentProjectSettingsDocument = gql`
       email
     }
     paymentMethods {
-      id
-      createdAt
-      brand
-      last4
-      expMonth
-      expYear
-      type
-      importance
-      updatedAt
+      ...BasePaymenthMethod
     }
   }
 }
-    ${BaseProjcetFragmentDoc}`;
+    ${BaseProjcetFragmentDoc}
+${BasePaymenthMethodFragmentDoc}`;
 
 /**
  * __useCurrentProjectSettingsQuery__
@@ -313,6 +319,44 @@ export function useDeleteUserProjectMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteUserProjectMutationHookResult = ReturnType<typeof useDeleteUserProjectMutation>;
 export type DeleteUserProjectMutationResult = Apollo.MutationResult<DeleteUserProjectMutation>;
 export type DeleteUserProjectMutationOptions = Apollo.BaseMutationOptions<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>;
+export const GetPaymentMethodsDocument = gql`
+    query GetPaymentMethods($projectId: String) {
+  currentProject(projectId: $projectId) {
+    id
+    paymentMethods {
+      ...BasePaymenthMethod
+    }
+  }
+}
+    ${BasePaymenthMethodFragmentDoc}`;
+
+/**
+ * __useGetPaymentMethodsQuery__
+ *
+ * To run a query within a React component, call `useGetPaymentMethodsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPaymentMethodsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPaymentMethodsQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useGetPaymentMethodsQuery(baseOptions?: Apollo.QueryHookOptions<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>(GetPaymentMethodsDocument, options);
+      }
+export function useGetPaymentMethodsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>(GetPaymentMethodsDocument, options);
+        }
+export type GetPaymentMethodsQueryHookResult = ReturnType<typeof useGetPaymentMethodsQuery>;
+export type GetPaymentMethodsLazyQueryHookResult = ReturnType<typeof useGetPaymentMethodsLazyQuery>;
+export type GetPaymentMethodsQueryResult = Apollo.QueryResult<GetPaymentMethodsQuery, GetPaymentMethodsQueryVariables>;
 export const PingDocument = gql`
     query Ping {
   ping
@@ -618,6 +662,8 @@ export type Mutation = {
   updateProject?: Maybe<Project>;
   deleteProject?: Maybe<Project>;
   createSetupIntent?: Maybe<SetupIntent>;
+  updatePaymentMethod?: Maybe<PaymentMethod>;
+  deletePaymentMethod?: Maybe<PaymentMethod>;
   updateUserProject?: Maybe<UserProject>;
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
@@ -667,6 +713,16 @@ export type MutationDeleteProjectArgs = {
 
 export type MutationCreateSetupIntentArgs = {
   projectId: Scalars['String'];
+};
+
+
+export type MutationUpdatePaymentMethodArgs = {
+  input: UpdatePaymentMethodInput;
+};
+
+
+export type MutationDeletePaymentMethodArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -725,7 +781,6 @@ export enum PaymentMethodImportance {
 
 export type PaymentMethodWhereUniqueInput = {
   id?: Maybe<Scalars['String']>;
-  stripePaymentMethodId?: Maybe<Scalars['String']>;
 };
 
 export type Project = {
@@ -820,6 +875,11 @@ export enum SubscriptionStatus {
   Trialing = 'TRIALING',
   Unpaid = 'UNPAID'
 }
+
+export type UpdatePaymentMethodInput = {
+  id: Scalars['String'];
+  importance?: Maybe<PaymentMethodImportance>;
+};
 
 export type UpdateProjectInput = {
   id: Scalars['String'];
@@ -977,7 +1037,7 @@ export type CurrentProjectSettingsQuery = (
       & Pick<UserInvite, 'id' | 'createdAt' | 'role' | 'email'>
     )>, paymentMethods: Array<(
       { __typename?: 'PaymentMethod' }
-      & Pick<PaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'updatedAt'>
+      & BasePaymenthMethodFragment
     )> }
     & BaseProjcetFragment
   )> }
@@ -1020,6 +1080,28 @@ export type DeleteUserProjectMutation = (
     { __typename?: 'UserProject' }
     & Pick<UserProject, 'id'>
   )> }
+);
+
+export type GetPaymentMethodsQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type GetPaymentMethodsQuery = (
+  { __typename?: 'Query' }
+  & { currentProject?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id'>
+    & { paymentMethods: Array<(
+      { __typename?: 'PaymentMethod' }
+      & BasePaymenthMethodFragment
+    )> }
+  )> }
+);
+
+export type BasePaymenthMethodFragment = (
+  { __typename?: 'PaymentMethod' }
+  & Pick<PaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'updatedAt'>
 );
 
 export type PingQueryVariables = Exact<{ [key: string]: never; }>;

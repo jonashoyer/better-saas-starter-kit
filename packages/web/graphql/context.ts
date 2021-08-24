@@ -12,7 +12,7 @@ export const prisma = new PrismaClient();
 export const redis = createRedisClient('client');
 export const queueManager = createQueueMananger();
 
-export type Context = {
+export type Context<E = any> = {
   req: IncomingMessage & { cookies: Record<string, string> };
   res: OutgoingMessage;
   prisma: PrismaClient;
@@ -22,6 +22,7 @@ export type Context = {
   getStripeHandler: () => StripeHandler;
   user?: User;
   session?: Session;
+  entity?: E;
 };
 
 export const createContext: ContextFunction<any> = async (ctx)  => {

@@ -11,12 +11,12 @@ import useTranslation from 'next-translate/useTranslation';
 import FormTextField from './FormTextField';
 import { Box, MenuItem } from '@material-ui/core';
 import FormSelect from './FormSelect';
-import { CurrentProject_MembersQuery, Project, ProjectRole, useCreateManyUserInviteMutation } from 'types/gql';
+import { CurrentProjectSettingsQuery, Project, ProjectRole, useCreateManyUserInviteMutation } from 'types/gql';
 
 export interface DialogUserInviteProps {
   open: boolean;
   onClose?: () => any;
-  project?: CurrentProject_MembersQuery['currentProject'] | Project;
+  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
 }
 
 export default function DialogUserInvite({ open, onClose, project }: DialogUserInviteProps) {

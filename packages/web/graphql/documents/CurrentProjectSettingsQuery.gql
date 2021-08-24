@@ -21,15 +21,7 @@ query CurrentProjectSettings($projectId: String) {
       email
     }
     paymentMethods {
-      id
-      createdAt
-      brand
-      last4
-      expMonth
-      expYear
-      type
-      importance
-      updatedAt
+      ...BasePaymenthMethod
     }
   }
 }

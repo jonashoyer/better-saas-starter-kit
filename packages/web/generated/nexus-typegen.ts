@@ -42,6 +42,10 @@ export interface NexusGenInputs {
   PaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
   }
+  UpdatePaymentMethodInput: { // input type
+    id: string; // String!
+    importance?: NexusGenEnums['PaymentMethodImportance'] | null; // PaymentMethodImportance
+  }
   UpdateProjectInput: { // input type
     id: string; // String!
     name?: string | null; // String
@@ -175,10 +179,12 @@ export interface NexusGenFieldTypes {
     createProject: NexusGenRootTypes['Project'] | null; // Project
     createSetupIntent: NexusGenRootTypes['SetupIntent'] | null; // SetupIntent
     createSubscription: NexusGenRootTypes['BillingSubscription'] | null; // BillingSubscription
+    deletePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
+    updatePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
     updateProject: NexusGenRootTypes['Project'] | null; // Project
     updateSubscription: NexusGenRootTypes['BillingSubscription'] | null; // BillingSubscription
     updateUser: NexusGenRootTypes['User'] | null; // User
@@ -285,10 +291,12 @@ export interface NexusGenFieldTypeNames {
     createProject: 'Project'
     createSetupIntent: 'SetupIntent'
     createSubscription: 'BillingSubscription'
+    deletePaymentMethod: 'PaymentMethod'
     deleteProject: 'Project'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
     sendVerifyEmail: 'StatusResponse'
+    updatePaymentMethod: 'PaymentMethod'
     updateProject: 'Project'
     updateSubscription: 'BillingSubscription'
     updateUser: 'User'
@@ -379,6 +387,9 @@ export interface NexusGenArgTypes {
       projectId: string; // String!
       quantity: number; // Int!
     }
+    deletePaymentMethod: { // args
+      id: string; // String!
+    }
     deleteProject: { // args
       id: string; // String!
     }
@@ -390,6 +401,9 @@ export interface NexusGenArgTypes {
     }
     sendVerifyEmail: { // args
       email: string; // String!
+    }
+    updatePaymentMethod: { // args
+      input: NexusGenInputs['UpdatePaymentMethodInput']; // UpdatePaymentMethodInput!
     }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!

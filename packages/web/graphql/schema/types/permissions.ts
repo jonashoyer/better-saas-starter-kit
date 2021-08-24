@@ -28,6 +28,21 @@ export const requireProjectAccess = (options: ProjectAccessOptions = {}): AuthRe
 }
 
 
+interface ProjectResourceOptions {
+  nullable?: boolean;
+  role?: 'ANY' | prisma.ProjectRole;
+  projectIdFn: (root: any, args: any, ctx: Context) => Promise<string>;
+}
+
+export const requireProjectResource = (options: ProjectResourceOptions): AuthResolver => async (root, args, ctx, info) => {
+  if (!requireAuth(root, args, ctx, info)) return false;
+  const role = options.role ?? 'ANY';
+  const projectId = await options.projectIdFn(root, args, ctx);
+  if (options.nullable && !projectId) return true;
+  return hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId, role);
+}
+
+
 export function requireCombine (arr: AuthResolver[]): AuthResolver;
 export function requireCombine (...arr: AuthResolver[]): AuthResolver;
 export function requireCombine (...arr: ([AuthResolver[]] | AuthResolver[])): AuthResolver {

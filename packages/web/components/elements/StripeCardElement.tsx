@@ -25,6 +25,7 @@ const StripeCardElement = ({ setError, setCardComplete }: StripeCardElementProps
   return (
     <Box sx={{ boxSizing: 'border-box', borderStyle: 'solid', borderWidth: 1, py: 1.5, px: 1.5, borderRadius: 1, borderColor: colors[state], '&:hover': state == 'BLUR' ? { borderColor: colors.HOVER } : {} }}>
       <CardElement
+        className='CardElement'
         onChange={(e) => {
           setError(e.error);
           setCardComplete(e.complete);

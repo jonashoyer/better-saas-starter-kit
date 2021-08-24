@@ -108,7 +108,7 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
           //TODO: 
           break;
         case 'payment_method.attached':
-          console.log('payment_method.attached', obj);
+          await handler.upsertPaymentMethodRecord(obj);
           break;
         default:
           throw new Error('Unhandled relevant event!');

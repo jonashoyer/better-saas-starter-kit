@@ -1,0 +1,11 @@
+fragment BasePaymenthMethod on PaymentMethod {
+  id
+  createdAt
+  brand
+  last4
+  expMonth
+  expYear
+  type
+  importance
+  updatedAt
+}

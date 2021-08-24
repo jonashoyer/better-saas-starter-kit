@@ -18,6 +18,7 @@ import countryCodes from 'utils/countryCodes.json';
 export type DialogPaymentMethodProps = {
   open: boolean;
   handleClose: () => any;
+  onCreated?: () => any;
 }
 
 // https://stripe.com/docs/stripe-js/react
@@ -25,28 +26,21 @@ export type DialogPaymentMethodProps = {
 // https://github.com/stripe-samples/subscription-use-cases
 // https://stripe.com/docs/payments/save-and-reuse
 
-export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymentMethodProps) {
+export default function DialogPaymentMethod({ open, onCreated, handleClose }: DialogPaymentMethodProps) {
 
   const { t, lang } = useTranslation();
-
-  const { control, handleSubmit, formState: { errors, isValid }, reset } = useForm({ criteriaMode: 'firstError', mode: 'all' });
-
-  const [error, setError] = React.useState(null);
-  const [cardComplete, setCardComplete] = React.useState(false);
-  const [processing, setProcessing] = React.useState(false);
-  
-  React.useEffect(() => {
-    if (!open) return;
-    reset();
-    setCardComplete(false);
-    setProcessing(false);
-    setError(null);
-  }, [reset, open]);
 
   const [projectId] = useProject();
 
   const stripe = useStripe();
   const elements = useElements();
+
+  const { control, handleSubmit, formState: { errors, isValid }, reset, setValue } = useForm({ criteriaMode: 'firstError', mode: 'all' });
+  const isSetupIntentUsedRef = React.useRef(false);
+
+  const [error, setError] = React.useState(null);
+  const [cardComplete, setCardComplete] = React.useState(false);
+  const [processing, setProcessing] = React.useState(false);
 
   const [clientSecret, setClientSecret] = React.useState(null);
 
@@ -55,6 +49,21 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
       projectId,
     }
   })
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (isSetupIntentUsedRef.current) {
+      createSetupIntent(null);
+      isSetupIntentUsedRef.current = false;
+    }
+
+    reset();
+    setCardComplete(false);
+    setProcessing(false);
+    setError(null);
+  }, [reset, open, createSetupIntent]);
+
+  
 
   React.useEffect(() => {
     if (clientSecret) return;
@@ -108,10 +117,19 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
       return;
     }
 
+    isSetupIntentUsedRef.current = true;
     console.log('[PaymentMethod]', payload.setupIntent);
+    onCreated?.();
   };
 
-  const loading = processing || createSetupIntentLoading;  
+  const loading = processing || createSetupIntentLoading;
+
+  const _debugFill = () => {
+    navigator.clipboard.writeText('4242424242424242424242');
+    setValue('fullName', 'Me :)')
+    setValue('country', countryCodes[236]);
+  }
+  
 
   // TODO: Add spinner overlay
   return (
@@ -119,6 +137,9 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
       <DialogTitle>{t('settings:addPaymentMethod')}</DialogTitle>
       <form onSubmit={handleSubmit(confirmCardSetup)}>
         <DialogContent>
+          {true &&
+            <Button onClick={_debugFill}>Fill</Button>
+          }
           <StripeCardElement
             setError={setError}
             setCardComplete={setCardComplete}
@@ -147,7 +168,7 @@ export default function DialogPaymentMethod({ open,  handleClose }: DialogPaymen
               options={countryCodes}
               autoHighlight
               textFieldProps={{
-                label: 'Country'
+                label: t('pricing:country')
               }}
               getOptionLabel={(option) => option.label}
               renderOption={(props, option: any) => (

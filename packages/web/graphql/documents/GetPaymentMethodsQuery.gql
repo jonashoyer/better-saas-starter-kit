@@ -1,0 +1,8 @@
+query GetPaymentMethods($projectId: String) {
+  currentProject(projectId: $projectId) {
+    id
+    paymentMethods {
+      ...BasePaymenthMethod
+    }
+  }
+}

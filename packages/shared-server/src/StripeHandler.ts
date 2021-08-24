@@ -223,46 +223,6 @@ export class StripeHandler {
     })
   }
 
-  // {
-  //   id: 'pm_1JS1kLKwqn1NB0NWRazyyf3W',
-  //   object: 'payment_method',
-  //   billing_details: {
-  //     address: {
-  //       city: null,
-  //       country: 'DK',
-  //       line1: null,
-  //       line2: null,
-  //       postal_code: null,
-  //       state: null
-  //     },
-  //     email: null,
-  //     name: 'JJJ',
-  //     phone: null
-  //   },
-  //   card: {
-  //     brand: 'visa',
-  //     checks: {
-  //       address_line1_check: null,
-  //       address_postal_code_check: null,
-  //       cvc_check: 'pass'
-  //     },
-  //     country: 'US',
-  //     exp_month: 4,
-  //     exp_year: 2024,
-  //     fingerprint: 'xVJAF5umqYGteAdp',
-  //     funding: 'credit',
-  //     generated_from: null,
-  //     last4: '4242',
-  //     networks: { available: [Array], preferred: null },
-  //     three_d_secure_usage: { supported: true },
-  //     wallet: null
-  //   },
-  //   created: 1629819665,
-  //   customer: 'cus_K5iO5vQ10q6MAw',
-  //   livemode: false,
-  //   metadata: {},
-  //   type: 'card'
-  // }
   async upsertPaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
     if (!paymentMethod.card) {
       throw new Error('Payment method must be of type card!');
@@ -292,6 +252,7 @@ export class StripeHandler {
       return PaymentMethodImportance.OTHER;
     }
 
+    const importance = getImportance()
     const paymentMethodData = {
       id: paymentMethod.id,
       type: paymentMethod.type,
@@ -301,17 +262,29 @@ export class StripeHandler {
       expMonth: paymentMethod.card.exp_month,
       expYear: paymentMethod.card.exp_year,
 
-      importance: getImportance(),
+      importance,
       project: {
         connect: { id: project.id },
       },
     };
+
+    if (importance == PaymentMethodImportance.PRIMARY) {
+      await this.updateDefaulyPaymentMethod(stripeCustomerId, paymentMethod.id);
+    }
 
     return this.prisma.paymentMethod.upsert({
       create: paymentMethodData,
       update: paymentMethodData,
       where: {
         id: paymentMethod.id,
+      }
+    })
+  }
+
+  updateDefaulyPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
+    return this.stripe.customers.update(stripeCustomerId, {
+      invoice_settings: {
+        default_payment_method: paymentMethodId,
       }
     })
   }

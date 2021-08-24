@@ -88,10 +88,12 @@ type Mutation {
   createProject(input: CreateProjectInput!): Project
   createSetupIntent(projectId: String!): SetupIntent
   createSubscription(priceId: String!, projectId: String!, quantity: Int!): BillingSubscription
+  deletePaymentMethod(id: String!): PaymentMethod
   deleteProject(id: String!): Project
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
   sendVerifyEmail(email: String!): StatusResponse
+  updatePaymentMethod(input: UpdatePaymentMethodInput!): PaymentMethod
   updateProject(input: UpdateProjectInput!): Project
   updateSubscription(priceId: String, projectId: String!, quantity: Int): BillingSubscription
   updateUser(input: UpdateUserInput!): User
@@ -168,6 +170,11 @@ enum SubscriptionStatus {
   PAST_DUE
   TRIALING
   UNPAID
+}
+
+input UpdatePaymentMethodInput {
+  id: String!
+  importance: PaymentMethodImportance
 }
 
 input UpdateProjectInput {
