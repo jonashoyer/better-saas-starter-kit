@@ -82,6 +82,7 @@ model Project {
   updatedAt            DateTime         @updatedAt
   stripeCustomerId     String           @unique
   stripeSubscriptionId String           @unique
+  stripeTaxId          String?
   subscriptionPlan     SubscriptionPlan @default(FREE)
 
   users          UserProject[]

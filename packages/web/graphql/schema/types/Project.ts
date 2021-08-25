@@ -161,3 +161,73 @@ export const DeleteProject = mutationField('deleteProject', {
     return ctx.prisma.project.delete({ where: { id } });
   }
 })
+
+export const Ok = objectType({
+  name: 'Ok',
+  definition(t) {
+    t.boolean('ok', { required: true });
+    t.string('message');
+  }
+})
+
+export const TaxType = enumType({
+  name: 'TaxType',
+  members: ['AE_TRN', 'AU_ABN', 'AU_ARN', 'BR_CNPJ', 'BR_CPF', 'CA_BN', 'CA_GST_HST', 'CA_PST_BC', 'CA_PST_MB', 'CA_PST_SK', 'CA_QST', 'CH_VAT', 'CL_TIN', 'ES_CIF', 'EU_VAT', 'GB_VAT', 'HK_BR', 'ID_NPWP', 'IL_VAT', 'IN_GST', 'JP_CN', 'JP_RN', 'KR_BRN', 'LI_UID', 'MX_RFC', 'MY_FRP', 'MY_ITN', 'MY_SST', 'NO_VAT', 'NZ_GST', 'RU_INN', 'RU_KPP', 'SA_VAT', 'SG_GST', 'SG_UEN', 'TH_VAT', 'TW_VAT', 'US_EIN', 'ZA_VAT']
+})
+
+export const UpdateTaxIdInput = inputObjectType({
+  name: 'UpdateTaxIdInput',
+  definition(t) {
+    t.string('projectId', { required: true });
+    t.field('taxType', { type: TaxType, required: true });
+    t.string('taxId', { nullable: true, required: true });
+  }
+})
+
+export const UpdateTaxId = mutationField('updateTaxId', {
+  type: Ok,
+  args: {
+    input: arg({ required: true, type: UpdateTaxIdInput }),
+  },
+  authorize: requireProjectAccess({
+    projectIdFn: (_, { input }) => input.projectId,
+    role: 'ADMIN',
+  }),
+  async resolve(root, { input }, ctx) {
+    const project = await ctx.prisma.project.findUnique({ where: { id: input.projectId }, select: { stripeCustomerId: true, stripeTaxId: true } });
+    if (project.stripeTaxId) {
+      await ctx.stripe.customers.deleteTaxId(project.stripeCustomerId, project.stripeTaxId);
+      await ctx.prisma.project.update({
+        where: { id: input.projectId },
+        data: { stripeTaxId: null },
+      });
+    }
+
+    const taxId = await ctx.stripe.customers.createTaxId(project.stripeCustomerId, {
+      value: input.taxId,
+      type: input.taxType,
+    });
+    await ctx.prisma.project.update({
+      where: { id: input.projectId },
+      data: {stripeTaxId: taxId.id },
+    });
+    return { ok: true };
+  }
+})
+
+export const DeleteTaxId = mutationField('deleteTaxId', {
+  type: Ok,
+  args: {
+    projectId: stringArg({ required: true }),
+  },
+  authorize: requireProjectAccess({
+    projectIdFn: (_, { projectId }) => projectId,
+    role: 'ADMIN',
+  }),
+  async resolve(root, { projectId }, ctx) {
+    const project = await ctx.prisma.project.findUnique({ where: { id: projectId }, select: { stripeCustomerId: true, stripeTaxId: true } });
+    await ctx.stripe.customers.deleteTaxId(project.stripeCustomerId, project.stripeTaxId);
+    await ctx.prisma.project.update({ where: { id: projectId }, data: { stripeTaxId: null } });
+    return { ok: true };
+  }
+})
