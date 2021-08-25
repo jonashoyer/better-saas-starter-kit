@@ -15,6 +15,7 @@ import StripeCardElement from './StripeCardElement';
 import FormAutocompleteTextField from './FormAutocompleteTextField';
 import countryCodes from 'utils/countryCodes.json';
 import { LoadingButton } from '@material-ui/lab';
+import PaymentMethodForm from './PaymentMethodForm';
 
 export type DialogPaymentMethodProps = {
   open: boolean;
@@ -37,7 +38,9 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
   const stripe = useStripe();
   const elements = useElements();
 
-  const { control, handleSubmit, formState: { errors, isValid }, reset, setValue } = useForm({ criteriaMode: 'firstError', mode: 'all' });
+  const form = useForm({ criteriaMode: 'firstError', mode: 'all' });
+  const { reset } = form;
+
   const isSetupIntentUsedRef = React.useRef(false);
 
   const [error, setError] = React.useState(null);
@@ -127,72 +130,23 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
 
   const loading = processing || createSetupIntentLoading || outterLoading;
 
-  const _debugFill = () => {
-    navigator.clipboard.writeText('4242424242424242424242');
-    setValue('fullName', 'Me :)')
-    setValue('country', countryCodes[236]);
-  }
-  
 
   // TODO: Add spinner overlay
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
       <DialogTitle>{t('settings:addPaymentMethod')}</DialogTitle>
-      <form onSubmit={handleSubmit(confirmCardSetup)}>
+      <form onSubmit={form.handleSubmit(confirmCardSetup)}>
         <DialogContent>
-          {true &&
-            <Button onClick={_debugFill}>Fill</Button>
-          }
-          <StripeCardElement
-            setError={setError}
+          <PaymentMethodForm
+            form={form}
+            loading={loading}
             setCardComplete={setCardComplete}
-            disabled={loading}
+            setError={setError}
           />
-          <Box sx={{ pt: 2 }}>
-            <FormTextField
-              label={t('pricing:fullName')}
-              autoFocus
-              fullWidth
-              size='small'
-              margin='dense'
-              disabled={loading}
-              name='fullName'
-              control={control}
-              defaultValue=''
-              controllerProps={{
-                rules: {
-                  required: true,
-                  minLength: 3,
-                }
-              }}
-            />
-            <FormAutocompleteTextField
-              control={control}
-              name='country'
-              options={countryCodes}
-              autoHighlight
-              disabled={loading}
-              textFieldProps={{
-                label: t('pricing:country'),
-                disabled: loading,
-              }}
-              getOptionLabel={(option) => option.label}
-              renderOption={(props, option: any) => (
-                <Box
-                  component="li"
-                  sx={{ fontSize: 15, '& > span': { mr: '10px', fontSize: 18 } }}
-                  {...props}
-                >
-                  <span>{countryToFlag(option.code)}</span> {option.label}
-                </Box>
-              )}
-            />
-            
-          </Box>
         </DialogContent>
         <DialogActions>
           <Button disabled={loading} onClick={handleClose}>{t('common:close')}</Button>
-          <LoadingButton loading={!clientSecret || loading} disabled={!isValid || !cardComplete || !stripe} type="submit" variant='contained'>{t('common:add')}</LoadingButton>
+          <LoadingButton loading={!clientSecret || loading} disabled={!form.formState.isValid || !cardComplete || !stripe} type="submit" variant='contained'>{t('common:add')}</LoadingButton>
         </DialogActions>
       </form>
     </Dialog>
@@ -272,10 +226,3 @@ const BillingAddressForm = ({ loading, control }) => {
   )
 }
 
-function countryToFlag(isoCode) {
-  return typeof String.fromCodePoint !== 'undefined'
-    ? isoCode
-        .toUpperCase()
-        .replace(/./g, (char) => String.fromCodePoint(char.charCodeAt(0) + 127397))
-    : isoCode;
-}

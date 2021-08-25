@@ -8,7 +8,7 @@ import useTranslation from 'next-translate/useTranslation';
 import { Product, ProductPrice } from '@prisma/client';
 import { CurrentProjectSettingsQuery, Project } from 'types/gql';
 import { formatCurrency } from '../../../shared/lib';
-import { Box, DialogContentText, Typography } from '@material-ui/core';
+import { Box, DialogContentText, Divider, Typography } from '@material-ui/core';
 
 export type DialogChangePlanProps = {
   open: boolean;
@@ -34,20 +34,42 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   }, [targetProduct]);
 
   const pricing = price && `${formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })} ${t('pricing:perMember')} / ${price.intervalCount != 1 && price.intervalCount} ${t(`pricing:${price.interval}`, { count: price.intervalCount })}`;
+  const interval = `${price.intervalCount != 1 ? price.intervalCount : ''} ${t(`pricing:${price.interval}`, { count: price.intervalCount })}`.trimStart();
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
       <DialogTitle>{t('pricing:changePlanTitle')}</DialogTitle>
       <DialogContent>
-        <DialogContentText gutterBottom variant='body1'>{t('pricing:changePlanContent')}</DialogContentText>
-        <DialogContentText gutterBottom variant='body1'>{t('pricing:currentPlan', { plan: project.subscriptionPlan })}</DialogContentText>
-        <DialogContentText gutterBottom variant='body1'>{t('pricing:billingText', { plan: type, pricing })}</DialogContentText>
-        {price &&
-          <React.Fragment>
-            <Typography sx={{ pl: 2 }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })} {t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
-            <Typography sx={{ pl: 2 }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })} x {project.users.length} {t('common:member', { count: project.users.length }).toLowerCase()} = {formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
-          </React.Fragment>
-        }
+        <Box sx={{ display: 'flex' }}>
+          <Box sx={{  px: .5 }}>
+
+            <DialogContentText gutterBottom variant='body1'>{t('pricing:changePlanContent')}</DialogContentText>
+            <DialogContentText gutterBottom variant='body1'>{t('pricing:currentPlan', { plan: project.subscriptionPlan })}</DialogContentText>
+            <DialogContentText gutterBottom variant='body1'>{t('pricing:billingText', { plan: type, pricing })}</DialogContentText>
+          </Box>
+          <Box sx={{ flex: '1', px: .5 }}>
+            <Typography gutterBottom>Plan summary</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography color='text' variant='body2'>BASIC plan ({project.users.length} {t('common:member', { count: project.users.length }).toLowerCase()})</Typography>
+              <Typography fontSize='0.875rem' variant='body1'>{formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+            </Box>
+            <Typography fontSize='0.75rem' color='textSecondary' variant='body2'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })} / member / {interval}</Typography>
+            <Divider sx={{ my: 1 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography color='textSecondary' variant='body2'>Subtotal</Typography>
+              <Typography fontSize='0.75rem' variant='body1'>{formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography color='textSecondary' variant='body2'>Tax</Typography>
+              <Typography fontSize='0.75rem' variant='body1'>-</Typography>
+            </Box>
+            <Divider sx={{ my: 1 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography color='textSecondary' variant='body2'>Total</Typography>
+              <Typography fontSize='1.15rem' variant='body1'>{formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+            </Box>
+          </Box>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button disabled={loading} onClick={handleClose}>{t('common:close')}</Button>
