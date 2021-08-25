@@ -220,6 +220,39 @@ export function useCurrentProjectSettingsLazyQuery(baseOptions?: Apollo.LazyQuer
 export type CurrentProjectSettingsQueryHookResult = ReturnType<typeof useCurrentProjectSettingsQuery>;
 export type CurrentProjectSettingsLazyQueryHookResult = ReturnType<typeof useCurrentProjectSettingsLazyQuery>;
 export type CurrentProjectSettingsQueryResult = Apollo.QueryResult<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>;
+export const DeletePaymentMethodDocument = gql`
+    mutation DeletePaymentMethod($id: String!) {
+  deletePaymentMethod(id: $id) {
+    id
+  }
+}
+    `;
+export type DeletePaymentMethodMutationFn = Apollo.MutationFunction<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>;
+
+/**
+ * __useDeletePaymentMethodMutation__
+ *
+ * To run a mutation, you first call `useDeletePaymentMethodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePaymentMethodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePaymentMethodMutation, { data, loading, error }] = useDeletePaymentMethodMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>(DeletePaymentMethodDocument, options);
+      }
+export type DeletePaymentMethodMutationHookResult = ReturnType<typeof useDeletePaymentMethodMutation>;
+export type DeletePaymentMethodMutationResult = Apollo.MutationResult<DeletePaymentMethodMutation>;
+export type DeletePaymentMethodMutationOptions = Apollo.BaseMutationOptions<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>;
 export const DeleteProjectDocument = gql`
     mutation DeleteProject($id: String!) {
   deleteProject(id: $id) {
@@ -461,6 +494,41 @@ export function useSelfLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQ
 export type SelfQueryHookResult = ReturnType<typeof useSelfQuery>;
 export type SelfLazyQueryHookResult = ReturnType<typeof useSelfLazyQuery>;
 export type SelfQueryResult = Apollo.QueryResult<SelfQuery, SelfQueryVariables>;
+export const UpdatePaymentMethodDocument = gql`
+    mutation UpdatePaymentMethod($input: UpdatePaymentMethodInput!) {
+  updatePaymentMethod(input: $input) {
+    id
+    updatedAt
+    importance
+  }
+}
+    `;
+export type UpdatePaymentMethodMutationFn = Apollo.MutationFunction<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>;
+
+/**
+ * __useUpdatePaymentMethodMutation__
+ *
+ * To run a mutation, you first call `useUpdatePaymentMethodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePaymentMethodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePaymentMethodMutation, { data, loading, error }] = useUpdatePaymentMethodMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdatePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>(UpdatePaymentMethodDocument, options);
+      }
+export type UpdatePaymentMethodMutationHookResult = ReturnType<typeof useUpdatePaymentMethodMutation>;
+export type UpdatePaymentMethodMutationResult = Apollo.MutationResult<UpdatePaymentMethodMutation>;
+export type UpdatePaymentMethodMutationOptions = Apollo.BaseMutationOptions<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>;
 export const UpdateProjectDocument = gql`
     mutation UpdateProject($input: UpdateProjectInput!) {
   updateProject(input: $input) {
@@ -1043,6 +1111,19 @@ export type CurrentProjectSettingsQuery = (
   )> }
 );
 
+export type DeletePaymentMethodMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeletePaymentMethodMutation = (
+  { __typename?: 'Mutation' }
+  & { deletePaymentMethod?: Maybe<(
+    { __typename?: 'PaymentMethod' }
+    & Pick<PaymentMethod, 'id'>
+  )> }
+);
+
 export type DeleteProjectMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -1131,6 +1212,19 @@ export type SelfQuery = (
   & { self?: Maybe<(
     { __typename?: 'User' }
     & Pick<User, 'id' | 'email' | 'emailVerified' | 'name'>
+  )> }
+);
+
+export type UpdatePaymentMethodMutationVariables = Exact<{
+  input: UpdatePaymentMethodInput;
+}>;
+
+
+export type UpdatePaymentMethodMutation = (
+  { __typename?: 'Mutation' }
+  & { updatePaymentMethod?: Maybe<(
+    { __typename?: 'PaymentMethod' }
+    & Pick<PaymentMethod, 'id' | 'updatedAt' | 'importance'>
   )> }
 );
 

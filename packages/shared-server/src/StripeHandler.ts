@@ -269,7 +269,7 @@ export class StripeHandler {
     };
 
     if (importance == PaymentMethodImportance.PRIMARY) {
-      await this.updateDefaulyPaymentMethod(stripeCustomerId, paymentMethod.id);
+      await this.updateDefaultPaymentMethod(stripeCustomerId, paymentMethod.id);
     }
 
     return this.prisma.paymentMethod.upsert({
@@ -281,12 +281,16 @@ export class StripeHandler {
     })
   }
 
-  updateDefaulyPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
+  updateDefaultPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
     return this.stripe.customers.update(stripeCustomerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,
       }
     })
+  }
+
+  deletePaymentMethod(paymentMethodId: string) {
+    return this.stripe.paymentMethods.detach(paymentMethodId);
   }
 
   manageChargeSucceeded(charge: Stripe.Charge) {

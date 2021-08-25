@@ -67,6 +67,7 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
     const obj = event.data.object as any;
     try {
       switch (event.type) {
+        // customer.updated -> catch new default payment method ?
         case 'charge.succeeded':
           // NOTE: Use metadata to trace user and product
           await handler.manageChargeSucceeded(obj);

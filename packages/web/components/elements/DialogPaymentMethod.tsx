@@ -14,9 +14,11 @@ import { Box } from '@material-ui/core';
 import StripeCardElement from './StripeCardElement';
 import FormAutocompleteTextField from './FormAutocompleteTextField';
 import countryCodes from 'utils/countryCodes.json';
+import { LoadingButton } from '@material-ui/lab';
 
 export type DialogPaymentMethodProps = {
   open: boolean;
+  loading?: boolean;
   handleClose: () => any;
   onCreated?: () => any;
 }
@@ -26,7 +28,7 @@ export type DialogPaymentMethodProps = {
 // https://github.com/stripe-samples/subscription-use-cases
 // https://stripe.com/docs/payments/save-and-reuse
 
-export default function DialogPaymentMethod({ open, onCreated, handleClose }: DialogPaymentMethodProps) {
+export default function DialogPaymentMethod({ open, loading: outterLoading, onCreated, handleClose }: DialogPaymentMethodProps) {
 
   const { t, lang } = useTranslation();
 
@@ -67,7 +69,8 @@ export default function DialogPaymentMethod({ open, onCreated, handleClose }: Di
 
   React.useEffect(() => {
     if (clientSecret) return;
-    createSetupIntent().then(({ data }) => {
+    createSetupIntent()
+    .then(({ data }) => {
       setClientSecret(data.createSetupIntent.clientSecret);
     }).catch(err => {
       // TODO: Catch this
@@ -122,7 +125,7 @@ export default function DialogPaymentMethod({ open, onCreated, handleClose }: Di
     onCreated?.();
   };
 
-  const loading = processing || createSetupIntentLoading;
+  const loading = processing || createSetupIntentLoading || outterLoading;
 
   const _debugFill = () => {
     navigator.clipboard.writeText('4242424242424242424242');
@@ -143,6 +146,7 @@ export default function DialogPaymentMethod({ open, onCreated, handleClose }: Di
           <StripeCardElement
             setError={setError}
             setCardComplete={setCardComplete}
+            disabled={loading}
           />
           <Box sx={{ pt: 2 }}>
             <FormTextField
@@ -167,8 +171,10 @@ export default function DialogPaymentMethod({ open, onCreated, handleClose }: Di
               name='country'
               options={countryCodes}
               autoHighlight
+              disabled={loading}
               textFieldProps={{
-                label: t('pricing:country')
+                label: t('pricing:country'),
+                disabled: loading,
               }}
               getOptionLabel={(option) => option.label}
               renderOption={(props, option: any) => (
@@ -186,7 +192,7 @@ export default function DialogPaymentMethod({ open, onCreated, handleClose }: Di
         </DialogContent>
         <DialogActions>
           <Button disabled={loading} onClick={handleClose}>{t('common:close')}</Button>
-          <Button disabled={!isValid || !cardComplete || !stripe || loading} type="submit" onClick={handleClose} variant='contained'>{t('common:add')}</Button>
+          <LoadingButton loading={!clientSecret || loading} disabled={!isValid || !cardComplete || !stripe} type="submit" variant='contained'>{t('common:add')}</LoadingButton>
         </DialogActions>
       </form>
     </Dialog>

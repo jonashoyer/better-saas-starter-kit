@@ -1,0 +1,5 @@
+mutation DeletePaymentMethod($id: String!) {
+  deletePaymentMethod(id: $id) {
+    id
+  }
+}
