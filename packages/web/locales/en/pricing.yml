@@ -1,6 +1,6 @@
-free_description: "No, just no..."
-basic_description: "This is pretty basic, you can do better... Try premium!"
-premium_description: "This is a lot better!"
+free_description: "For individuals looking to get more done"
+basic_description: "All the basics"
+premium_description: "Advanced tools"
 perMember: 'per member'
 
 current: 'Current'
@@ -36,3 +36,15 @@ postalCode: 'Postal code'
 city: 'City'
 country: 'Country'
 expires: 'Expires'
+
+planSummary: 'Plan summary'
+productNameMemberCount:
+  one: '{{productName}} plan ({{count}} member)'
+  other: '{{productName}} plan ({{count}} members)'
+
+subtotal: 'Subtotal'
+tax: 'Tax'
+total: 'Total'
+
+planPricingSummary: '{{price}} / member / {{interval}}'
+billedYearly: 'Billed yearly'

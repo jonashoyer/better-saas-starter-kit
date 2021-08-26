@@ -33,15 +33,17 @@ Monorepo using npm workspace
 ### To do list:
  - [x] Basic project management
  - [ ] Basic user management
+   - [ ] Account linking
  - [x] Better error handling
  - [ ] Stripe subscription integration
- - [ ] Basic subscription management
+   - [ ] Basic subscription management
  - [ ] Stripe charge integration
- - [ ] Basic charge management
+   - [ ] Basic charge management
+ - [ ] Custom theme
+   - [ ] Web app layout template
+   - [ ] Landing page template
  - [ ] Work quene management
  - [ ] Platform admin page
- - [ ] Landing page template
- - [ ] Web app layout template
  - [ ] [Going to production](https://nextjs.org/docs/going-to-production)
    - [ ] Caching
    - [ ] Reducing JavaScript Size
@@ -50,7 +52,6 @@ Monorepo using npm workspace
 
 ### Bugs
   - [ ] Old project id in cookies
-  - [ ] Auth missing account linking
 
 #### Shared environment variables
 - REDIS_URL

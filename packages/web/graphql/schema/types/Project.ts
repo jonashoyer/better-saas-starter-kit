@@ -180,7 +180,7 @@ export const UpdateTaxIdInput = inputObjectType({
   definition(t) {
     t.string('projectId', { required: true });
     t.field('taxType', { type: TaxType, required: true });
-    t.string('taxId', { nullable: true, required: true });
+    t.string('taxId', { required: true });
   }
 })
 

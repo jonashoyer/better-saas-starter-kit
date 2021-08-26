@@ -11,9 +11,6 @@ import useProject from 'hooks/useProject';
 import FormTextField from './FormTextField';
 import { useForm } from 'react-hook-form';
 import { Box } from '@material-ui/core';
-import StripeCardElement from './StripeCardElement';
-import FormAutocompleteTextField from './FormAutocompleteTextField';
-import countryCodes from 'utils/countryCodes.json';
 import { LoadingButton } from '@material-ui/lab';
 import PaymentMethodForm from './PaymentMethodForm';
 

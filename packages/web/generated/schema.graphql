@@ -90,15 +90,22 @@ type Mutation {
   createSubscription(priceId: String!, projectId: String!, quantity: Int!): BillingSubscription
   deletePaymentMethod(id: String!): PaymentMethod
   deleteProject(id: String!): Project
+  deleteTaxId(projectId: String!): Ok
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
   sendVerifyEmail(email: String!): StatusResponse
   updatePaymentMethod(input: UpdatePaymentMethodInput!): PaymentMethod
   updateProject(input: UpdateProjectInput!): Project
   updateSubscription(priceId: String, projectId: String!, quantity: Int): BillingSubscription
+  updateTaxId(input: UpdateTaxIdInput!): Ok
   updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
   verifyEmail(token: String!): User
+}
+
+type Ok {
+  message: String
+  ok: Boolean!
 }
 
 type PaymentMethod {
@@ -172,6 +179,48 @@ enum SubscriptionStatus {
   UNPAID
 }
 
+enum TaxType {
+  AE_TRN
+  AU_ABN
+  AU_ARN
+  BR_CNPJ
+  BR_CPF
+  CA_BN
+  CA_GST_HST
+  CA_PST_BC
+  CA_PST_MB
+  CA_PST_SK
+  CA_QST
+  CH_VAT
+  CL_TIN
+  ES_CIF
+  EU_VAT
+  GB_VAT
+  HK_BR
+  ID_NPWP
+  IL_VAT
+  IN_GST
+  JP_CN
+  JP_RN
+  KR_BRN
+  LI_UID
+  MX_RFC
+  MY_FRP
+  MY_ITN
+  MY_SST
+  NO_VAT
+  NZ_GST
+  RU_INN
+  RU_KPP
+  SA_VAT
+  SG_GST
+  SG_UEN
+  TH_VAT
+  TW_VAT
+  US_EIN
+  ZA_VAT
+}
+
 input UpdatePaymentMethodInput {
   id: String!
   importance: PaymentMethodImportance
@@ -180,6 +229,12 @@ input UpdatePaymentMethodInput {
 input UpdateProjectInput {
   id: String!
   name: String
+}
+
+input UpdateTaxIdInput {
+  projectId: String!
+  taxId: String!
+  taxType: TaxType!
 }
 
 input UpdateUserInput {

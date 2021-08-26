@@ -224,7 +224,6 @@ const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserM
 
 const PaymentMethodListItem = ({ t, paymentMethod: e, handleUserMenuClick }: { t: any, paymentMethod: CurrentProjectSettingsQuery['currentProject']['paymentMethods'][0], handleUserMenuClick: (paymentMethod: any) => (event: any) => any,  }) => (
   <ListItem
-    key={e.id}
     secondaryAction={
       <IconButton onClick={handleUserMenuClick(e)} disabled={e?.importance == PaymentMethodImportance.Primary}>
         <MoreVertIcon />
