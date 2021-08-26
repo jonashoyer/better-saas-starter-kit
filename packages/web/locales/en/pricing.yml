@@ -20,6 +20,7 @@ year:
   other: 'years'
 
 changePlanTitle: 'Changing plan'
+upgradeToPlan: 'Upgrade to {{planName}}'
 changePlanContent: 'You are about to change your plan!'
 changePlanConfirm: 'Change plan'
 

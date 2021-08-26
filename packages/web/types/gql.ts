@@ -729,6 +729,8 @@ export type Mutation = {
   createProject?: Maybe<Project>;
   updateProject?: Maybe<Project>;
   deleteProject?: Maybe<Project>;
+  updateTaxId?: Maybe<Ok>;
+  deleteTaxId?: Maybe<Ok>;
   createSetupIntent?: Maybe<SetupIntent>;
   updatePaymentMethod?: Maybe<PaymentMethod>;
   deletePaymentMethod?: Maybe<PaymentMethod>;
@@ -779,6 +781,16 @@ export type MutationDeleteProjectArgs = {
 };
 
 
+export type MutationUpdateTaxIdArgs = {
+  input: UpdateTaxIdInput;
+};
+
+
+export type MutationDeleteTaxIdArgs = {
+  projectId: Scalars['String'];
+};
+
+
 export type MutationCreateSetupIntentArgs = {
   projectId: Scalars['String'];
 };
@@ -825,6 +837,12 @@ export type MutationUpdateSubscriptionArgs = {
   projectId: Scalars['String'];
   priceId?: Maybe<Scalars['String']>;
   quantity?: Maybe<Scalars['Int']>;
+};
+
+export type Ok = {
+  __typename?: 'Ok';
+  ok: Scalars['Boolean'];
+  message?: Maybe<Scalars['String']>;
 };
 
 export type PaymentMethod = {
@@ -944,6 +962,48 @@ export enum SubscriptionStatus {
   Unpaid = 'UNPAID'
 }
 
+export enum TaxType {
+  AeTrn = 'AE_TRN',
+  AuAbn = 'AU_ABN',
+  AuArn = 'AU_ARN',
+  BrCnpj = 'BR_CNPJ',
+  BrCpf = 'BR_CPF',
+  CaBn = 'CA_BN',
+  CaGstHst = 'CA_GST_HST',
+  CaPstBc = 'CA_PST_BC',
+  CaPstMb = 'CA_PST_MB',
+  CaPstSk = 'CA_PST_SK',
+  CaQst = 'CA_QST',
+  ChVat = 'CH_VAT',
+  ClTin = 'CL_TIN',
+  EsCif = 'ES_CIF',
+  EuVat = 'EU_VAT',
+  GbVat = 'GB_VAT',
+  HkBr = 'HK_BR',
+  IdNpwp = 'ID_NPWP',
+  IlVat = 'IL_VAT',
+  InGst = 'IN_GST',
+  JpCn = 'JP_CN',
+  JpRn = 'JP_RN',
+  KrBrn = 'KR_BRN',
+  LiUid = 'LI_UID',
+  MxRfc = 'MX_RFC',
+  MyFrp = 'MY_FRP',
+  MyItn = 'MY_ITN',
+  MySst = 'MY_SST',
+  NoVat = 'NO_VAT',
+  NzGst = 'NZ_GST',
+  RuInn = 'RU_INN',
+  RuKpp = 'RU_KPP',
+  SaVat = 'SA_VAT',
+  SgGst = 'SG_GST',
+  SgUen = 'SG_UEN',
+  ThVat = 'TH_VAT',
+  TwVat = 'TW_VAT',
+  UsEin = 'US_EIN',
+  ZaVat = 'ZA_VAT'
+}
+
 export type UpdatePaymentMethodInput = {
   id: Scalars['String'];
   importance?: Maybe<PaymentMethodImportance>;
@@ -952,6 +1012,12 @@ export type UpdatePaymentMethodInput = {
 export type UpdateProjectInput = {
   id: Scalars['String'];
   name?: Maybe<Scalars['String']>;
+};
+
+export type UpdateTaxIdInput = {
+  projectId: Scalars['String'];
+  taxType: TaxType;
+  taxId: Scalars['String'];
 };
 
 export type UpdateUserInput = {

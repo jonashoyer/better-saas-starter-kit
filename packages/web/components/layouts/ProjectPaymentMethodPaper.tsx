@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import Lazy from 'components/elements/Lazy';
 import { snakeToReadable } from 'utils';
 import { PaymentMethod } from '@prisma/client';
+import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 
 export interface ProjectPaymentMethodPaperProps {
   project?: CurrentProjectSettingsQuery['currentProject'];
@@ -22,12 +23,19 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
   
   const { t } = useTranslation();
 
-  const [loading, setLoading] = React.useState(false);
   const [menuPaymentMethodAnchorEl, setMenuPaymentMethodAnchorEl] = React.useState(null);
   const [menuPaymentMethod, setMenuPaymentMethod] = React.useState<PaymentMethod>(null);
 
   const [addPaymenthMethodDialog, setAddPaymenthMethodDialog] = React.useState(false);
   const [deletePaymentMethodConfirm, setDeletePaymentMethodConfirm] = React.useState(null);
+
+  const [pollPaymentMethods, pollPaymentMethodsLoading] = usePollPaymentMethods({
+    projectId: project.id,
+    paymentMethods: project.paymentMethods,
+    onCompleted() {
+      setAddPaymenthMethodDialog(false);
+    },
+  })
 
   const [getPaymenMethods, { loading: getPaymentMethodsLoading }] = useGetPaymentMethodsLazyQuery({
     variables: {
@@ -35,7 +43,6 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
     },
     notifyOnNetworkStatusChange: true,
     onCompleted() {
-      setLoading(false);
       setAddPaymenthMethodDialog(false);
     },
     fetchPolicy: 'network-only',
@@ -97,21 +104,14 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
     })
   }
 
-  const onPaymentMethodCreated = () => {
-    setLoading(true);
-    setTimeout(() => {
-      getPaymenMethods();
-    }, 1000);
-  }
-
   return (
     <React.Fragment>
       <Lazy
         Component={LazyDialogPaymentMethod}
         open={addPaymenthMethodDialog}
-        onCreated={onPaymentMethodCreated}
+        onCreated={pollPaymentMethods}
         handleClose={() => setAddPaymenthMethodDialog(false)}
-        loading={loading}
+        loading={pollPaymentMethodsLoading}
       />
       <Lazy
         Component={LazyDialogYN}

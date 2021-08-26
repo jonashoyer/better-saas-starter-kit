@@ -73,6 +73,7 @@ CREATE TABLE "Project" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "stripeCustomerId" TEXT NOT NULL,
     "stripeSubscriptionId" TEXT NOT NULL,
+    "stripeTaxId" TEXT,
     "subscriptionPlan" "SubscriptionPlan" NOT NULL DEFAULT E'FREE',
 
     PRIMARY KEY ("id")

@@ -29,3 +29,17 @@ export const isJSONValueObject = (jsonValue: Prisma.JsonValue): jsonValue is Pri
 }
 
 export const snakeToReadable = (str: string) => capitalize(str.toLowerCase().replace(/_/g, ' '));
+
+
+export const hashString = (str: string) => {
+  let hash = 0;
+  if (str.length == 0) {
+    return hash;
+  }
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
