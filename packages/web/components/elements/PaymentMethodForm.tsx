@@ -9,13 +9,14 @@ import { FieldValues, UseFormReturn } from 'react-hook-form';
 import useTranslation from 'next-translate/useTranslation';
 
 interface PaymentMethodFormProps<TFieldValues = FieldValues>  {
+  autoFocus?: boolean;
   form: UseFormReturn<TFieldValues>;
   setError: (error: any) => any;
   setCardComplete: (completed: boolean) => any;
   loading: boolean;
 }
 
-export default function PaymentMethodForm({ form, setError, setCardComplete, loading }: PaymentMethodFormProps) {
+export default function PaymentMethodForm({ autoFocus, form, setError, setCardComplete, loading }: PaymentMethodFormProps) {
 
   const { t, lang } = useTranslation();
 
@@ -33,6 +34,7 @@ export default function PaymentMethodForm({ form, setError, setCardComplete, loa
         <Button onClick={_debugFill}>Fill</Button>
       }
       <StripeCardElement
+        autoFocus={autoFocus}
         setError={setError}
         setCardComplete={setCardComplete}
         disabled={loading}
@@ -40,7 +42,6 @@ export default function PaymentMethodForm({ form, setError, setCardComplete, loa
       <Box sx={{ pt: 2 }}>
         <FormTextField
           label={t('pricing:fullName')}
-          autoFocus
           fullWidth
           size='small'
           margin='dense'

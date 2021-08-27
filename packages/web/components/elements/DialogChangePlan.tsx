@@ -34,6 +34,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const elements = useElements();
 
   const form = useForm({ criteriaMode: 'firstError', mode: 'all' });
+  const { reset } = form;
+
   const [error, setError] = React.useState(null);
   const [cardComplete, setCardComplete] = React.useState(false);
   const [stripeClientSecret, setStripeClientSecret] = React.useState(null);
@@ -56,6 +58,11 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       projectId: project.id,
     }
   })
+
+  React.useEffect(() => {
+    if (!open) return;
+    reset();
+  }, [reset, open])
 
   React.useEffect(() => {
     if (!targetProduct) return;
@@ -115,8 +122,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
     const createPaymentMethod = async () => {
       if (!stripe || !elements) {
-        // Stripe.js has not loaded yet. Make sure to disable
-        // form submission until Stripe.js has loaded.
         return;
       }
   
@@ -185,7 +190,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
             }
 
             <Box>
-              <Typography color='textSecondary' variant='body2'>Payment Method</Typography>
+              <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
               {currentPaymentMethod &&
                 <ListItem dense>
                   <ListItemIcon>
@@ -196,6 +201,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
               }
               {!currentPaymentMethod &&
                 <PaymentMethodForm
+                  autoFocus
                   form={form}
                   setCardComplete={setCardComplete}
                   loading={loading}

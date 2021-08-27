@@ -35,6 +35,9 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
     onCompleted() {
       setAddPaymenthMethodDialog(false);
     },
+    onFailed() {
+      console.error('timeouted!');
+    }
   })
 
   const [getPaymenMethods, { loading: getPaymentMethodsLoading }] = useGetPaymentMethodsLazyQuery({
@@ -138,7 +141,7 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
       </Menu>
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
 
-        <Typography variant='h6' gutterBottom>{t('settings:paymentMethods')}</Typography>
+        <Typography variant='h6' gutterBottom>{t('settings:paymentMethod', { count: 99 })}</Typography>
 
         <PaymentMethodPair
           t={t}

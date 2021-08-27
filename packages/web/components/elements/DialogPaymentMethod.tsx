@@ -135,6 +135,7 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
       <form onSubmit={form.handleSubmit(confirmCardSetup)}>
         <DialogContent>
           <PaymentMethodForm
+            autoFocus
             form={form}
             loading={loading}
             setCardComplete={setCardComplete}

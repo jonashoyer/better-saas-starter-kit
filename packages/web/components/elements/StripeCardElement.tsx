@@ -2,19 +2,21 @@
 
 import React from "react";
 import { Box, useTheme } from "@material-ui/core";
-import { CardElement } from "@stripe/react-stripe-js";
+import { CardElement, useElements } from "@stripe/react-stripe-js";
 
 
 export interface StripeCardElementProps {
   setError: (e: any) => any;
   setCardComplete: (completed: boolean) => any;
   disabled?: boolean;
+  autoFocus?: boolean;
 }
 
 
-const StripeCardElement = ({ setError, setCardComplete, disabled }: StripeCardElementProps) => {
+const StripeCardElement = ({ setError, setCardComplete, disabled, autoFocus }: StripeCardElementProps) => {
 
   const theme = useTheme();
+  const elements = useElements();
 
   const colors = React.useMemo(() => ({
       BLUR: 'rgba(0, 0, 0, 0.23)',
@@ -32,6 +34,9 @@ const StripeCardElement = ({ setError, setCardComplete, disabled }: StripeCardEl
         }}
         onFocus={() => setState('FOCUS')}
         onBlur={() => setState('BLUR')}
+        onReady={() => {
+          autoFocus && elements.getElement("card").focus();
+        }}
         options={{
           hidePostalCode: true,
           disabled,
