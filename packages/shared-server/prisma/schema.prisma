@@ -89,6 +89,7 @@ model Project {
   paymentMethods PaymentMethod[]
   userInvites    UserInvite[]
   invoices       Invoice[]
+  subscriptions  StripeSubscription[]
 }
 
 model UserInvite {
@@ -105,7 +106,7 @@ model UserInvite {
 }
 
 model PaymentMethod {
-  id        String   @id
+  id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -126,6 +127,36 @@ enum PaymentMethodImportance {
   PRIMARY
   BACKUP
   OTHER
+}
+
+enum StripeSubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+model StripeSubscription {
+  id                 String                   @id
+  metadata           Json
+  status             StripeSubscriptionStatus
+  
+  priceId            String
+  quantity           Int
+  cancelAtPeriodEnd  Boolean
+
+  cancelAt           DateTime?
+  canceledAt         DateTime?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  created            DateTime
+  endedAt            DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model VerificationRequest {

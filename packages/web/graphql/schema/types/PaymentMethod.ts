@@ -62,7 +62,6 @@ export const CreateSetupIntent = mutationField('createSetupIntent', {
       customer: project.stripeCustomerId,
     });
 
-
     return {
       clientSecret: intent.client_secret,
     };

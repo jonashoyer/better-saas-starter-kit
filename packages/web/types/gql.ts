@@ -654,13 +654,6 @@ export type BillingInfomation = {
   upcomingInvoice: Invoice;
 };
 
-export type BillingSubscription = {
-  __typename?: 'BillingSubscription';
-  stripeSubscriptionId: Scalars['String'];
-  status: SubscriptionStatus;
-  trialEnd?: Maybe<Scalars['Date']>;
-};
-
 export type CheckoutSession = {
   __typename?: 'CheckoutSession';
   sessionId?: Maybe<Scalars['String']>;
@@ -738,8 +731,8 @@ export type Mutation = {
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   deleteUserInvite?: Maybe<UserInvite>;
-  createSubscription?: Maybe<BillingSubscription>;
-  updateSubscription?: Maybe<BillingSubscription>;
+  createSubscription?: Maybe<StripeSubscription>;
+  updateSubscription?: Maybe<StripeSubscription>;
 };
 
 
@@ -836,7 +829,6 @@ export type MutationCreateSubscriptionArgs = {
 export type MutationUpdateSubscriptionArgs = {
   projectId: Scalars['String'];
   priceId?: Maybe<Scalars['String']>;
-  quantity?: Maybe<Scalars['Int']>;
 };
 
 export type Ok = {
@@ -941,6 +933,32 @@ export type StatusResponse = {
   message?: Maybe<Scalars['String']>;
 };
 
+export type StripeSubscription = {
+  __typename?: 'StripeSubscription';
+  id: Scalars['String'];
+  metadata: Scalars['Json'];
+  status: StripeSubscriptionStatus;
+  priceId: Scalars['String'];
+  quantity: Scalars['Int'];
+  cancelAtPeriodEnd: Scalars['Boolean'];
+  cancelAt?: Maybe<Scalars['DateTime']>;
+  canceledAt?: Maybe<Scalars['DateTime']>;
+  currentPeriodStart: Scalars['DateTime'];
+  currentPeriodEnd: Scalars['DateTime'];
+  created: Scalars['DateTime'];
+  endedAt?: Maybe<Scalars['DateTime']>;
+};
+
+export enum StripeSubscriptionStatus {
+  Incomplete = 'INCOMPLETE',
+  IncompleteExpired = 'INCOMPLETE_EXPIRED',
+  Trialing = 'TRIALING',
+  Active = 'ACTIVE',
+  PastDue = 'PAST_DUE',
+  Canceled = 'CANCELED',
+  Unpaid = 'UNPAID'
+}
+
 export type Subscription = {
   __typename?: 'Subscription';
   ping?: Maybe<Scalars['DateTime']>;
@@ -950,16 +968,6 @@ export enum SubscriptionPlan {
   Free = 'FREE',
   Basic = 'BASIC',
   Premium = 'PREMIUM'
-}
-
-export enum SubscriptionStatus {
-  Active = 'ACTIVE',
-  Canceled = 'CANCELED',
-  Incomplete = 'INCOMPLETE',
-  IncompleteExpired = 'INCOMPLETE_EXPIRED',
-  PastDue = 'PAST_DUE',
-  Trialing = 'TRIALING',
-  Unpaid = 'UNPAID'
 }
 
 export enum TaxType {

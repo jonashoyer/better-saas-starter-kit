@@ -1,4 +1,4 @@
-import { PaymentMethodImportance, PrismaClient } from '@prisma/client';
+import { PaymentMethodImportance, StripeSubscription, PrismaClient } from '@prisma/client';
 import Stripe from 'stripe'
 
 // https://egghead.io/blog/saas-app-with-nextjs-prisma-auth0-and-stripe
@@ -101,16 +101,6 @@ export class StripeHandler {
     })
   };
 
-  createSubscription(customerId: string, priceId: string) {
-    return this.stripe.subscriptions.create({
-      customer: customerId,
-      items: [{
-        price: priceId,
-      }],
-      payment_behavior: 'allow_incomplete',
-    });
-  }
-
   /**
    * Copies the billing details from the payment method to the customer object.
    */
@@ -140,52 +130,116 @@ export class StripeHandler {
   //   if (error) throw error;
   // };
 
+  formatStripeSubscription(s: Stripe.Subscription): StripeSubscription {
+    return {
+      id: s.id,
+      metadata: s.metadata,
+      status: s.status.toUpperCase() as any,
+      priceId: s.items.data[0].price.id,
+      quantity: s.items.data[0].quantity ?? 1,
+      cancelAtPeriodEnd: s.cancel_at_period_end,
+      cancelAt: s.cancel_at ? secondsToDate(s.cancel_at) : null,
+      canceledAt: s.canceled_at ? secondsToDate(s.canceled_at) : null,
+      currentPeriodStart: secondsToDate(s.current_period_start),
+      currentPeriodEnd: secondsToDate(s.current_period_end),
+      created: secondsToDate(s.created),
+      endedAt: s.ended_at ? secondsToDate(s.ended_at) : null,
+      projectId: 'unknown'
+    }
+  }
+
+  async createSubscription(stripeCustomerId: string, priceId: string, quantity: number) {
+    const subscription = await this.stripe.subscriptions.create({
+      customer: stripeCustomerId,
+      items: [
+        { price: priceId, quantity },
+      ],
+      expand: ['latest_invoice.payment_intent', 'plan.product'],
+    });
+
+    return this.formatStripeSubscription(subscription);
+  }
+
+  async updateSubscription(stripeCustomerId: string, stripeSubscriptionId: string, priceId: string, quantity: number) {
+    const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const currentPriceId = subscription.items.data[0].price.id;
+
+    let updatedSubscription: any;
+    if (currentPriceId == priceId) {
+      updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
+        items: [
+          {
+            id: subscription.items.data[0].id,
+            quantity,
+          },
+        ],
+      });
+    } else {
+      updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
+        items: [
+          {
+            id: subscription.items.data[0].id,
+            deleted: true,
+          },
+          {
+            price: priceId,
+            quantity,
+          },
+        ],
+      });
+    }
+
+    const invoice = await this.stripe.invoices.create({
+      customer: stripeCustomerId,
+      subscription: subscription.id,
+      description: `Change to ${quantity} seat(s) on the ${updatedSubscription.plan.product.name} plan`,
+    });
+
+    await this.stripe.invoices.pay(invoice.id);
+    return this.formatStripeSubscription(updatedSubscription);
+  }
+
   async manageSubscriptionStatusChange(
-    subscriptionId: string,
-    stripeCustomerId: string,
-    createAction = false
+    subscription: any,
   ) {
+    
+    // TODO: 
+    const project = await this.prisma.project.findUnique({
+      where: { stripeCustomerId: subscription.customer }
+    });
 
-    // const project = await this.prisma.project.findUnique({
-    //   where: { stripeCustomerId }
-    // });
+    if (!project) {
+      throw new Error(`Stripe customer not found! (id: ${subscription.customer})`);
+    }
 
-    // if (!project) {
-    //   throw new Error(`Stripe customer not found! (id: ${stripeCustomerId})`);
-    // }
+    const subscriptionData = {
+      id: subscription.id,
+      projectId: project.id,
+      metadata: subscription.metadata,
+      status: subscription.status.toUpperCase() as any,
+      priceId: subscription.items.data[0].price.id,
+      quantity: subscription.items.data[0].quantity ?? 1,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAt: subscription.cancel_at ? secondsToDate(subscription.cancel_at) : null,
+      canceledAt: subscription.canceled_at ? secondsToDate(subscription.canceled_at) : null,
+      currentPeriodStart: secondsToDate(subscription.current_period_start),
+      currentPeriodEnd: secondsToDate(subscription.current_period_end),
+      created: secondsToDate(subscription.created),
+      endedAt: subscription.ended_at ? secondsToDate(subscription.ended_at) : null,
+    };
 
-    // const subscription = await this.stripe.subscriptions.retrieve(subscriptionId, {
-    //   expand: ['default_payment_method']
-    // });
+    await this.prisma.stripeSubscription.upsert({
+      create: subscriptionData,
+      update: subscriptionData,
+      where: { id: subscriptionData.id },
+    });
 
-    // // Upsert the latest status of the subscription object.
-    // const subscriptionData = {
-    //   id: subscription.id,
-    //   projectId: project.id,
-    //   metadata: subscription.metadata,
-    //   status: subscription.status,
-    //   priceId: subscription.items.data[0].price.id,
-    //   quantity: subscription.quantity,
-    //   cancel_at_period_end: subscription.cancel_at_period_end,
-    //   cancel_at: subscription.cancel_at
-    //     ? secondsToDate(subscription.cancel_at)
-    //     : null,
-    //   canceled_at: subscription.canceled_at
-    //     ? secondsToDate(subscription.canceled_at)
-    //     : null,
-    //   current_period_start: secondsToDate(subscription.current_period_start),
-    //   current_period_end: secondsToDate(subscription.current_period_end),
-    //   created: secondsToDate(subscription.created),
-    //   ended_at: subscription.ended_at ? secondsToDate(subscription.ended_at) : null,
-    // };
-
-    // const { error } = await supabaseAdmin
-    //   .from('subscriptions')
-    //   .insert([subscriptionData], { upsert: true });
-    // if (error) throw error;
-    // console.log(
-    //   `Inserted/updated subscription [${subscription.id}] for user [${uuid}]`
-    // );
+    if (subscription.metadata.type) {
+      await this.prisma.project.update({
+        where: { stripeCustomerId: subscription.customer },
+        data: { subscriptionPlan: subscription.metadata.type },
+      })
+    }
 
     // // For a new subscription copy the billing details to the customer object.
     // // NOTE: This is a costly operation and should happen at the very end.
@@ -197,19 +251,6 @@ export class StripeHandler {
   };
 
   createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam ) {
-    // const lineItems = [
-    //   {
-    //     price_data: {
-    //       currency: 'usd', // swap this out for your currency
-    //       product_data: {
-    //         name: course.title,
-    //       },
-    //       unit_amount: course.price,
-    //     },
-    //     quantity: 1,
-    //   },
-    // ]
-
     return this.stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],

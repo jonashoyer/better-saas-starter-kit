@@ -118,7 +118,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const canSubmit = !loading && (!!currentPaymentMethod || cardComplete);
 
-  const submit = async (data: any) => {
+  const handleChangePlan = async (data: any) => {
 
     const createPaymentMethod = async () => {
       if (!stripe || !elements) {
@@ -162,8 +162,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       console.log('[PaymentMethod]', payload.setupIntent);
     }
 
-    if (currentPaymentMethod) {
-      createPaymentMethod();
+    if (!currentPaymentMethod) {
+      return createPaymentMethod();
     }
 
     // TODO: Contiune subscription billing
@@ -237,7 +237,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       </DialogContent>
       <DialogActions>
         <Button disabled={loading} onClick={handleClose}>{t('common:close')}</Button>
-        <LoadingButton loading={loading} disabled={!canSubmit} onClick={submit} variant='contained'>{t('pricing:changePlanConfirm')}</LoadingButton>
+        <LoadingButton loading={loading} disabled={!canSubmit} onClick={form.handleSubmit(handleChangePlan)} variant='contained'>{t('pricing:changePlanConfirm')}</LoadingButton>
       </DialogActions>
     </Dialog>
   );

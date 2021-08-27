@@ -86,27 +86,33 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
-          await handler.manageSubscriptionStatusChange(
-            obj.id,
-            obj.customer,
-            event.type === 'customer.subscription.created'
-          );
+          await handler.manageSubscriptionStatusChange(obj);
+          break;
+        case 'customer.subscription.trial_will_end':
+          // Send notification to your user that the trial will end
           break;
         case 'checkout.session.completed':
           if (obj.mode === 'subscription') {
-            const subscriptionId = obj.subscription;
-            await handler.manageSubscriptionStatusChange(
-              subscriptionId,
-              obj.customer,
-              true
-            );
+            const subscription = await stripe.subscriptions.retrieve(obj.subscription);
+            await handler.manageSubscriptionStatusChange(subscription);
           }
           break;
         case 'invoice.paid':
           //TODO: 
+          // Used to provision services after the trial has ended.
+          // The status of the invoice will show up as paid. Store the status in your
+          // database to reference when a user accesses your service to avoid hitting rate limits.
           break;
         case 'invoice.payment_failed':
           //TODO: 
+          // If the payment fails or the customer does not have a valid payment method,
+          //  an invoice.payment_failed event is sent, the subscription becomes past_due.
+          // Use this webhook to notify your user that their payment has
+          // failed and to retrieve new card details.
+          break;
+        case 'invoice.finalized':
+          // If you want to manually send out invoices to your customers
+          // or store them locally to reference to avoid hitting Stripe rate limits.
           break;
         case 'payment_method.attached':
           await handler.upsertPaymentMethodRecord(obj);

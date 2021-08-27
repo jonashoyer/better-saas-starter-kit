@@ -9,12 +9,6 @@ type BillingInfomation {
   upcomingInvoice: Invoice!
 }
 
-type BillingSubscription {
-  status: SubscriptionStatus!
-  stripeSubscriptionId: String!
-  trialEnd: Date
-}
-
 type CheckoutSession {
   sessionId: String
 }
@@ -87,7 +81,7 @@ type Mutation {
   createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
   createSetupIntent(projectId: String!): SetupIntent
-  createSubscription(priceId: String!, projectId: String!, quantity: Int!): BillingSubscription
+  createSubscription(priceId: String!, projectId: String!, quantity: Int!): StripeSubscription
   deletePaymentMethod(id: String!): PaymentMethod
   deleteProject(id: String!): Project
   deleteTaxId(projectId: String!): Ok
@@ -96,7 +90,7 @@ type Mutation {
   sendVerifyEmail(email: String!): StatusResponse
   updatePaymentMethod(input: UpdatePaymentMethodInput!): PaymentMethod
   updateProject(input: UpdateProjectInput!): Project
-  updateSubscription(priceId: String, projectId: String!, quantity: Int): BillingSubscription
+  updateSubscription(priceId: String, projectId: String!): StripeSubscription
   updateTaxId(input: UpdateTaxIdInput!): Ok
   updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
@@ -163,13 +157,22 @@ type StatusResponse {
   ok: Boolean
 }
 
-enum SubscriptionPlan {
-  BASIC
-  FREE
-  PREMIUM
+type StripeSubscription {
+  cancelAt: DateTime
+  cancelAtPeriodEnd: Boolean!
+  canceledAt: DateTime
+  created: DateTime!
+  currentPeriodEnd: DateTime!
+  currentPeriodStart: DateTime!
+  endedAt: DateTime
+  id: String!
+  metadata: Json!
+  priceId: String!
+  quantity: Int!
+  status: StripeSubscriptionStatus!
 }
 
-enum SubscriptionStatus {
+enum StripeSubscriptionStatus {
   ACTIVE
   CANCELED
   INCOMPLETE
@@ -177,6 +180,12 @@ enum SubscriptionStatus {
   PAST_DUE
   TRIALING
   UNPAID
+}
+
+enum SubscriptionPlan {
+  BASIC
+  FREE
+  PREMIUM
 }
 
 enum TaxType {

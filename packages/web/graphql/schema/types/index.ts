@@ -23,4 +23,4 @@ export * as Project from './Project';
 export * as PaymentMethod from './PaymentMethod';
 export * as UserProject from './UserProject';
 export * as UserInvite from './UserInvite';
-export * as BillingSubscription from './BillingSubscription';
+export * as StripeSubscription from './StripeSubscription';

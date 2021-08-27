@@ -87,8 +87,8 @@ export interface NexusGenEnums {
   InvoiceStatus: prisma.InvoiceStatus
   PaymentMethodImportance: prisma.PaymentMethodImportance
   ProjectRole: prisma.ProjectRole
+  StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
   SubscriptionPlan: prisma.SubscriptionPlan
-  SubscriptionStatus: "ACTIVE" | "CANCELED" | "INCOMPLETE" | "INCOMPLETE_EXPIRED" | "PAST_DUE" | "TRIALING" | "UNPAID"
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
 }
 
@@ -111,11 +111,6 @@ export interface NexusGenObjects {
     latestInvoice: NexusGenRootTypes['Invoice']; // Invoice!
     upcomingInvoice: NexusGenRootTypes['Invoice']; // Invoice!
   }
-  BillingSubscription: { // root type
-    status: NexusGenEnums['SubscriptionStatus']; // SubscriptionStatus!
-    stripeSubscriptionId: string; // String!
-    trialEnd?: NexusGenScalars['Date'] | null; // Date
-  }
   CheckoutSession: { // root type
     sessionId?: string | null; // String
   }
@@ -135,6 +130,7 @@ export interface NexusGenObjects {
     message?: string | null; // String
     ok?: boolean | null; // Boolean
   }
+  StripeSubscription: prisma.StripeSubscription;
   User: prisma.User;
   UserInvite: prisma.UserInvite;
   UserProject: prisma.UserProject;
@@ -157,11 +153,6 @@ export interface NexusGenFieldTypes {
     currentQuantity: number; // Int!
     latestInvoice: NexusGenRootTypes['Invoice']; // Invoice!
     upcomingInvoice: NexusGenRootTypes['Invoice']; // Invoice!
-  }
-  BillingSubscription: { // field return type
-    status: NexusGenEnums['SubscriptionStatus']; // SubscriptionStatus!
-    stripeSubscriptionId: string; // String!
-    trialEnd: NexusGenScalars['Date'] | null; // Date
   }
   CheckoutSession: { // field return type
     sessionId: string | null; // String
@@ -188,7 +179,7 @@ export interface NexusGenFieldTypes {
     createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     createProject: NexusGenRootTypes['Project'] | null; // Project
     createSetupIntent: NexusGenRootTypes['SetupIntent'] | null; // SetupIntent
-    createSubscription: NexusGenRootTypes['BillingSubscription'] | null; // BillingSubscription
+    createSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     deletePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
@@ -197,7 +188,7 @@ export interface NexusGenFieldTypes {
     sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     updatePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
     updateProject: NexusGenRootTypes['Project'] | null; // Project
-    updateSubscription: NexusGenRootTypes['BillingSubscription'] | null; // BillingSubscription
+    updateSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     updateTaxId: NexusGenRootTypes['Ok'] | null; // Ok
     updateUser: NexusGenRootTypes['User'] | null; // User
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
@@ -242,6 +233,20 @@ export interface NexusGenFieldTypes {
     message: string | null; // String
     ok: boolean | null; // Boolean
   }
+  StripeSubscription: { // field return type
+    cancelAt: NexusGenScalars['DateTime'] | null; // DateTime
+    cancelAtPeriodEnd: boolean; // Boolean!
+    canceledAt: NexusGenScalars['DateTime'] | null; // DateTime
+    created: NexusGenScalars['DateTime']; // DateTime!
+    currentPeriodEnd: NexusGenScalars['DateTime']; // DateTime!
+    currentPeriodStart: NexusGenScalars['DateTime']; // DateTime!
+    endedAt: NexusGenScalars['DateTime'] | null; // DateTime
+    id: string; // String!
+    metadata: NexusGenScalars['Json']; // Json!
+    priceId: string; // String!
+    quantity: number; // Int!
+    status: NexusGenEnums['StripeSubscriptionStatus']; // StripeSubscriptionStatus!
+  }
   User: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     email: string | null; // String
@@ -276,11 +281,6 @@ export interface NexusGenFieldTypeNames {
     latestInvoice: 'Invoice'
     upcomingInvoice: 'Invoice'
   }
-  BillingSubscription: { // field return type name
-    status: 'SubscriptionStatus'
-    stripeSubscriptionId: 'String'
-    trialEnd: 'Date'
-  }
   CheckoutSession: { // field return type name
     sessionId: 'String'
   }
@@ -306,7 +306,7 @@ export interface NexusGenFieldTypeNames {
     createManyUserInvite: 'UserInvite'
     createProject: 'Project'
     createSetupIntent: 'SetupIntent'
-    createSubscription: 'BillingSubscription'
+    createSubscription: 'StripeSubscription'
     deletePaymentMethod: 'PaymentMethod'
     deleteProject: 'Project'
     deleteTaxId: 'Ok'
@@ -315,7 +315,7 @@ export interface NexusGenFieldTypeNames {
     sendVerifyEmail: 'StatusResponse'
     updatePaymentMethod: 'PaymentMethod'
     updateProject: 'Project'
-    updateSubscription: 'BillingSubscription'
+    updateSubscription: 'StripeSubscription'
     updateTaxId: 'Ok'
     updateUser: 'User'
     updateUserProject: 'UserProject'
@@ -359,6 +359,20 @@ export interface NexusGenFieldTypeNames {
   StatusResponse: { // field return type name
     message: 'String'
     ok: 'Boolean'
+  }
+  StripeSubscription: { // field return type name
+    cancelAt: 'DateTime'
+    cancelAtPeriodEnd: 'Boolean'
+    canceledAt: 'DateTime'
+    created: 'DateTime'
+    currentPeriodEnd: 'DateTime'
+    currentPeriodStart: 'DateTime'
+    endedAt: 'DateTime'
+    id: 'String'
+    metadata: 'Json'
+    priceId: 'String'
+    quantity: 'Int'
+    status: 'StripeSubscriptionStatus'
   }
   User: { // field return type name
     createdAt: 'DateTime'
@@ -436,7 +450,6 @@ export interface NexusGenArgTypes {
     updateSubscription: { // args
       priceId?: string | null; // String
       projectId: string; // String!
-      quantity?: number | null; // Int
     }
     updateTaxId: { // args
       input: NexusGenInputs['UpdateTaxIdInput']; // UpdateTaxIdInput!
