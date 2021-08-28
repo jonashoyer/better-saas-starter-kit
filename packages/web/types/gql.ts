@@ -631,6 +631,50 @@ export function useUpdateUserProjectMutation(baseOptions?: Apollo.MutationHookOp
 export type UpdateUserProjectMutationHookResult = ReturnType<typeof useUpdateUserProjectMutation>;
 export type UpdateUserProjectMutationResult = Apollo.MutationResult<UpdateUserProjectMutation>;
 export type UpdateUserProjectMutationOptions = Apollo.BaseMutationOptions<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>;
+export const UpsertSubscriptionDocument = gql`
+    mutation UpsertSubscription($input: UpsertSubscriptionInput!) {
+  upsertSubscription(input: $input) {
+    id
+    metadata
+    status
+    priceId
+    quantity
+    cancelAtPeriodEnd
+    cancelAt
+    canceledAt
+    currentPeriodStart
+    currentPeriodEnd
+    created
+    endedAt
+  }
+}
+    `;
+export type UpsertSubscriptionMutationFn = Apollo.MutationFunction<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>;
+
+/**
+ * __useUpsertSubscriptionMutation__
+ *
+ * To run a mutation, you first call `useUpsertSubscriptionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertSubscriptionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertSubscriptionMutation, { data, loading, error }] = useUpsertSubscriptionMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpsertSubscriptionMutation(baseOptions?: Apollo.MutationHookOptions<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>(UpsertSubscriptionDocument, options);
+      }
+export type UpsertSubscriptionMutationHookResult = ReturnType<typeof useUpsertSubscriptionMutation>;
+export type UpsertSubscriptionMutationResult = Apollo.MutationResult<UpsertSubscriptionMutation>;
+export type UpsertSubscriptionMutationOptions = Apollo.BaseMutationOptions<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -731,8 +775,7 @@ export type Mutation = {
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   deleteUserInvite?: Maybe<UserInvite>;
-  createSubscription?: Maybe<StripeSubscription>;
-  updateSubscription?: Maybe<StripeSubscription>;
+  upsertSubscription?: Maybe<StripeSubscription>;
 };
 
 
@@ -819,16 +862,8 @@ export type MutationDeleteUserInviteArgs = {
 };
 
 
-export type MutationCreateSubscriptionArgs = {
-  projectId: Scalars['String'];
-  priceId: Scalars['String'];
-  quantity: Scalars['Int'];
-};
-
-
-export type MutationUpdateSubscriptionArgs = {
-  projectId: Scalars['String'];
-  priceId?: Maybe<Scalars['String']>;
+export type MutationUpsertSubscriptionArgs = {
+  input: UpsertSubscriptionInput;
 };
 
 export type Ok = {
@@ -1036,6 +1071,11 @@ export type UpdateUserInput = {
 export type UpdateUserProjectInput = {
   id: Scalars['String'];
   role?: Maybe<ProjectRole>;
+};
+
+export type UpsertSubscriptionInput = {
+  projectId: Scalars['String'];
+  priceId: Scalars['String'];
 };
 
 export type User = {
@@ -1338,5 +1378,18 @@ export type UpdateUserProjectMutation = (
   & { updateUserProject?: Maybe<(
     { __typename?: 'UserProject' }
     & Pick<UserProject, 'id' | 'createdAt' | 'role'>
+  )> }
+);
+
+export type UpsertSubscriptionMutationVariables = Exact<{
+  input: UpsertSubscriptionInput;
+}>;
+
+
+export type UpsertSubscriptionMutation = (
+  { __typename?: 'Mutation' }
+  & { upsertSubscription?: Maybe<(
+    { __typename?: 'StripeSubscription' }
+    & Pick<StripeSubscription, 'id' | 'metadata' | 'status' | 'priceId' | 'quantity' | 'cancelAtPeriodEnd' | 'cancelAt' | 'canceledAt' | 'currentPeriodStart' | 'currentPeriodEnd' | 'created' | 'endedAt'>
   )> }
 );

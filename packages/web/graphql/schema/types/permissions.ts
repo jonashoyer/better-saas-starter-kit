@@ -24,6 +24,7 @@ export const requireProjectAccess = (options: ProjectAccessOptions = {}): AuthRe
   const projectIdFn = options.projectIdFn ?? ((_, args) => args.projectId);
   const projectId = projectIdFn(root, args, ctx);
   if (options.nullable && !projectId) return true;
+  if (!projectId) throw new Error('Project id was not retrieved!');
   return hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId, role);
 }
 

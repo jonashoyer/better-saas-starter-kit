@@ -1,0 +1,16 @@
+mutation UpsertSubscription($input: UpsertSubscriptionInput!) {
+  upsertSubscription(input: $input) {
+    id
+    metadata
+    status
+    priceId
+    quantity
+    cancelAtPeriodEnd
+    cancelAt
+    canceledAt
+    currentPeriodStart
+    currentPeriodEnd
+    created
+    endedAt
+  }
+}

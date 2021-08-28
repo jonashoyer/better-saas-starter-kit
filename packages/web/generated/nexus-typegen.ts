@@ -63,6 +63,10 @@ export interface NexusGenInputs {
     id: string; // String!
     role?: NexusGenEnums['ProjectRole'] | null; // ProjectRole
   }
+  UpsertSubscriptionInput: { // input type
+    priceId: string; // String!
+    projectId: string; // String!
+  }
   UserInviteProjectIdEmailCompoundUniqueInput: { // input type
     email: string; // String!
     projectId: string; // String!
@@ -179,7 +183,6 @@ export interface NexusGenFieldTypes {
     createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     createProject: NexusGenRootTypes['Project'] | null; // Project
     createSetupIntent: NexusGenRootTypes['SetupIntent'] | null; // SetupIntent
-    createSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     deletePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
@@ -188,10 +191,10 @@ export interface NexusGenFieldTypes {
     sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     updatePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
     updateProject: NexusGenRootTypes['Project'] | null; // Project
-    updateSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     updateTaxId: NexusGenRootTypes['Ok'] | null; // Ok
     updateUser: NexusGenRootTypes['User'] | null; // User
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    upsertSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     verifyEmail: NexusGenRootTypes['User'] | null; // User
   }
   Ok: { // field return type
@@ -306,7 +309,6 @@ export interface NexusGenFieldTypeNames {
     createManyUserInvite: 'UserInvite'
     createProject: 'Project'
     createSetupIntent: 'SetupIntent'
-    createSubscription: 'StripeSubscription'
     deletePaymentMethod: 'PaymentMethod'
     deleteProject: 'Project'
     deleteTaxId: 'Ok'
@@ -315,10 +317,10 @@ export interface NexusGenFieldTypeNames {
     sendVerifyEmail: 'StatusResponse'
     updatePaymentMethod: 'PaymentMethod'
     updateProject: 'Project'
-    updateSubscription: 'StripeSubscription'
     updateTaxId: 'Ok'
     updateUser: 'User'
     updateUserProject: 'UserProject'
+    upsertSubscription: 'StripeSubscription'
     verifyEmail: 'User'
   }
   Ok: { // field return type name
@@ -418,11 +420,6 @@ export interface NexusGenArgTypes {
     createSetupIntent: { // args
       projectId: string; // String!
     }
-    createSubscription: { // args
-      priceId: string; // String!
-      projectId: string; // String!
-      quantity: number; // Int!
-    }
     deletePaymentMethod: { // args
       id: string; // String!
     }
@@ -447,10 +444,6 @@ export interface NexusGenArgTypes {
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
     }
-    updateSubscription: { // args
-      priceId?: string | null; // String
-      projectId: string; // String!
-    }
     updateTaxId: { // args
       input: NexusGenInputs['UpdateTaxIdInput']; // UpdateTaxIdInput!
     }
@@ -459,6 +452,9 @@ export interface NexusGenArgTypes {
     }
     updateUserProject: { // args
       input: NexusGenInputs['UpdateUserProjectInput']; // UpdateUserProjectInput!
+    }
+    upsertSubscription: { // args
+      input: NexusGenInputs['UpsertSubscriptionInput']; // UpsertSubscriptionInput!
     }
     verifyEmail: { // args
       token: string; // String!

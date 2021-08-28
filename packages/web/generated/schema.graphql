@@ -81,7 +81,6 @@ type Mutation {
   createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
   createSetupIntent(projectId: String!): SetupIntent
-  createSubscription(priceId: String!, projectId: String!, quantity: Int!): StripeSubscription
   deletePaymentMethod(id: String!): PaymentMethod
   deleteProject(id: String!): Project
   deleteTaxId(projectId: String!): Ok
@@ -90,10 +89,10 @@ type Mutation {
   sendVerifyEmail(email: String!): StatusResponse
   updatePaymentMethod(input: UpdatePaymentMethodInput!): PaymentMethod
   updateProject(input: UpdateProjectInput!): Project
-  updateSubscription(priceId: String, projectId: String!): StripeSubscription
   updateTaxId(input: UpdateTaxIdInput!): Ok
   updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
+  upsertSubscription(input: UpsertSubscriptionInput!): StripeSubscription
   verifyEmail(token: String!): User
 }
 
@@ -254,6 +253,11 @@ input UpdateUserInput {
 input UpdateUserProjectInput {
   id: String!
   role: ProjectRole
+}
+
+input UpsertSubscriptionInput {
+  priceId: String!
+  projectId: String!
 }
 
 type User {

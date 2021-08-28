@@ -5,7 +5,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
 import { Product, ProductPrice } from '@prisma/client';
-import { CurrentProjectSettingsQuery, PaymentMethodImportance, SubscriptionPlan, useCreateSetupIntentMutation } from 'types/gql';
+import { CurrentProjectSettingsQuery, PaymentMethodImportance, SubscriptionPlan, useCreateSetupIntentMutation, useUpsertSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from '../../../shared/lib';
 import { Box, capitalize, Divider, FormControlLabel, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@material-ui/core';
 import PaymentMethodForm from './PaymentMethodForm';
@@ -28,8 +28,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const { t, lang } = useTranslation();
 
-  const loading = false;
-
   const stripe = useStripe();
   const elements = useElements();
 
@@ -49,7 +47,15 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     paymentMethods: project.paymentMethods,
     onCompleted() {
       setProcessing(false);
-      // TODO: Contiune subscription billing
+
+      upsertSubscription({
+        variables: {
+          input: {
+            projectId: project.id,
+            priceId: price.id,
+          }
+        }
+      })
     },
   })
 
@@ -58,6 +64,12 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       projectId: project.id,
     }
   })
+
+  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertSubscriptionMutation({
+    onCompleted() {
+      handleClose();
+    }
+  });
 
   React.useEffect(() => {
     if (!open) return;
@@ -116,8 +128,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   }, [createSetupIntent, currentPaymentMethod, project, stripeClientSecret]);
 
 
-  const canSubmit = !loading && (!!currentPaymentMethod || cardComplete);
-
   const handleChangePlan = async (data: any) => {
 
     const createPaymentMethod = async () => {
@@ -166,8 +176,19 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       return createPaymentMethod();
     }
 
-    // TODO: Contiune subscription billing
+    upsertSubscription({
+      variables: {
+        input: {
+          projectId: project.id,
+          priceId: price.id,
+        }
+      }
+    })
   }
+
+  const loading = processing || createSetupIntentLoading || upsertSubscriptionLoading;
+  const canSubmit = !loading && (!!currentPaymentMethod || cardComplete);
+
   
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>

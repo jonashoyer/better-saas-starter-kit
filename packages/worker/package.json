@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
     "clean": "rm -rf dist",
     "build": "npm run clean && npm run generate && tsc",

@@ -1,6 +1,4 @@
-import * as Prisma from '@prisma/client';
-import { Context } from 'graphql/context';
-import { enumType, intArg, mutationField, objectType, queryField, stringArg } from 'nexus';
+import { arg, enumType, inputObjectType, intArg, mutationField, objectType, queryField, stringArg } from 'nexus';
 import Stripe from 'stripe';
 import { secondsToDate } from '../../../../shared-server/lib';
 import { requireProjectAccess } from './permissions';
@@ -144,14 +142,23 @@ export const StripeSubscription = objectType({
   }
 })
 
+export const UpsertSubscriptionInput = inputObjectType({
+  name: 'UpsertSubscriptionInput',
+  definition(t) {
+    t.string('projectId', { required: true });
+    t.string('priceId', { required: true });
+  }
+})
+
 export const upsertSubscription = mutationField('upsertSubscription', {
   type: StripeSubscription,
   args: {
-    projectId: stringArg({ required: true }),
-    priceId: stringArg(),
+    input: arg({ type: UpsertSubscriptionInput, required: true }),
   },
-  authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, args) => args.projectId }),
-  async resolve(root, { projectId, priceId }, ctx) {
+  authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, args) => args.input.projectId }),
+  async resolve(root, { input }, ctx) {
+
+    const { projectId, priceId } = input;
 
     const project = await ctx.prisma.project.findUnique({
       where: { id: projectId },
