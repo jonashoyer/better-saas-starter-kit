@@ -2,9 +2,9 @@ import React from 'react';
 import Head from 'next/head';
 import PageLayout from '../components/layouts/PageLayout';
 import { useSession, signIn, signOut, getSession  } from "next-auth/client";
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@material-ui/core';
 import { CurrentProjectDocument, SelfProjectsDocument, useCurrentProjectQuery, useSelfProjectsQuery } from 'types/gql';
-import ProductPricingsLayout from 'components/layouts/ProductPricingsLayout';
+import ProductPricingsTable from 'components/layouts/ProductPricingsTable';
 import prisma from 'utils/prisma';
 import { GetServerSideProps } from 'next';
 import ProjectSelector from 'components/layouts/ProjectSelector';
@@ -48,7 +48,7 @@ export default function Home(props: any) {
         </Box>
 
         <Box sx={{ py: 1 }}>
-          <ProductPricingsLayout products={props.products} />
+          <ProductPricingsTable component={Paper} products={props.products} />
         </Box>
 
         <Box sx={{ py: 1 }}>

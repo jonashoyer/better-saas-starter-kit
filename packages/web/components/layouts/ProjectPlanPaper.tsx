@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { Box, Button, Paper, Typography } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';
 import { Product, ProductPrice } from '@prisma/client';
-import { formatCurrency } from '../../../shared/lib';
+import { formatCurrency } from 'bs-shared-kit';
 import { isJSONValueObject } from 'utils';
 import Lazy from 'components/elements/Lazy';
 import { CurrentProjectSettingsQuery, Project } from 'types/gql';
@@ -38,6 +38,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant='h6'>{t('common:plan')}</Typography>
+          <Button sx={{ mr: 2 }} variant='outlined'>Compare</Button>
         </Box>
         <Box>
           {sortedProducts.map((e, i) => {

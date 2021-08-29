@@ -96,7 +96,6 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
       setProcessing(true);
     }
 
-
     const payload = await stripe.confirmCardSetup(
       clientSecret,
       {
