@@ -189,21 +189,28 @@ export class StripeHandler {
       });
     }
 
-    const invoice = await this.stripe.invoices.create({
-      customer: stripeCustomerId,
-      subscription: subscription.id,
-      description: `Change to ${quantity} seat(s) on the ${updatedSubscription.plan.product.name} plan`,
-    });
+    // try {
+    //   const invoice = await this.stripe.invoices.create({
+    //     customer: stripeCustomerId,
+    //     subscription: subscription.id,
+    //     description: `Change to ${quantity} seat(s) on the ${updatedSubscription.plan.product.name} plan`,
+    //   });
+    //   try {
+    //     await this.stripe.invoices.pay(invoice.id);
+    //   } catch {
+    //     console.log('pay')
+    //   }
+    // } catch {
+    //   console.log('invoice')
+    // }
 
-    await this.stripe.invoices.pay(invoice.id);
     return this.formatStripeSubscription(updatedSubscription);
   }
 
   async manageSubscriptionStatusChange(
     subscription: any,
   ) {
-    
-    // TODO: 
+
     const project = await this.prisma.project.findUnique({
       where: { stripeCustomerId: subscription.customer }
     });
@@ -211,6 +218,12 @@ export class StripeHandler {
     if (!project) {
       throw new Error(`Stripe customer not found! (id: ${subscription.customer})`);
     }
+
+    if (subscription.items.data.length > 1) {
+      console.warn('Subscription containes more then one item!');
+    }
+
+    const product = await this.stripe.products.retrieve(subscription.items.data[0].plan.product);
 
     const subscriptionData = {
       id: subscription.id,
@@ -234,10 +247,10 @@ export class StripeHandler {
       where: { id: subscriptionData.id },
     });
 
-    if (subscription.metadata.type) {
+    if (product && product.metadata?.type) {
       await this.prisma.project.update({
         where: { stripeCustomerId: subscription.customer },
-        data: { subscriptionPlan: subscription.metadata.type },
+        data: { subscriptionPlan: product.metadata.type as any },
       })
     }
 
