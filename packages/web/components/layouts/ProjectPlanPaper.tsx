@@ -9,6 +9,7 @@ import Lazy from 'components/elements/Lazy';
 import { CurrentProjectSettingsQuery, Project } from 'types/gql';
 
 const LazyDialogChangePlan = dynamic(() => import('../elements/DialogChangePlan'));
+const LazyDialogPlanCompare = dynamic(() => import('../elements/DialogPlanCompare'));
 
 interface ProjectPlanPaperProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
@@ -21,6 +22,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
   const priceFindFn = e => e.interval == 'month';
 
   const [changePlan, setChangePlan] = React.useState(null);
+  const [showDialogPlanCompare, setShowDialogPlanCompare] = React.useState(false);
 
 
   const sortedProducts = products.sort((a, b) => (a.prices.find(priceFindFn).unitAmount ?? Infinity) - (b.prices.find(priceFindFn).unitAmount ?? Infinity) );
@@ -35,10 +37,17 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
         products={products}
         targetProduct={changePlan}
       />
+      <Lazy
+        Component={LazyDialogPlanCompare}
+        open={!!showDialogPlanCompare}
+        handleClose={() => setShowDialogPlanCompare(null)}
+        onPlanSwitch={(e: any) => setChangePlan(e)}
+        products={products}
+      />
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant='h6'>{t('common:plan')}</Typography>
-          <Button sx={{ mr: 2 }} variant='outlined'>Compare</Button>
+          <Button sx={{ mr: 2 }} onClick={() => setShowDialogPlanCompare(true)}>{t('common:compare')}</Button>
         </Box>
         <Box>
           {sortedProducts.map((e, i) => {
@@ -55,7 +64,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
             return (
               <Box key={e.id} sx={{ py: 1.5, px: 2, display: 'flex', justifyContent: 'space-between', ...itemSx }}>
                 <Box sx={{ pr: 1 }}>
-                  {isFeatured &&  <Typography variant='caption' color='primary'>Recommended</Typography>}
+                  {isFeatured &&  <Typography variant='caption' color='primary'>{t('pricing:recommended')}</Typography>}
                   <Typography variant='subtitle1'>{e.name}</Typography>
                   <Typography variant='body2' color='textSecondary'>{t(`pricing:${e.type.toLowerCase()}_description`)}</Typography>
                 </Box>

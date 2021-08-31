@@ -49,3 +49,4 @@ total: 'Total'
 
 planPricingSummary: '{{price}} / member / {{interval}}'
 billedYearly: 'Billed yearly'
+recommended: 'Recommended'

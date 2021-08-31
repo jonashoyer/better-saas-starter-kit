@@ -15,6 +15,7 @@ role: 'Role'
 invite: 'Invite'
 logout: 'Logout'
 login: 'Login'
+compare: 'Compare'
 
 accountSettings: 'Account Settings'
 

@@ -1,0 +1,6 @@
+query GetCurrentProjectSubscriptionPlan {
+  currentProject {
+    id
+    subscriptionPlan
+  }
+}

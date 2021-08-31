@@ -1,17 +1,18 @@
 import React from "react";
 import { Product, ProductPrice, SubscriptionPlan } from "@prisma/client";
-import { Box,  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
+import { Box,  Button,  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@material-ui/core";
 import useTranslation from "next-translate/useTranslation";
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 import { formatCurrency } from "bs-shared-kit";
 
-interface ProductPricingsLayoutProps {
+export interface ProductPricingsLayoutProps {
   products: (Product & { prices: ProductPrice[] })[];
   component?: any;
+  onPlanSwitch?: (product: Product & { prices: ProductPrice[] }) => any;
 }
 
-const ProductPricingsTable = ({ component, products }: ProductPricingsLayoutProps) => {
+const ProductPricingsTable = ({ component, products, onPlanSwitch }: ProductPricingsLayoutProps) => {
 
   const { t, lang } = useTranslation();
 
@@ -22,7 +23,7 @@ const ProductPricingsTable = ({ component, products }: ProductPricingsLayoutProp
   }, [products, priceFindFn]);
 
   return (
-    <Box sx={{ minWidth: 650, maxWidth: 800 }}>
+    <Box sx={{ minWidth: 650, maxWidth: 900 }}>
       <TableContainer component={component}>
         <Table>
           <TableHead>
@@ -40,9 +41,7 @@ const ProductPricingsTable = ({ component, products }: ProductPricingsLayoutProp
           </TableHead>
           <TableBody>
             <TableRow>
-              <TableCell colSpan={2} component="th" scope="row">
-                Pricing
-              </TableCell>
+              <TableCell colSpan={2} component="th" scope="row" />
               {sortedProducts.map(e => {
                 const price = e.prices.find(priceFindFn);
                 return (
@@ -50,6 +49,7 @@ const ProductPricingsTable = ({ component, products }: ProductPricingsLayoutProp
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
                       <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
+                      {onPlanSwitch && <Button sx={{ mt: .5 }} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{`switch`}</Button>}
                     </Box>
                   </TableCell>
                 )

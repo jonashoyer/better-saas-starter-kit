@@ -14,6 +14,7 @@ import PaymentIcon from '@material-ui/icons/Payment';
 import { LoadingButton } from '@material-ui/lab';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
+import usePollPlan from 'hooks/usePollPlan';
 
 type ProductNPricing = (Product & { prices: ProductPrice[] });
 export type DialogChangePlanProps = {
@@ -24,7 +25,7 @@ export type DialogChangePlanProps = {
   targetProduct?: ProductNPricing;
 }
 
-export default function DialogChangePlan({ open,  handleClose, targetProduct, project, products }: DialogChangePlanProps) {
+export default function DialogChangePlan({ open,  handleClose, targetProduct, project }: DialogChangePlanProps) {
 
   const { t, lang } = useTranslation();
 
@@ -42,12 +43,11 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const [price, setPrice] = React.useState(null);
   const latestProductRef = React.useRef(null);
 
-  const [pollPaymentMethods] = usePollPaymentMethods({
+  const [pollPaymentMethods, loadingPaymentMethods] = usePollPaymentMethods({
     projectId: project.id,
     paymentMethods: project.paymentMethods,
     onCompleted() {
       setProcessing(false);
-
       upsertSubscription({
         variables: {
           input: {
@@ -59,6 +59,20 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     },
   })
 
+  const [pollPlan, loadingPlan] = usePollPlan({
+    projectId: project.id,
+    initialDelay: 800,
+    delay: 1000,
+    maxTries: 5,
+    onCompleted() {
+      handleClose();
+    },
+    onFailed() {
+      console.error('Failed to poll updated plan!');
+      handleClose();
+    }
+  })
+
   const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateSetupIntentMutation({
     variables: {
       projectId: project.id,
@@ -67,7 +81,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertSubscriptionMutation({
     onCompleted() {
-      handleClose();
+      pollPlan();
     }
   });
 
@@ -82,18 +96,21 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     setPrice(targetProduct?.prices[0]);
   }, [targetProduct]);
 
-  const isMonthOrYearlyBilling = React.useMemo(() => {
-    if (!targetProduct) return true;
-    return targetProduct.prices.length == 2
-      && targetProduct.prices.some(e => e.intervalCount == 1 && e.interval == 'month')
-      && targetProduct.prices.some(e => e.intervalCount == 1 && e.interval == 'year');
-  }, [targetProduct]);
 
   const product: ProductNPricing = targetProduct || latestProductRef.current;
+
+  const isMonthOrYearlyBilling = React.useMemo(() => {
+    if (!product) return true;
+    return product.prices.length == 2
+      && product.prices.some(e => e.intervalCount == 1 && e.interval == 'month')
+      && product.prices.some(e => e.intervalCount == 1 && e.interval == 'year');
+  }, [product]);
+
 
   const yearlyDiscount = React.useMemo(() => {
     if (!product) return;
     if (!isMonthOrYearlyBilling) return null;
+    console.log(isMonthOrYearlyBilling);
     const pm = product.prices.find(e => e.interval == 'month')
     const py = product.prices.find(e => e.interval == 'year');
     return ((1 - ((py.unitAmount / 12) / pm.unitAmount)) * 100).toFixed(1);
@@ -186,12 +203,17 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     })
   }
 
-  const loading = processing || createSetupIntentLoading || upsertSubscriptionLoading;
+  const loading = processing || createSetupIntentLoading || upsertSubscriptionLoading || loadingPlan || loadingPaymentMethods;
   const canSubmit = !loading && (!!currentPaymentMethod || cardComplete);
 
   
+  const handleCloseProxy = () => {
+    if (loading) return;
+    handleClose();
+  }
+
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+    <Dialog open={open} onClose={handleCloseProxy} maxWidth='sm' fullWidth>
       <DialogContent>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: '1' }}>
@@ -202,6 +224,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
             {isMonthOrYearlyBilling &&
               <FormControlLabel
+                disabled={loading}
                 sx={{ mb: 2 }}
                 control={
                   <Switch checked={price && price.interval == 'year'} onChange={(_, c) => setPrice(product.prices.find(e => e.interval == (c ? 'year' : 'month')))} />
@@ -257,7 +280,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button disabled={loading} onClick={handleClose}>{t('common:close')}</Button>
+        <Button disabled={loading} onClick={handleCloseProxy}>{t('common:close')}</Button>
         <LoadingButton loading={loading} disabled={!canSubmit} onClick={form.handleSubmit(handleChangePlan)} variant='contained'>{t('pricing:changePlanConfirm')}</LoadingButton>
       </DialogActions>
     </Dialog>

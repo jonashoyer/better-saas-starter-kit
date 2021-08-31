@@ -352,6 +352,41 @@ export function useDeleteUserProjectMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteUserProjectMutationHookResult = ReturnType<typeof useDeleteUserProjectMutation>;
 export type DeleteUserProjectMutationResult = Apollo.MutationResult<DeleteUserProjectMutation>;
 export type DeleteUserProjectMutationOptions = Apollo.BaseMutationOptions<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>;
+export const GetCurrentProjectSubscriptionPlanDocument = gql`
+    query GetCurrentProjectSubscriptionPlan {
+  currentProject {
+    id
+    subscriptionPlan
+  }
+}
+    `;
+
+/**
+ * __useGetCurrentProjectSubscriptionPlanQuery__
+ *
+ * To run a query within a React component, call `useGetCurrentProjectSubscriptionPlanQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCurrentProjectSubscriptionPlanQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCurrentProjectSubscriptionPlanQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetCurrentProjectSubscriptionPlanQuery(baseOptions?: Apollo.QueryHookOptions<GetCurrentProjectSubscriptionPlanQuery, GetCurrentProjectSubscriptionPlanQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetCurrentProjectSubscriptionPlanQuery, GetCurrentProjectSubscriptionPlanQueryVariables>(GetCurrentProjectSubscriptionPlanDocument, options);
+      }
+export function useGetCurrentProjectSubscriptionPlanLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetCurrentProjectSubscriptionPlanQuery, GetCurrentProjectSubscriptionPlanQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetCurrentProjectSubscriptionPlanQuery, GetCurrentProjectSubscriptionPlanQueryVariables>(GetCurrentProjectSubscriptionPlanDocument, options);
+        }
+export type GetCurrentProjectSubscriptionPlanQueryHookResult = ReturnType<typeof useGetCurrentProjectSubscriptionPlanQuery>;
+export type GetCurrentProjectSubscriptionPlanLazyQueryHookResult = ReturnType<typeof useGetCurrentProjectSubscriptionPlanLazyQuery>;
+export type GetCurrentProjectSubscriptionPlanQueryResult = Apollo.QueryResult<GetCurrentProjectSubscriptionPlanQuery, GetCurrentProjectSubscriptionPlanQueryVariables>;
 export const GetPaymentMethodsDocument = gql`
     query GetPaymentMethods($projectId: String) {
   currentProject(projectId: $projectId) {
@@ -1274,6 +1309,17 @@ export type DeleteUserProjectMutation = (
   & { deleteUserProject?: Maybe<(
     { __typename?: 'UserProject' }
     & Pick<UserProject, 'id'>
+  )> }
+);
+
+export type GetCurrentProjectSubscriptionPlanQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetCurrentProjectSubscriptionPlanQuery = (
+  { __typename?: 'Query' }
+  & { currentProject?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id' | 'subscriptionPlan'>
   )> }
 );
 
