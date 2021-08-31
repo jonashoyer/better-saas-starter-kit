@@ -10,6 +10,7 @@ import Lazy from 'components/elements/Lazy';
 import { snakeToReadable } from 'utils';
 import { PaymentMethod } from '@prisma/client';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
+import ComponentPreview from './ComponentPreview';
 
 export interface ProjectPaymentMethodPaperProps {
   project?: CurrentProjectSettingsQuery['currentProject'];
@@ -142,12 +143,23 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
 
         <Typography variant='h6' gutterBottom>{t('settings:paymentMethod', { count: 99 })}</Typography>
-
-        <PaymentMethodPair
-          t={t}
-          project={project}
-          setAddPaymenthMethodDialog={setAddPaymenthMethodDialog}
-          handleUserMenuClick={handleUserMenuClick}
+        <ComponentPreview
+          components={[
+            <PaymentMethodPair
+              key={0}
+              t={t}
+              project={project}
+              setAddPaymenthMethodDialog={setAddPaymenthMethodDialog}
+              handleUserMenuClick={handleUserMenuClick}
+            />,
+            <PaymentMethodList
+              key={1}
+              t={t}
+              project={project}
+              setAddPaymenthMethodDialog={setAddPaymenthMethodDialog}
+              handleUserMenuClick={handleUserMenuClick}
+            />
+          ]}
         />
 
       </Paper>
