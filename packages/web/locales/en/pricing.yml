@@ -24,9 +24,6 @@ upgradeToPlan: 'Upgrade to {{planName}}'
 changePlanContent: 'You are about to change your plan!'
 changePlanConfirm: 'Change plan'
 
-currentPlan: "Your current plan is {{plan}}"
-switchPlan: "The plan you are switch to is {{plan}}"
-
 billingText: "With the {{plan}} plan you will be charged:"
 
 fullName: 'Full name'
@@ -50,3 +47,7 @@ total: 'Total'
 planPricingSummary: '{{price}} / member / {{interval}}'
 billedYearly: 'Billed yearly'
 recommended: 'Recommended'
+
+currentPlan: 'Current plan'
+upgrade: 'Upgrade'
+downgrade: 'Downgrade'

@@ -8,19 +8,22 @@ import { formatCurrency } from "bs-shared-kit";
 
 export interface ProductPricingsLayoutProps {
   products: (Product & { prices: ProductPrice[] })[];
+  currentProduct: (Product & { prices: ProductPrice[] });
   component?: any;
   onPlanSwitch?: (product: Product & { prices: ProductPrice[] }) => any;
 }
 
-const ProductPricingsTable = ({ component, products, onPlanSwitch }: ProductPricingsLayoutProps) => {
+const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduct }: ProductPricingsLayoutProps) => {
 
   const { t, lang } = useTranslation();
 
   const priceFindFn = React.useCallback(e => e.interval == 'month', []);
-
+  
   const sortedProducts = React.useMemo(() => {
     return products.sort((a, b) => (a.prices.find(priceFindFn).unitAmount ?? Infinity) - (b.prices.find(priceFindFn).unitAmount ?? Infinity) );
   }, [products, priceFindFn]);
+
+  const currentProductIndex = sortedProducts.findIndex(e => e.type == currentProduct?.type);
 
   return (
     <Box sx={{ minWidth: 650, maxWidth: 900 }}>
@@ -42,14 +45,16 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch }: ProductPric
           <TableBody>
             <TableRow>
               <TableCell colSpan={2} component="th" scope="row" />
-              {sortedProducts.map(e => {
+              {sortedProducts.map((e, i) => {
                 const price = e.prices.find(priceFindFn);
+                const isCurrentProduct = i == currentProductIndex;
                 return (
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
                       <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
-                      {onPlanSwitch && <Button sx={{ mt: .5 }} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{`switch`}</Button>}
+                      {onPlanSwitch && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>}
+                      {!onPlanSwitch && isCurrentProduct && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{t('pricing:currentPlan')}</Button>}
                     </Box>
                   </TableCell>
                 )

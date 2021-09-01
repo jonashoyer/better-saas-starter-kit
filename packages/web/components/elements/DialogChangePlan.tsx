@@ -219,7 +219,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
           <Box sx={{ flex: '1' }}>
             <Box sx={{ mb: 2 }}>
               <Typography variant='h6'>{project.subscriptionPlan == SubscriptionPlan.Free ? t('pricing:upgradeToPlan', { planName: product.type.toLowerCase() }) : t('pricing:changePlanTitle')}</Typography>
-              <Typography color='textSecondary' variant='body2'>{t(`pricing:${product.type.toLowerCase()}_description`)}</Typography>
+              <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.type?.toLowerCase()}_description`)}</Typography>
             </Box>
 
             {isMonthOrYearlyBilling &&

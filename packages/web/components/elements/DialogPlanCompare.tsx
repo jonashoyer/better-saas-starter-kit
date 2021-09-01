@@ -25,7 +25,7 @@ export default function DialogPlanCompare({ open, handleClose, onPlanSwitch, ...
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='md' fullWidth>
       <DialogTitle>{t('pricing:planSummary')}</DialogTitle>
-      <DialogContent sx={{ margin: 'auto' }}>
+      <DialogContent>
         <ProductPricingsTable {...rest} onPlanSwitch={onPlanSwitchProxy} />
       </DialogContent>
       <DialogActions>
