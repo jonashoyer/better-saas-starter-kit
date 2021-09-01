@@ -4,9 +4,17 @@ import React from 'react';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 
-interface ComponentPreviewProps {
+export enum Position {
+  TopLeft = 'TOP_LEFT',
+  TopRight = 'TOP_RIGHT',
+  BottomRight = 'BOTTOM_RIGHT',
+  BottomLeft = 'BOTTOM_LEFT'
+}
+
+export interface ComponentPreviewProps {
   components: JSX.Element[];
   defaultIndex?: number;
+  position?: Position;
 }
 
 const ComponentPreview = (props: ComponentPreviewProps) => {
@@ -26,7 +34,7 @@ const ComponentPreview = (props: ComponentPreviewProps) => {
   return (
     <Box sx={{ position: 'relative', ':hover .preview-handler': { opacity: 1 } }}>
       {props.components[index]}
-      <Box className='preview-handler' sx={{ opacity: 0, transition: 'opacity 150ms linear', position: 'absolute', right: 8, bottom: 8, display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Box className='preview-handler' sx={{ ...positionEnumToCSSPosition(props.position ?? Position.BottomRight, 8), opacity: 0, transition: 'opacity 150ms linear', position: 'absolute', display: 'flex', alignItems: 'center', gap: 1 }}>
         <IconButton disabled={index == 0} size='small' onClick={onBack}>
           <ArrowBackIosIcon fontSize='small' />
         </IconButton>
@@ -40,3 +48,12 @@ const ComponentPreview = (props: ComponentPreviewProps) => {
 }
 
 export default ComponentPreview;
+
+const positionEnumToCSSPosition = (pos: Position, spacing?: number) => {
+  switch(pos) {
+    case Position.TopLeft: return { top: spacing, left: spacing };
+    case Position.TopRight: return { top: spacing, right: spacing };
+    case Position.BottomRight: return { bottom: spacing, right: spacing };
+    case Position.BottomLeft: return { bottom: spacing, left: spacing };
+  }
+}
