@@ -94,7 +94,7 @@ export const CreateProject = mutationField('createProject', {
       },
     });
 
-    const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID);
+    const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID, 1);
 
     try {
       const project = await ctx.prisma.project.create({
@@ -205,7 +205,7 @@ export const UpdateTaxId = mutationField('updateTaxId', {
 
     const taxId = await ctx.stripe.customers.createTaxId(project.stripeCustomerId, {
       value: input.taxId,
-      type: input.taxType,
+      type: input.taxType.toLowerCase() as any,
     });
     await ctx.prisma.project.update({
       where: { id: input.projectId },

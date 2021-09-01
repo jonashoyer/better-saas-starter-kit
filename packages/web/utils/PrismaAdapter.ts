@@ -8,6 +8,7 @@ import { NextApiRequest } from "next";
 import cuid from 'cuid';
 import argon2 from 'argon2';
 import { DEFAULT_SUBSCRIPTION_PRICE_ID } from "config";
+import { isJSONValueObject } from "utils";
 
 const GENERATE_ACCESS_TOKEN = true;
 
@@ -53,49 +54,49 @@ export const PrismaAdapter: Adapter<
           },
         });
 
-        const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID);
+        const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID, 1);
 
         try {
 
-        const project = await prisma.project.create({
-          data: {
-            id: projectId,
-            name: `${firstName}'s Project`,
-            stripeCustomerId: stripeCustomer.id,
-            stripeSubscriptionId: stripeSubscription.id,
-            subscriptionPlan: stripeSubscription.metadata.type as any,
-            users: {
-              create: {
-                role: 'ADMIN',
-                user: {
-                  create: {
-                    name,
-                    email: profile.email,
-                    image: profile.image,
-                    emailVerified: profile.emailVerified?.toISOString() ?? null,
+          const project = await prisma.project.create({
+            data: {
+              id: projectId,
+              name: `${firstName}'s Project`,
+              stripeCustomerId: stripeCustomer.id,
+              stripeSubscriptionId: stripeSubscription.id,
+              subscriptionPlan: isJSONValueObject(stripeSubscription.metadata) ? stripeSubscription.metadata.type as any : undefined,
+              users: {
+                create: {
+                  role: 'ADMIN',
+                  user: {
+                    create: {
+                      name,
+                      email: profile.email,
+                      image: profile.image,
+                      emailVerified: profile.emailVerified?.toISOString() ?? null,
+                    }
                   }
                 }
               }
-            }
-          },
-          include: {
-            users: {
-              include: {
-                user: true,
+            },
+            include: {
+              users: {
+                include: {
+                  user: true,
+                }
               }
-            } 
-          }
-        })
+            }
+          })
 
-        return {
-          project,
-          user: project.users[0].user,
+          return {
+            project,
+            user: project.users[0].user,
+          }
+        } catch (err) {
+          await stripe.deleteCustomer(stripeCustomer.id);
+          throw new err;
         }
-      } catch (err) {
-        await stripe.deleteCustomer(stripeCustomer.id);
-        throw new err;
       }
-    }
 
       return {
         displayName: "PRISMA",

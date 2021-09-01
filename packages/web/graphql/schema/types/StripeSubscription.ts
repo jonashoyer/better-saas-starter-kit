@@ -171,7 +171,7 @@ export const upsertSubscription = mutationField('upsertSubscription', {
     const quantity = userProjectCount;
 
     if (project.stripeSubscriptionId) {
-      return ctx.getStripeHandler().updateSubscription(project.stripeCustomerId, project.stripeSubscriptionId, priceId, quantity);
+      return ctx.getStripeHandler().updateSubscription(project.stripeSubscriptionId, priceId, quantity);
     }
 
     return ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);

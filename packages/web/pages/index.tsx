@@ -12,6 +12,7 @@ import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'bs-shared-kit';
 import { setCookie } from 'utils/cookies';
 import useProject from 'hooks/useProject';
+import dayjs from 'dayjs';
 
 // FIXME: Cookie project is deleted it should fallback
 
@@ -39,7 +40,6 @@ export default function Home(props: any) {
       </Head>
 
       <PageLayout padded>
-
         {!session && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
         {session && <Button onClick={() => signOut() } variant='contained'>Logout</Button>}
         <Box sx={{ py: 1 }}>

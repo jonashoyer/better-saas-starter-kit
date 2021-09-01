@@ -53,7 +53,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
         <Box>
           <ComponentPreview
             components={[
-              <ProjectPlanList
+              <ProjectPlanCurrent
                 key={0}
                 project={project}
                 sortedProducts={sortedProducts}
@@ -62,8 +62,8 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
                 lang={lang}
                 setChangePlan={setChangePlan}
                 setShowDialogPlanCompare={setShowDialogPlanCompare}
-                />,
-              <ProjectPlanCurrent
+              />,
+              <ProjectPlanList
                 key={1}
                 project={project}
                 sortedProducts={sortedProducts}
@@ -72,7 +72,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
                 lang={lang}
                 setChangePlan={setChangePlan}
                 setShowDialogPlanCompare={setShowDialogPlanCompare}
-              />
+              />,
             ]}
           />
         </Box>
