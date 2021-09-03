@@ -5,6 +5,9 @@ CREATE TYPE "ProjectRole" AS ENUM ('ADMIN', 'USER');
 CREATE TYPE "SubscriptionPlan" AS ENUM ('FREE', 'BASIC', 'PREMIUM');
 
 -- CreateEnum
+CREATE TYPE "StripeSubscriptionStatus" AS ENUM ('INCOMPLETE', 'INCOMPLETE_EXPIRED', 'TRIALING', 'ACTIVE', 'PAST_DUE', 'CANCELED', 'UNPAID');
+
+-- CreateEnum
 CREATE TYPE "PaymentMethodImportance" AS ENUM ('PRIMARY', 'BACKUP', 'OTHER');
 
 -- CreateEnum
@@ -72,9 +75,28 @@ CREATE TABLE "Project" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "stripeCustomerId" TEXT NOT NULL,
-    "stripeSubscriptionId" TEXT NOT NULL,
     "stripeTaxId" TEXT,
     "subscriptionPlan" "SubscriptionPlan" NOT NULL DEFAULT E'FREE',
+
+    PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StripeSubscription" (
+    "id" TEXT NOT NULL,
+    "subscriptionPlan" "SubscriptionPlan" NOT NULL DEFAULT E'FREE',
+    "metadata" JSONB NOT NULL,
+    "status" "StripeSubscriptionStatus" NOT NULL,
+    "stripePriceId" TEXT NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "cancelAtPeriodEnd" BOOLEAN NOT NULL,
+    "cancelAt" TIMESTAMP(3),
+    "canceledAt" TIMESTAMP(3),
+    "currentPeriodStart" TIMESTAMP(3) NOT NULL,
+    "currentPeriodEnd" TIMESTAMP(3) NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL,
+    "endedAt" TIMESTAMP(3),
+    "projectId" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -92,7 +114,7 @@ CREATE TABLE "UserInvite" (
 );
 
 -- CreateTable
-CREATE TABLE "PaymentMethod" (
+CREATE TABLE "StripePaymentMethod" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -132,7 +154,7 @@ CREATE TABLE "VerificationEmail" (
 );
 
 -- CreateTable
-CREATE TABLE "Product" (
+CREATE TABLE "StripeProduct" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "active" BOOLEAN NOT NULL,
@@ -144,7 +166,7 @@ CREATE TABLE "Product" (
 );
 
 -- CreateTable
-CREATE TABLE "ProductPrice" (
+CREATE TABLE "StripePrice" (
     "id" TEXT NOT NULL,
     "productId" TEXT,
     "active" BOOLEAN NOT NULL,
@@ -160,7 +182,7 @@ CREATE TABLE "ProductPrice" (
 );
 
 -- CreateTable
-CREATE TABLE "Invoice" (
+CREATE TABLE "StripeInvoice" (
     "id" TEXT NOT NULL,
     "created" TIMESTAMP(3) NOT NULL,
     "dueDate" TIMESTAMP(3),
@@ -197,9 +219,6 @@ CREATE UNIQUE INDEX "UserProject.projectId_userId_unique" ON "UserProject"("proj
 CREATE UNIQUE INDEX "Project.stripeCustomerId_unique" ON "Project"("stripeCustomerId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Project.stripeSubscriptionId_unique" ON "Project"("stripeSubscriptionId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "UserInvite.token_unique" ON "UserInvite"("token");
 
 -- CreateIndex
@@ -221,7 +240,7 @@ CREATE UNIQUE INDEX "VerificationEmail.accountId_token_unique" ON "VerificationE
 CREATE UNIQUE INDEX "VerificationEmail_accountId_unique" ON "VerificationEmail"("accountId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Product.type_unique" ON "Product"("type");
+CREATE UNIQUE INDEX "StripeProduct.type_unique" ON "StripeProduct"("type");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -236,16 +255,22 @@ ALTER TABLE "UserProject" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON 
 ALTER TABLE "UserProject" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "StripeSubscription" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StripeSubscription" ADD FOREIGN KEY ("stripePriceId") REFERENCES "StripePrice"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "UserInvite" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PaymentMethod" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripePaymentMethod" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "VerificationEmail" ADD FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ProductPrice" ADD FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripePrice" ADD FOREIGN KEY ("productId") REFERENCES "StripeProduct"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Invoice" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripeInvoice" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;

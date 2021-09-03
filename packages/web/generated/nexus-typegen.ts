@@ -39,16 +39,16 @@ export interface NexusGenInputs {
     projectId: string; // String!
     role: NexusGenEnums['ProjectRole']; // ProjectRole!
   }
-  PaymentMethodWhereUniqueInput: { // input type
+  StripePaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
-  }
-  UpdatePaymentMethodInput: { // input type
-    id: string; // String!
-    importance?: NexusGenEnums['PaymentMethodImportance'] | null; // PaymentMethodImportance
   }
   UpdateProjectInput: { // input type
     id: string; // String!
     name?: string | null; // String
+  }
+  UpdateStripePaymentMethodInput: { // input type
+    id: string; // String!
+    importance?: NexusGenEnums['PaymentMethodImportance'] | null; // PaymentMethodImportance
   }
   UpdateTaxIdInput: { // input type
     projectId: string; // String!
@@ -63,7 +63,7 @@ export interface NexusGenInputs {
     id: string; // String!
     role?: NexusGenEnums['ProjectRole'] | null; // ProjectRole
   }
-  UpsertSubscriptionInput: { // input type
+  UpsertStripeSubscriptionInput: { // input type
     priceId: string; // String!
     projectId: string; // String!
   }
@@ -109,30 +109,24 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  BillingInfomation: { // root type
-    currentPrice: string; // String!
-    currentQuantity: number; // Int!
-    latestInvoice: NexusGenRootTypes['Invoice']; // Invoice!
-    upcomingInvoice: NexusGenRootTypes['Invoice']; // Invoice!
-  }
   CheckoutSession: { // root type
     sessionId?: string | null; // String
   }
-  Invoice: prisma.Invoice;
   Mutation: {};
   Ok: { // root type
     message?: string | null; // String
     ok: boolean; // Boolean!
   }
-  PaymentMethod: prisma.PaymentMethod;
   Project: prisma.Project;
   Query: {};
-  SetupIntent: { // root type
-    clientSecret: string; // String!
-  }
   StatusResponse: { // root type
     message?: string | null; // String
     ok?: boolean | null; // Boolean
+  }
+  StripeInvoice: prisma.StripeInvoice;
+  StripePaymentMethod: prisma.StripePaymentMethod;
+  StripeSetupIntent: { // root type
+    clientSecret: string; // String!
   }
   StripeSubscription: prisma.StripeSubscription;
   User: prisma.User;
@@ -152,16 +146,52 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
-  BillingInfomation: { // field return type
-    currentPrice: string; // String!
-    currentQuantity: number; // Int!
-    latestInvoice: NexusGenRootTypes['Invoice']; // Invoice!
-    upcomingInvoice: NexusGenRootTypes['Invoice']; // Invoice!
-  }
   CheckoutSession: { // field return type
     sessionId: string | null; // String
   }
-  Invoice: { // field return type
+  Mutation: { // field return type
+    createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
+    createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
+    createProject: NexusGenRootTypes['Project'] | null; // Project
+    createStripeSetupIntent: NexusGenRootTypes['StripeSetupIntent'] | null; // StripeSetupIntent
+    deleteProject: NexusGenRootTypes['Project'] | null; // Project
+    deleteStripePaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
+    deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
+    deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
+    deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
+    updateProject: NexusGenRootTypes['Project'] | null; // Project
+    updateStripePaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
+    updateTaxId: NexusGenRootTypes['Ok'] | null; // Ok
+    updateUser: NexusGenRootTypes['User'] | null; // User
+    updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    upsertStripeSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
+    verifyEmail: NexusGenRootTypes['User'] | null; // User
+  }
+  Ok: { // field return type
+    message: string | null; // String
+    ok: boolean; // Boolean!
+  }
+  Project: { // field return type
+    id: string; // String!
+    name: string; // String!
+    stripePaymentMethods: NexusGenRootTypes['StripePaymentMethod'][]; // [StripePaymentMethod!]!
+    subscriptionPlan: NexusGenEnums['SubscriptionPlan']; // SubscriptionPlan!
+    userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
+    users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
+  }
+  Query: { // field return type
+    currentProject: NexusGenRootTypes['Project'] | null; // Project
+    getUserInvites: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
+    ping: string; // String!
+    self: NexusGenRootTypes['User'] | null; // User
+    selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
+  }
+  StatusResponse: { // field return type
+    message: string | null; // String
+    ok: boolean | null; // Boolean
+  }
+  StripeInvoice: { // field return type
     amountDue: number; // Int!
     amountPaid: number; // Int!
     amountRemaining: number; // Int!
@@ -178,30 +208,7 @@ export interface NexusGenFieldTypes {
     tax: number | null; // Int
     total: number; // Int!
   }
-  Mutation: { // field return type
-    createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
-    createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
-    createProject: NexusGenRootTypes['Project'] | null; // Project
-    createSetupIntent: NexusGenRootTypes['SetupIntent'] | null; // SetupIntent
-    deletePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
-    deleteProject: NexusGenRootTypes['Project'] | null; // Project
-    deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
-    deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
-    deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
-    sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
-    updatePaymentMethod: NexusGenRootTypes['PaymentMethod'] | null; // PaymentMethod
-    updateProject: NexusGenRootTypes['Project'] | null; // Project
-    updateTaxId: NexusGenRootTypes['Ok'] | null; // Ok
-    updateUser: NexusGenRootTypes['User'] | null; // User
-    updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
-    upsertSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
-    verifyEmail: NexusGenRootTypes['User'] | null; // User
-  }
-  Ok: { // field return type
-    message: string | null; // String
-    ok: boolean; // Boolean!
-  }
-  PaymentMethod: { // field return type
+  StripePaymentMethod: { // field return type
     brand: string; // String!
     createdAt: NexusGenScalars['DateTime']; // DateTime!
     expMonth: number; // Int!
@@ -213,28 +220,8 @@ export interface NexusGenFieldTypes {
     type: string; // String!
     updatedAt: NexusGenScalars['DateTime']; // DateTime!
   }
-  Project: { // field return type
-    id: string; // String!
-    name: string; // String!
-    paymentMethods: NexusGenRootTypes['PaymentMethod'][]; // [PaymentMethod!]!
-    subscriptionPlan: NexusGenEnums['SubscriptionPlan']; // SubscriptionPlan!
-    userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
-    users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
-  }
-  Query: { // field return type
-    currentProject: NexusGenRootTypes['Project'] | null; // Project
-    getBillingInfomation: NexusGenRootTypes['BillingInfomation'] | null; // BillingInfomation
-    getUserInvites: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
-    ping: string; // String!
-    self: NexusGenRootTypes['User'] | null; // User
-    selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
-  }
-  SetupIntent: { // field return type
+  StripeSetupIntent: { // field return type
     clientSecret: string; // String!
-  }
-  StatusResponse: { // field return type
-    message: string | null; // String
-    ok: boolean | null; // Boolean
   }
   StripeSubscription: { // field return type
     cancelAt: NexusGenScalars['DateTime'] | null; // DateTime
@@ -246,9 +233,9 @@ export interface NexusGenFieldTypes {
     endedAt: NexusGenScalars['DateTime'] | null; // DateTime
     id: string; // String!
     metadata: NexusGenScalars['Json']; // Json!
-    priceId: string; // String!
     quantity: number; // Int!
     status: NexusGenEnums['StripeSubscriptionStatus']; // StripeSubscriptionStatus!
+    stripePriceId: string; // String!
   }
   User: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -278,16 +265,52 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
-  BillingInfomation: { // field return type name
-    currentPrice: 'String'
-    currentQuantity: 'Int'
-    latestInvoice: 'Invoice'
-    upcomingInvoice: 'Invoice'
-  }
   CheckoutSession: { // field return type name
     sessionId: 'String'
   }
-  Invoice: { // field return type name
+  Mutation: { // field return type name
+    createCheckoutSession: 'CheckoutSession'
+    createManyUserInvite: 'UserInvite'
+    createProject: 'Project'
+    createStripeSetupIntent: 'StripeSetupIntent'
+    deleteProject: 'Project'
+    deleteStripePaymentMethod: 'StripePaymentMethod'
+    deleteTaxId: 'Ok'
+    deleteUserInvite: 'UserInvite'
+    deleteUserProject: 'UserProject'
+    sendVerifyEmail: 'StatusResponse'
+    updateProject: 'Project'
+    updateStripePaymentMethod: 'StripePaymentMethod'
+    updateTaxId: 'Ok'
+    updateUser: 'User'
+    updateUserProject: 'UserProject'
+    upsertStripeSubscription: 'StripeSubscription'
+    verifyEmail: 'User'
+  }
+  Ok: { // field return type name
+    message: 'String'
+    ok: 'Boolean'
+  }
+  Project: { // field return type name
+    id: 'String'
+    name: 'String'
+    stripePaymentMethods: 'StripePaymentMethod'
+    subscriptionPlan: 'SubscriptionPlan'
+    userInvites: 'UserInvite'
+    users: 'UserProject'
+  }
+  Query: { // field return type name
+    currentProject: 'Project'
+    getUserInvites: 'UserInvite'
+    ping: 'String'
+    self: 'User'
+    selfProjects: 'Project'
+  }
+  StatusResponse: { // field return type name
+    message: 'String'
+    ok: 'Boolean'
+  }
+  StripeInvoice: { // field return type name
     amountDue: 'Int'
     amountPaid: 'Int'
     amountRemaining: 'Int'
@@ -304,30 +327,7 @@ export interface NexusGenFieldTypeNames {
     tax: 'Int'
     total: 'Int'
   }
-  Mutation: { // field return type name
-    createCheckoutSession: 'CheckoutSession'
-    createManyUserInvite: 'UserInvite'
-    createProject: 'Project'
-    createSetupIntent: 'SetupIntent'
-    deletePaymentMethod: 'PaymentMethod'
-    deleteProject: 'Project'
-    deleteTaxId: 'Ok'
-    deleteUserInvite: 'UserInvite'
-    deleteUserProject: 'UserProject'
-    sendVerifyEmail: 'StatusResponse'
-    updatePaymentMethod: 'PaymentMethod'
-    updateProject: 'Project'
-    updateTaxId: 'Ok'
-    updateUser: 'User'
-    updateUserProject: 'UserProject'
-    upsertSubscription: 'StripeSubscription'
-    verifyEmail: 'User'
-  }
-  Ok: { // field return type name
-    message: 'String'
-    ok: 'Boolean'
-  }
-  PaymentMethod: { // field return type name
+  StripePaymentMethod: { // field return type name
     brand: 'String'
     createdAt: 'DateTime'
     expMonth: 'Int'
@@ -339,28 +339,8 @@ export interface NexusGenFieldTypeNames {
     type: 'String'
     updatedAt: 'DateTime'
   }
-  Project: { // field return type name
-    id: 'String'
-    name: 'String'
-    paymentMethods: 'PaymentMethod'
-    subscriptionPlan: 'SubscriptionPlan'
-    userInvites: 'UserInvite'
-    users: 'UserProject'
-  }
-  Query: { // field return type name
-    currentProject: 'Project'
-    getBillingInfomation: 'BillingInfomation'
-    getUserInvites: 'UserInvite'
-    ping: 'String'
-    self: 'User'
-    selfProjects: 'Project'
-  }
-  SetupIntent: { // field return type name
+  StripeSetupIntent: { // field return type name
     clientSecret: 'String'
-  }
-  StatusResponse: { // field return type name
-    message: 'String'
-    ok: 'Boolean'
   }
   StripeSubscription: { // field return type name
     cancelAt: 'DateTime'
@@ -372,9 +352,9 @@ export interface NexusGenFieldTypeNames {
     endedAt: 'DateTime'
     id: 'String'
     metadata: 'Json'
-    priceId: 'String'
     quantity: 'Int'
     status: 'StripeSubscriptionStatus'
+    stripePriceId: 'String'
   }
   User: { // field return type name
     createdAt: 'DateTime'
@@ -417,13 +397,13 @@ export interface NexusGenArgTypes {
     createProject: { // args
       input: NexusGenInputs['CreateProjectInput']; // CreateProjectInput!
     }
-    createSetupIntent: { // args
+    createStripeSetupIntent: { // args
       projectId: string; // String!
     }
-    deletePaymentMethod: { // args
+    deleteProject: { // args
       id: string; // String!
     }
-    deleteProject: { // args
+    deleteStripePaymentMethod: { // args
       id: string; // String!
     }
     deleteTaxId: { // args
@@ -438,11 +418,11 @@ export interface NexusGenArgTypes {
     sendVerifyEmail: { // args
       email: string; // String!
     }
-    updatePaymentMethod: { // args
-      input: NexusGenInputs['UpdatePaymentMethodInput']; // UpdatePaymentMethodInput!
-    }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!
+    }
+    updateStripePaymentMethod: { // args
+      input: NexusGenInputs['UpdateStripePaymentMethodInput']; // UpdateStripePaymentMethodInput!
     }
     updateTaxId: { // args
       input: NexusGenInputs['UpdateTaxIdInput']; // UpdateTaxIdInput!
@@ -453,16 +433,16 @@ export interface NexusGenArgTypes {
     updateUserProject: { // args
       input: NexusGenInputs['UpdateUserProjectInput']; // UpdateUserProjectInput!
     }
-    upsertSubscription: { // args
-      input: NexusGenInputs['UpsertSubscriptionInput']; // UpsertSubscriptionInput!
+    upsertStripeSubscription: { // args
+      input: NexusGenInputs['UpsertStripeSubscriptionInput']; // UpsertStripeSubscriptionInput!
     }
     verifyEmail: { // args
       token: string; // String!
     }
   }
   Project: {
-    paymentMethods: { // args
-      cursor?: NexusGenInputs['PaymentMethodWhereUniqueInput'] | null; // PaymentMethodWhereUniqueInput
+    stripePaymentMethods: { // args
+      cursor?: NexusGenInputs['StripePaymentMethodWhereUniqueInput'] | null; // StripePaymentMethodWhereUniqueInput
       skip?: number | null; // Int
       take?: number | null; // Int
     }
@@ -480,9 +460,6 @@ export interface NexusGenArgTypes {
   Query: {
     currentProject: { // args
       projectId?: string | null; // String
-    }
-    getBillingInfomation: { // args
-      subscriptionId: string; // String!
     }
     getUserInvites: { // args
       projectId: string; // String!

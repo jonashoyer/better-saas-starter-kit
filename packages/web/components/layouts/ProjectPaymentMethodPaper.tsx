@@ -1,14 +1,14 @@
 import { Box, Button, capitalize, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Typography } from '@material-ui/core';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
-import { CurrentProjectSettingsQuery, PaymentMethodImportance, useDeletePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdatePaymentMethodMutation } from 'types/gql';
+import { CurrentProjectSettingsQuery, PaymentMethodImportance, useDeleteStripePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdateStripePaymentMethodMutation } from 'types/gql';
 import PaymentIcon from '@material-ui/icons/Payment';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import dynamic from 'next/dynamic';
 import Lazy from 'components/elements/Lazy';
 import { snakeToReadable } from 'utils';
-import { PaymentMethod } from '@prisma/client';
+import { StripePaymentMethod } from '@prisma/client';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 import ComponentPreview from './ComponentPreview';
 
@@ -25,14 +25,14 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
   const { t } = useTranslation();
 
   const [menuPaymentMethodAnchorEl, setMenuPaymentMethodAnchorEl] = React.useState(null);
-  const [menuPaymentMethod, setMenuPaymentMethod] = React.useState<PaymentMethod>(null);
+  const [menuPaymentMethod, setMenuPaymentMethod] = React.useState<StripePaymentMethod>(null);
 
   const [addPaymenthMethodDialog, setAddPaymenthMethodDialog] = React.useState(false);
   const [deletePaymentMethodConfirm, setDeletePaymentMethodConfirm] = React.useState(null);
 
   const [pollPaymentMethods, pollPaymentMethodsLoading] = usePollPaymentMethods({
     projectId: project.id,
-    paymentMethods: project.paymentMethods,
+    paymentMethods: project.stripePaymentMethods,
     onCompleted() {
       setAddPaymenthMethodDialog(false);
     },
@@ -52,18 +52,18 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
     fetchPolicy: 'network-only',
   });
 
-  const [updatePaymentMethod, { loading: updateLoading }] = useUpdatePaymentMethodMutation({
+  const [updatePaymentMethod, { loading: updateLoading }] = useUpdateStripePaymentMethodMutation({
     onCompleted() {
       getPaymenMethods();
     }
   });
-  const [deletePaymentMethod, { loading: deleteLoading }] = useDeletePaymentMethodMutation({
+  const [deletePaymentMethod, { loading: deleteLoading }] = useDeleteStripePaymentMethodMutation({
     update(cache, { data }) {
       cache.modify({
         id: cache.identify(project),
         fields: {
           paymentMethods(existing, { toReference }) {
-            const ref = toReference(data.deletePaymentMethod);
+            const ref = toReference(data.deleteStripePaymentMethod);
             return existing.filter((e: any) => e.__ref !== ref.__ref);
           }
         }
@@ -178,8 +178,8 @@ interface PaymentMethodPairProps {
 
 const PaymentMethodPair = ({ t, project, setAddPaymenthMethodDialog, handleUserMenuClick }: PaymentMethodPairProps) => {
   
-  const primary = project.paymentMethods.find(e => e.importance == PaymentMethodImportance.Primary);
-  const backup = project.paymentMethods.find(e => e.importance == PaymentMethodImportance.Backup);
+  const primary = project.stripePaymentMethods.find(e => e.importance == PaymentMethodImportance.Primary);
+  const backup = project.stripePaymentMethods.find(e => e.importance == PaymentMethodImportance.Backup);
   
   return (
     <List>
@@ -216,16 +216,16 @@ interface PaymentMethodListProps {
 const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserMenuClick }: PaymentMethodListProps) => {
   return (
     <List>
-      {project.paymentMethods.length == 0 &&
+      {project.stripePaymentMethods.length == 0 &&
         <Box sx={{ textAlign: 'center', py: 2 }}>
           <Typography gutterBottom>No payment method has been added!</Typography>
           <Button variant='contained' onClick={() => setAddPaymenthMethodDialog(true)}>Add payment method</Button>
         </Box>
       }
-      {project.paymentMethods.map(e => {
+      {project.stripePaymentMethods.map(e => {
         return <PaymentMethodListItem key={e.id} t={t} paymentMethod={e} handleUserMenuClick={handleUserMenuClick} />
       })}
-      {project.paymentMethods.length != 0 &&
+      {project.stripePaymentMethods.length != 0 &&
         <ListItemButton onClick={() => setAddPaymenthMethodDialog(true)}>
           <ListItemIcon>
             <AddCircleIcon />
@@ -237,7 +237,7 @@ const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserM
   )
 }
 
-const PaymentMethodListItem = ({ t, paymentMethod: e, handleUserMenuClick }: { t: any, paymentMethod: CurrentProjectSettingsQuery['currentProject']['paymentMethods'][0], handleUserMenuClick: (paymentMethod: any) => (event: any) => any,  }) => (
+const PaymentMethodListItem = ({ t, paymentMethod: e, handleUserMenuClick }: { t: any, paymentMethod: CurrentProjectSettingsQuery['currentProject']['stripePaymentMethods'][0], handleUserMenuClick: (paymentMethod: any) => (event: any) => any,  }) => (
   <ListItem
     secondaryAction={
       <IconButton onClick={handleUserMenuClick(e)} disabled={e?.importance == PaymentMethodImportance.Primary}>

@@ -38,6 +38,7 @@ const relevantEvents = new Set([
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'subscription_schedule.updated',
   'invoice.paid',
   'invoice.payment_failed',
   'payment_method.attached',
@@ -87,6 +88,9 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
           await handler.manageSubscriptionStatusChange(obj);
+          break;
+        case 'subscription_schedule.updated':
+          console.dir(obj, { depth: null });
           break;
         case 'customer.subscription.trial_will_end':
           // Send notification to your user that the trial will end

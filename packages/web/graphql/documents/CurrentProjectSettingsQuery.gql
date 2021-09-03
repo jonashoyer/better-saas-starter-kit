@@ -20,7 +20,7 @@ query CurrentProjectSettings($projectId: String) {
       role
       email
     }
-    paymentMethods {
+    stripePaymentMethods {
       ...BasePaymenthMethod
     }
   }

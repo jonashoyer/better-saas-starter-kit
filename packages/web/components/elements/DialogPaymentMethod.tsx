@@ -6,7 +6,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import useTranslation from 'next-translate/useTranslation';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useCreateSetupIntentMutation } from 'types/gql';
+import { useCreateStripeSetupIntentMutation } from 'types/gql';
 import useProject from 'hooks/useProject';
 import FormTextField from './FormTextField';
 import { useForm } from 'react-hook-form';
@@ -46,7 +46,7 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
 
   const [clientSecret, setClientSecret] = React.useState(null);
 
-  const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateSetupIntentMutation({
+  const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateStripeSetupIntentMutation({
     variables: {
       projectId,
     }
@@ -71,7 +71,7 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
     if (clientSecret) return;
     createSetupIntent()
     .then(({ data }) => {
-      setClientSecret(data.createSetupIntent.clientSecret);
+      setClientSecret(data.createStripeSetupIntent.clientSecret);
     }).catch(err => {
       // TODO: Catch this
       console.error(err);

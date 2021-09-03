@@ -70,7 +70,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const client = initializeApollo({}, ctx.req.headers);
 
-  const products = await prisma.product.findMany({
+  const products = await prisma.stripeProduct.findMany({
     where: { active: true },
     include: {
       prices: {

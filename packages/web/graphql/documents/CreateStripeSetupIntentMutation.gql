@@ -1,0 +1,5 @@
+mutation CreateStripeSetupIntent($projectId: String!) {
+  createStripeSetupIntent(projectId: $projectId) {
+    clientSecret
+  }
+}

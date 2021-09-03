@@ -76,20 +76,51 @@ enum SubscriptionPlan {
 }
 
 model Project {
-  id                           String           @id @default(cuid())
-  name                         String
-  createdAt                    DateTime         @default(now())
-  updatedAt                    DateTime         @updatedAt
-  stripeCustomerId             String           @unique
-  stripeSubscriptionId         String           @unique
-  stripeTaxId                  String?
-  subscriptionPlan             SubscriptionPlan @default(FREE)
+  id               String           @id @default(cuid())
+  name             String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  stripeCustomerId String           @unique
+  stripeTaxId      String?
+  subscriptionPlan SubscriptionPlan @default(FREE)
 
-  users          UserProject[]
-  paymentMethods PaymentMethod[]
-  userInvites    UserInvite[]
-  invoices       Invoice[]
-  subscriptions  StripeSubscription[]
+  users                UserProject[]
+  userInvites          UserInvite[]
+  stripeSubscriptions  StripeSubscription[]
+  stripePaymentMethods StripePaymentMethod[]
+  stripeInvoices       StripeInvoice[]
+}
+
+enum StripeSubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+model StripeSubscription {
+  id               String                   @id
+  subscriptionPlan SubscriptionPlan         @default(FREE)
+  metadata         Json
+  status           StripeSubscriptionStatus
+  stripePriceId    String
+
+  quantity          Int
+  cancelAtPeriodEnd Boolean
+
+  cancelAt           DateTime?
+  canceledAt         DateTime?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  created            DateTime
+  endedAt            DateTime?
+
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stripePrice StripePrice @relation(fields: [stripePriceId], references: [id], onDelete: Cascade)
 }
 
 model UserInvite {
@@ -105,7 +136,7 @@ model UserInvite {
   @@unique([projectId, email])
 }
 
-model PaymentMethod {
+model StripePaymentMethod {
   id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,36 +158,6 @@ enum PaymentMethodImportance {
   PRIMARY
   BACKUP
   OTHER
-}
-
-enum StripeSubscriptionStatus {
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  TRIALING
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  UNPAID
-}
-
-model StripeSubscription {
-  id       String                   @id
-  metadata Json
-  status   StripeSubscriptionStatus
-
-  priceId           String
-  quantity          Int
-  cancelAtPeriodEnd Boolean
-
-  cancelAt           DateTime?
-  canceledAt         DateTime?
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  created            DateTime
-  endedAt            DateTime?
-
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model VerificationRequest {
@@ -183,7 +184,7 @@ model VerificationEmail {
   @@unique([accountId, token])
 }
 
-model Product {
+model StripeProduct {
   id       String  @id
   type     String  @unique
   active   Boolean
@@ -191,10 +192,10 @@ model Product {
   image    String?
   metadata Json
 
-  prices ProductPrice[]
+  prices StripePrice[]
 }
 
-model ProductPrice {
+model StripePrice {
   id              String  @id
   productId       String?
   active          Boolean
@@ -206,7 +207,8 @@ model ProductPrice {
   trialPeriodDays Int?
   metadata        Json
 
-  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product             StripeProduct?       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stripeSubscriptions StripeSubscription[]
 }
 
 enum InvoiceStatus {
@@ -230,7 +232,7 @@ enum InvoiceBillingReason {
   UPCOMING
 }
 
-model Invoice {
+model StripeInvoice {
   id              String                @id
   created         DateTime
   dueDate         DateTime?

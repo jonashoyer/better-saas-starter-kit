@@ -1,4 +1,4 @@
-fragment BasePaymenthMethod on PaymentMethod {
+fragment BasePaymenthMethod on StripePaymentMethod {
   id
   createdAt
   brand

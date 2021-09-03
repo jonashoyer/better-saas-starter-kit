@@ -3,15 +3,6 @@ import Stripe from 'stripe';
 import { secondsToDate } from '../../../../shared-server/lib';
 import { requireProjectAccess } from './permissions';
 
-export const BillingInfomation = objectType({
-  name: 'BillingInfomation',
-  definition(t) {
-    t.string('currentPrice', { required: true });
-    t.int('currentQuantity', { required: true });
-    t.field('latestInvoice', { type: 'Invoice', required: true, });
-    t.field('upcomingInvoice', { type: 'Invoice', required: true, });
-  }
-})
 
 export const InvoiceStatus = enumType({
   name: 'InvoiceStatus',
@@ -40,8 +31,8 @@ export const InvoiceBillingReason = enumType({
   ]
 })
 
-export const Invoice = objectType({
-  name: 'Invoice',
+export const StripeInvoice = objectType({
+  name: 'StripeInvoice',
   definition(t) {
     t.model.id();
     t.model.created();
@@ -80,37 +71,6 @@ const formatStripeInvoice = (s: Stripe.Invoice) => ({
   projectId: 'unset',
 })
 
-export const getBillingInfomation = queryField('getBillingInfomation', {
-  type: BillingInfomation,
-  args: {
-    subscriptionId: stringArg({ required: true }),
-  },
-  async resolve(root, { subscriptionId }, ctx) {
-
-    const subscription = await ctx.stripe.subscriptions.retrieve(subscriptionId, {
-      expand: [
-        'latest_invoice',
-        'items.data.price.product',
-      ],
-    });
-
-    const upcoming_invoice = await ctx.stripe.invoices.retrieveUpcoming({
-      subscription: subscriptionId,
-    });
-
-    const item = subscription.items.data[0];
-
-    console.log(subscription.latest_invoice, upcoming_invoice);
-
-    return {
-      currentPrice: item.price.id,
-      currentQuantity: item.quantity,
-      latestInvoice: formatStripeInvoice(subscription.latest_invoice as Stripe.Invoice),
-      upcomingInvoice: formatStripeInvoice(upcoming_invoice),
-    };
-  }
-})
-
 export const StripeSubscriptionStatus = enumType({
   name: 'StripeSubscriptionStatus',
   members: [
@@ -130,7 +90,7 @@ export const StripeSubscription = objectType({
     t.model.id();
     t.model.metadata();
     t.model.status();
-    t.model.priceId();
+    t.model.stripePriceId();
     t.model.quantity();
     t.model.cancelAtPeriodEnd();
     t.model.cancelAt();
@@ -143,14 +103,14 @@ export const StripeSubscription = objectType({
 })
 
 export const UpsertSubscriptionInput = inputObjectType({
-  name: 'UpsertSubscriptionInput',
+  name: 'UpsertStripeSubscriptionInput',
   definition(t) {
     t.string('projectId', { required: true });
     t.string('priceId', { required: true });
   }
 })
 
-export const upsertSubscription = mutationField('upsertSubscription', {
+export const upsertStripeSubscription = mutationField('upsertStripeSubscription', {
   type: StripeSubscription,
   args: {
     input: arg({ type: UpsertSubscriptionInput, required: true }),
@@ -160,20 +120,21 @@ export const upsertSubscription = mutationField('upsertSubscription', {
 
     const { projectId, priceId } = input;
 
-    const project = await ctx.prisma.project.findUnique({
-      where: { id: projectId },
-      select: { stripeCustomerId: true, stripeSubscriptionId: true },
-    });
+    throw new Error('Help...');
+    // const project = await ctx.prisma.project.findUnique({
+    //   where: { id: projectId },
+    //   select: { stripeCustomerId: true, stripeSubscriptionId: true },
+    // });
 
-    const userProjectCount = await ctx.prisma.userProject.count({
-      where: { projectId },
-    });
-    const quantity = userProjectCount;
+    // const userProjectCount = await ctx.prisma.userProject.count({
+    //   where: { projectId },
+    // });
+    // const quantity = userProjectCount;
 
-    if (project.stripeSubscriptionId) {
-      return ctx.getStripeHandler().updateSubscription(project.stripeSubscriptionId, priceId, quantity);
-    }
+    // if (project.stripeSubscriptionId) {
+    //   return ctx.getStripeHandler().updateSubscription(project.stripeSubscriptionId, priceId, quantity, true);
+    // }
 
-    return ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
+    // return ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
   }
 })

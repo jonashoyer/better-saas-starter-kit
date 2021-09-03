@@ -4,8 +4,8 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { Product, ProductPrice } from '@prisma/client';
-import { CurrentProjectSettingsQuery, PaymentMethodImportance, SubscriptionPlan, useCreateSetupIntentMutation, useUpsertSubscriptionMutation } from 'types/gql';
+import { StripeProduct, StripePrice } from '@prisma/client';
+import { CurrentProjectSettingsQuery, PaymentMethodImportance, SubscriptionPlan, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from '../../../shared/lib';
 import { Box, capitalize, Divider, FormControlLabel, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@material-ui/core';
 import PaymentMethodForm from './PaymentMethodForm';
@@ -16,12 +16,12 @@ import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 import usePollPlan from 'hooks/usePollPlan';
 
-type ProductNPricing = (Product & { prices: ProductPrice[] });
+type ProductNPricing = (StripeProduct & { prices: StripePrice[] });
 export type DialogChangePlanProps = {
   open: boolean;
   handleClose: () => any;
   project?: CurrentProjectSettingsQuery['currentProject'];
-  products: (Product & { prices: ProductPrice[] })[];
+  products: (StripeProduct & { prices: StripePrice[] })[];
   targetProduct?: ProductNPricing;
 }
 
@@ -45,7 +45,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const [pollPaymentMethods, loadingPaymentMethods] = usePollPaymentMethods({
     projectId: project.id,
-    paymentMethods: project.paymentMethods,
+    paymentMethods: project.stripePaymentMethods,
     onCompleted() {
       setProcessing(false);
       upsertSubscription({
@@ -73,13 +73,13 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     }
   })
 
-  const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateSetupIntentMutation({
+  const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateStripeSetupIntentMutation({
     variables: {
       projectId: project.id,
     }
   })
 
-  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertSubscriptionMutation({
+  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertStripeSubscriptionMutation({
     onCompleted() {
       pollPlan();
     }
@@ -117,7 +117,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   }, [isMonthOrYearlyBilling, product])
 
 
-  const currentPaymentMethod = project.paymentMethods.find(e => e.importance == PaymentMethodImportance.Primary);
+  const currentPaymentMethod = project.stripePaymentMethods.find(e => e.importance == PaymentMethodImportance.Primary);
 
   const interval = price && `${price.intervalCount != 1 ? price.intervalCount : ''} ${t(`pricing:${price.interval}`, { count: price.intervalCount })}`.trimStart();
 
@@ -136,7 +136,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     if (!project) return;
     createSetupIntent()
     .then(({ data }) => {
-      setStripeClientSecret(data.createSetupIntent.clientSecret);
+      setStripeClientSecret(data.createStripeSetupIntent.clientSecret);
     }).catch(err => {
       // TODO: Catch this
       console.error(err);

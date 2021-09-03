@@ -12,7 +12,7 @@ export const BaseProjcetFragmentDoc = gql`
 }
     `;
 export const BasePaymenthMethodFragmentDoc = gql`
-    fragment BasePaymenthMethod on PaymentMethod {
+    fragment BasePaymenthMethod on StripePaymentMethod {
   id
   createdAt
   brand
@@ -93,39 +93,39 @@ export function useCreateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type CreateProjectMutationHookResult = ReturnType<typeof useCreateProjectMutation>;
 export type CreateProjectMutationResult = Apollo.MutationResult<CreateProjectMutation>;
 export type CreateProjectMutationOptions = Apollo.BaseMutationOptions<CreateProjectMutation, CreateProjectMutationVariables>;
-export const CreateSetupIntentDocument = gql`
-    mutation CreateSetupIntent($projectId: String!) {
-  createSetupIntent(projectId: $projectId) {
+export const CreateStripeSetupIntentDocument = gql`
+    mutation CreateStripeSetupIntent($projectId: String!) {
+  createStripeSetupIntent(projectId: $projectId) {
     clientSecret
   }
 }
     `;
-export type CreateSetupIntentMutationFn = Apollo.MutationFunction<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>;
+export type CreateStripeSetupIntentMutationFn = Apollo.MutationFunction<CreateStripeSetupIntentMutation, CreateStripeSetupIntentMutationVariables>;
 
 /**
- * __useCreateSetupIntentMutation__
+ * __useCreateStripeSetupIntentMutation__
  *
- * To run a mutation, you first call `useCreateSetupIntentMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateSetupIntentMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useCreateStripeSetupIntentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateStripeSetupIntentMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [createSetupIntentMutation, { data, loading, error }] = useCreateSetupIntentMutation({
+ * const [createStripeSetupIntentMutation, { data, loading, error }] = useCreateStripeSetupIntentMutation({
  *   variables: {
  *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useCreateSetupIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>) {
+export function useCreateStripeSetupIntentMutation(baseOptions?: Apollo.MutationHookOptions<CreateStripeSetupIntentMutation, CreateStripeSetupIntentMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>(CreateSetupIntentDocument, options);
+        return Apollo.useMutation<CreateStripeSetupIntentMutation, CreateStripeSetupIntentMutationVariables>(CreateStripeSetupIntentDocument, options);
       }
-export type CreateSetupIntentMutationHookResult = ReturnType<typeof useCreateSetupIntentMutation>;
-export type CreateSetupIntentMutationResult = Apollo.MutationResult<CreateSetupIntentMutation>;
-export type CreateSetupIntentMutationOptions = Apollo.BaseMutationOptions<CreateSetupIntentMutation, CreateSetupIntentMutationVariables>;
+export type CreateStripeSetupIntentMutationHookResult = ReturnType<typeof useCreateStripeSetupIntentMutation>;
+export type CreateStripeSetupIntentMutationResult = Apollo.MutationResult<CreateStripeSetupIntentMutation>;
+export type CreateStripeSetupIntentMutationOptions = Apollo.BaseMutationOptions<CreateStripeSetupIntentMutation, CreateStripeSetupIntentMutationVariables>;
 export const CurrentProjectDocument = gql`
     query CurrentProject($projectId: String) {
   currentProject(projectId: $projectId) {
@@ -185,7 +185,7 @@ export const CurrentProjectSettingsDocument = gql`
       role
       email
     }
-    paymentMethods {
+    stripePaymentMethods {
       ...BasePaymenthMethod
     }
   }
@@ -220,39 +220,6 @@ export function useCurrentProjectSettingsLazyQuery(baseOptions?: Apollo.LazyQuer
 export type CurrentProjectSettingsQueryHookResult = ReturnType<typeof useCurrentProjectSettingsQuery>;
 export type CurrentProjectSettingsLazyQueryHookResult = ReturnType<typeof useCurrentProjectSettingsLazyQuery>;
 export type CurrentProjectSettingsQueryResult = Apollo.QueryResult<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>;
-export const DeletePaymentMethodDocument = gql`
-    mutation DeletePaymentMethod($id: String!) {
-  deletePaymentMethod(id: $id) {
-    id
-  }
-}
-    `;
-export type DeletePaymentMethodMutationFn = Apollo.MutationFunction<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>;
-
-/**
- * __useDeletePaymentMethodMutation__
- *
- * To run a mutation, you first call `useDeletePaymentMethodMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useDeletePaymentMethodMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [deletePaymentMethodMutation, { data, loading, error }] = useDeletePaymentMethodMutation({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useDeletePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>(DeletePaymentMethodDocument, options);
-      }
-export type DeletePaymentMethodMutationHookResult = ReturnType<typeof useDeletePaymentMethodMutation>;
-export type DeletePaymentMethodMutationResult = Apollo.MutationResult<DeletePaymentMethodMutation>;
-export type DeletePaymentMethodMutationOptions = Apollo.BaseMutationOptions<DeletePaymentMethodMutation, DeletePaymentMethodMutationVariables>;
 export const DeleteProjectDocument = gql`
     mutation DeleteProject($id: String!) {
   deleteProject(id: $id) {
@@ -286,6 +253,39 @@ export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
 export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
 export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const DeleteStripePaymentMethodDocument = gql`
+    mutation DeleteStripePaymentMethod($id: String!) {
+  deleteStripePaymentMethod(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteStripePaymentMethodMutationFn = Apollo.MutationFunction<DeleteStripePaymentMethodMutation, DeleteStripePaymentMethodMutationVariables>;
+
+/**
+ * __useDeleteStripePaymentMethodMutation__
+ *
+ * To run a mutation, you first call `useDeleteStripePaymentMethodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteStripePaymentMethodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteStripePaymentMethodMutation, { data, loading, error }] = useDeleteStripePaymentMethodMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteStripePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<DeleteStripePaymentMethodMutation, DeleteStripePaymentMethodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteStripePaymentMethodMutation, DeleteStripePaymentMethodMutationVariables>(DeleteStripePaymentMethodDocument, options);
+      }
+export type DeleteStripePaymentMethodMutationHookResult = ReturnType<typeof useDeleteStripePaymentMethodMutation>;
+export type DeleteStripePaymentMethodMutationResult = Apollo.MutationResult<DeleteStripePaymentMethodMutation>;
+export type DeleteStripePaymentMethodMutationOptions = Apollo.BaseMutationOptions<DeleteStripePaymentMethodMutation, DeleteStripePaymentMethodMutationVariables>;
 export const DeleteUserInviteDocument = gql`
     mutation DeleteUserInvite($id: String!) {
   deleteUserInvite(id: $id) {
@@ -391,7 +391,7 @@ export const GetPaymentMethodsDocument = gql`
     query GetPaymentMethods($projectId: String) {
   currentProject(projectId: $projectId) {
     id
-    paymentMethods {
+    stripePaymentMethods {
       ...BasePaymenthMethod
     }
   }
@@ -529,41 +529,6 @@ export function useSelfLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQ
 export type SelfQueryHookResult = ReturnType<typeof useSelfQuery>;
 export type SelfLazyQueryHookResult = ReturnType<typeof useSelfLazyQuery>;
 export type SelfQueryResult = Apollo.QueryResult<SelfQuery, SelfQueryVariables>;
-export const UpdatePaymentMethodDocument = gql`
-    mutation UpdatePaymentMethod($input: UpdatePaymentMethodInput!) {
-  updatePaymentMethod(input: $input) {
-    id
-    updatedAt
-    importance
-  }
-}
-    `;
-export type UpdatePaymentMethodMutationFn = Apollo.MutationFunction<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>;
-
-/**
- * __useUpdatePaymentMethodMutation__
- *
- * To run a mutation, you first call `useUpdatePaymentMethodMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpdatePaymentMethodMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [updatePaymentMethodMutation, { data, loading, error }] = useUpdatePaymentMethodMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useUpdatePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>(UpdatePaymentMethodDocument, options);
-      }
-export type UpdatePaymentMethodMutationHookResult = ReturnType<typeof useUpdatePaymentMethodMutation>;
-export type UpdatePaymentMethodMutationResult = Apollo.MutationResult<UpdatePaymentMethodMutation>;
-export type UpdatePaymentMethodMutationOptions = Apollo.BaseMutationOptions<UpdatePaymentMethodMutation, UpdatePaymentMethodMutationVariables>;
 export const UpdateProjectDocument = gql`
     mutation UpdateProject($input: UpdateProjectInput!) {
   updateProject(input: $input) {
@@ -597,6 +562,41 @@ export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const UpdateStripePaymentMethodDocument = gql`
+    mutation UpdateStripePaymentMethod($input: UpdateStripePaymentMethodInput!) {
+  updateStripePaymentMethod(input: $input) {
+    id
+    updatedAt
+    importance
+  }
+}
+    `;
+export type UpdateStripePaymentMethodMutationFn = Apollo.MutationFunction<UpdateStripePaymentMethodMutation, UpdateStripePaymentMethodMutationVariables>;
+
+/**
+ * __useUpdateStripePaymentMethodMutation__
+ *
+ * To run a mutation, you first call `useUpdateStripePaymentMethodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateStripePaymentMethodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateStripePaymentMethodMutation, { data, loading, error }] = useUpdateStripePaymentMethodMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateStripePaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<UpdateStripePaymentMethodMutation, UpdateStripePaymentMethodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateStripePaymentMethodMutation, UpdateStripePaymentMethodMutationVariables>(UpdateStripePaymentMethodDocument, options);
+      }
+export type UpdateStripePaymentMethodMutationHookResult = ReturnType<typeof useUpdateStripePaymentMethodMutation>;
+export type UpdateStripePaymentMethodMutationResult = Apollo.MutationResult<UpdateStripePaymentMethodMutation>;
+export type UpdateStripePaymentMethodMutationOptions = Apollo.BaseMutationOptions<UpdateStripePaymentMethodMutation, UpdateStripePaymentMethodMutationVariables>;
 export const UpdateUserDocument = gql`
     mutation UpdateUser($input: UpdateUserInput!) {
   updateUser(input: $input) {
@@ -666,13 +666,13 @@ export function useUpdateUserProjectMutation(baseOptions?: Apollo.MutationHookOp
 export type UpdateUserProjectMutationHookResult = ReturnType<typeof useUpdateUserProjectMutation>;
 export type UpdateUserProjectMutationResult = Apollo.MutationResult<UpdateUserProjectMutation>;
 export type UpdateUserProjectMutationOptions = Apollo.BaseMutationOptions<UpdateUserProjectMutation, UpdateUserProjectMutationVariables>;
-export const UpsertSubscriptionDocument = gql`
-    mutation UpsertSubscription($input: UpsertSubscriptionInput!) {
-  upsertSubscription(input: $input) {
+export const UpsertStripeSubscriptionDocument = gql`
+    mutation UpsertStripeSubscription($input: UpsertStripeSubscriptionInput!) {
+  upsertStripeSubscription(input: $input) {
     id
     metadata
     status
-    priceId
+    stripePriceId
     quantity
     cancelAtPeriodEnd
     cancelAt
@@ -684,32 +684,32 @@ export const UpsertSubscriptionDocument = gql`
   }
 }
     `;
-export type UpsertSubscriptionMutationFn = Apollo.MutationFunction<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>;
+export type UpsertStripeSubscriptionMutationFn = Apollo.MutationFunction<UpsertStripeSubscriptionMutation, UpsertStripeSubscriptionMutationVariables>;
 
 /**
- * __useUpsertSubscriptionMutation__
+ * __useUpsertStripeSubscriptionMutation__
  *
- * To run a mutation, you first call `useUpsertSubscriptionMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useUpsertSubscriptionMutation` returns a tuple that includes:
+ * To run a mutation, you first call `useUpsertStripeSubscriptionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertStripeSubscriptionMutation` returns a tuple that includes:
  * - A mutate function that you can call at any time to execute the mutation
  * - An object with fields that represent the current status of the mutation's execution
  *
  * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const [upsertSubscriptionMutation, { data, loading, error }] = useUpsertSubscriptionMutation({
+ * const [upsertStripeSubscriptionMutation, { data, loading, error }] = useUpsertStripeSubscriptionMutation({
  *   variables: {
  *      input: // value for 'input'
  *   },
  * });
  */
-export function useUpsertSubscriptionMutation(baseOptions?: Apollo.MutationHookOptions<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>) {
+export function useUpsertStripeSubscriptionMutation(baseOptions?: Apollo.MutationHookOptions<UpsertStripeSubscriptionMutation, UpsertStripeSubscriptionMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>(UpsertSubscriptionDocument, options);
+        return Apollo.useMutation<UpsertStripeSubscriptionMutation, UpsertStripeSubscriptionMutationVariables>(UpsertStripeSubscriptionDocument, options);
       }
-export type UpsertSubscriptionMutationHookResult = ReturnType<typeof useUpsertSubscriptionMutation>;
-export type UpsertSubscriptionMutationResult = Apollo.MutationResult<UpsertSubscriptionMutation>;
-export type UpsertSubscriptionMutationOptions = Apollo.BaseMutationOptions<UpsertSubscriptionMutation, UpsertSubscriptionMutationVariables>;
+export type UpsertStripeSubscriptionMutationHookResult = ReturnType<typeof useUpsertStripeSubscriptionMutation>;
+export type UpsertStripeSubscriptionMutationResult = Apollo.MutationResult<UpsertStripeSubscriptionMutation>;
+export type UpsertStripeSubscriptionMutationOptions = Apollo.BaseMutationOptions<UpsertStripeSubscriptionMutation, UpsertStripeSubscriptionMutationVariables>;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -723,14 +723,6 @@ export type Scalars = {
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: any;
   Json: any;
-};
-
-export type BillingInfomation = {
-  __typename?: 'BillingInfomation';
-  currentPrice: Scalars['String'];
-  currentQuantity: Scalars['Int'];
-  latestInvoice: Invoice;
-  upcomingInvoice: Invoice;
 };
 
 export type CheckoutSession = {
@@ -749,25 +741,6 @@ export type CreateUserInviteInput = {
 };
 
 
-
-export type Invoice = {
-  __typename?: 'Invoice';
-  id: Scalars['String'];
-  created: Scalars['DateTime'];
-  dueDate?: Maybe<Scalars['DateTime']>;
-  status: InvoiceStatus;
-  amountDue: Scalars['Int'];
-  amountPaid: Scalars['Int'];
-  amountRemaining: Scalars['Int'];
-  billingReason?: Maybe<InvoiceBillingReason>;
-  invoicePdf?: Maybe<Scalars['String']>;
-  periodStart: Scalars['DateTime'];
-  periodEnd: Scalars['DateTime'];
-  receiptNumber?: Maybe<Scalars['String']>;
-  subtotal: Scalars['Int'];
-  tax?: Maybe<Scalars['Int']>;
-  total: Scalars['Int'];
-};
 
 export enum InvoiceBillingReason {
   AutomaticPendingInvoiceItemInvoice = 'AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE',
@@ -803,14 +776,14 @@ export type Mutation = {
   deleteProject?: Maybe<Project>;
   updateTaxId?: Maybe<Ok>;
   deleteTaxId?: Maybe<Ok>;
-  createSetupIntent?: Maybe<SetupIntent>;
-  updatePaymentMethod?: Maybe<PaymentMethod>;
-  deletePaymentMethod?: Maybe<PaymentMethod>;
   updateUserProject?: Maybe<UserProject>;
   deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   deleteUserInvite?: Maybe<UserInvite>;
-  upsertSubscription?: Maybe<StripeSubscription>;
+  createStripeSetupIntent?: Maybe<StripeSetupIntent>;
+  updateStripePaymentMethod?: Maybe<StripePaymentMethod>;
+  deleteStripePaymentMethod?: Maybe<StripePaymentMethod>;
+  upsertStripeSubscription?: Maybe<StripeSubscription>;
 };
 
 
@@ -862,21 +835,6 @@ export type MutationDeleteTaxIdArgs = {
 };
 
 
-export type MutationCreateSetupIntentArgs = {
-  projectId: Scalars['String'];
-};
-
-
-export type MutationUpdatePaymentMethodArgs = {
-  input: UpdatePaymentMethodInput;
-};
-
-
-export type MutationDeletePaymentMethodArgs = {
-  id: Scalars['String'];
-};
-
-
 export type MutationUpdateUserProjectArgs = {
   input: UpdateUserProjectInput;
 };
@@ -897,8 +855,23 @@ export type MutationDeleteUserInviteArgs = {
 };
 
 
-export type MutationUpsertSubscriptionArgs = {
-  input: UpsertSubscriptionInput;
+export type MutationCreateStripeSetupIntentArgs = {
+  projectId: Scalars['String'];
+};
+
+
+export type MutationUpdateStripePaymentMethodArgs = {
+  input: UpdateStripePaymentMethodInput;
+};
+
+
+export type MutationDeleteStripePaymentMethodArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationUpsertStripeSubscriptionArgs = {
+  input: UpsertStripeSubscriptionInput;
 };
 
 export type Ok = {
@@ -907,29 +880,11 @@ export type Ok = {
   message?: Maybe<Scalars['String']>;
 };
 
-export type PaymentMethod = {
-  __typename?: 'PaymentMethod';
-  id: Scalars['String'];
-  createdAt: Scalars['DateTime'];
-  updatedAt: Scalars['DateTime'];
-  brand: Scalars['String'];
-  last4: Scalars['String'];
-  expMonth: Scalars['Int'];
-  expYear: Scalars['Int'];
-  type: Scalars['String'];
-  importance: PaymentMethodImportance;
-  project: Project;
-};
-
 export enum PaymentMethodImportance {
   Primary = 'PRIMARY',
   Backup = 'BACKUP',
   Other = 'OTHER'
 }
-
-export type PaymentMethodWhereUniqueInput = {
-  id?: Maybe<Scalars['String']>;
-};
 
 export type Project = {
   __typename?: 'Project';
@@ -937,7 +892,7 @@ export type Project = {
   name: Scalars['String'];
   users: Array<UserProject>;
   subscriptionPlan: SubscriptionPlan;
-  paymentMethods: Array<PaymentMethod>;
+  stripePaymentMethods: Array<StripePaymentMethod>;
   userInvites: Array<UserInvite>;
 };
 
@@ -949,10 +904,10 @@ export type ProjectUsersArgs = {
 };
 
 
-export type ProjectPaymentMethodsArgs = {
+export type ProjectStripePaymentMethodsArgs = {
   take?: Maybe<Scalars['Int']>;
   skip?: Maybe<Scalars['Int']>;
-  cursor?: Maybe<PaymentMethodWhereUniqueInput>;
+  cursor?: Maybe<StripePaymentMethodWhereUniqueInput>;
 };
 
 
@@ -970,7 +925,6 @@ export enum ProjectRole {
 export type Query = {
   __typename?: 'Query';
   currentProject?: Maybe<Project>;
-  getBillingInfomation?: Maybe<BillingInfomation>;
   getUserInvites?: Maybe<Array<Maybe<UserInvite>>>;
   ping: Scalars['String'];
   self?: Maybe<User>;
@@ -983,18 +937,8 @@ export type QueryCurrentProjectArgs = {
 };
 
 
-export type QueryGetBillingInfomationArgs = {
-  subscriptionId: Scalars['String'];
-};
-
-
 export type QueryGetUserInvitesArgs = {
   projectId: Scalars['String'];
-};
-
-export type SetupIntent = {
-  __typename?: 'SetupIntent';
-  clientSecret: Scalars['String'];
 };
 
 export type StatusResponse = {
@@ -1003,12 +947,54 @@ export type StatusResponse = {
   message?: Maybe<Scalars['String']>;
 };
 
+export type StripeInvoice = {
+  __typename?: 'StripeInvoice';
+  id: Scalars['String'];
+  created: Scalars['DateTime'];
+  dueDate?: Maybe<Scalars['DateTime']>;
+  status: InvoiceStatus;
+  amountDue: Scalars['Int'];
+  amountPaid: Scalars['Int'];
+  amountRemaining: Scalars['Int'];
+  billingReason?: Maybe<InvoiceBillingReason>;
+  invoicePdf?: Maybe<Scalars['String']>;
+  periodStart: Scalars['DateTime'];
+  periodEnd: Scalars['DateTime'];
+  receiptNumber?: Maybe<Scalars['String']>;
+  subtotal: Scalars['Int'];
+  tax?: Maybe<Scalars['Int']>;
+  total: Scalars['Int'];
+};
+
+export type StripePaymentMethod = {
+  __typename?: 'StripePaymentMethod';
+  id: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  updatedAt: Scalars['DateTime'];
+  brand: Scalars['String'];
+  last4: Scalars['String'];
+  expMonth: Scalars['Int'];
+  expYear: Scalars['Int'];
+  type: Scalars['String'];
+  importance: PaymentMethodImportance;
+  project: Project;
+};
+
+export type StripePaymentMethodWhereUniqueInput = {
+  id?: Maybe<Scalars['String']>;
+};
+
+export type StripeSetupIntent = {
+  __typename?: 'StripeSetupIntent';
+  clientSecret: Scalars['String'];
+};
+
 export type StripeSubscription = {
   __typename?: 'StripeSubscription';
   id: Scalars['String'];
   metadata: Scalars['Json'];
   status: StripeSubscriptionStatus;
-  priceId: Scalars['String'];
+  stripePriceId: Scalars['String'];
   quantity: Scalars['Int'];
   cancelAtPeriodEnd: Scalars['Boolean'];
   cancelAt?: Maybe<Scalars['DateTime']>;
@@ -1082,14 +1068,14 @@ export enum TaxType {
   ZaVat = 'ZA_VAT'
 }
 
-export type UpdatePaymentMethodInput = {
-  id: Scalars['String'];
-  importance?: Maybe<PaymentMethodImportance>;
-};
-
 export type UpdateProjectInput = {
   id: Scalars['String'];
   name?: Maybe<Scalars['String']>;
+};
+
+export type UpdateStripePaymentMethodInput = {
+  id: Scalars['String'];
+  importance?: Maybe<PaymentMethodImportance>;
 };
 
 export type UpdateTaxIdInput = {
@@ -1108,7 +1094,7 @@ export type UpdateUserProjectInput = {
   role?: Maybe<ProjectRole>;
 };
 
-export type UpsertSubscriptionInput = {
+export type UpsertStripeSubscriptionInput = {
   projectId: Scalars['String'];
   priceId: Scalars['String'];
 };
@@ -1205,16 +1191,16 @@ export type CreateProjectMutation = (
   )> }
 );
 
-export type CreateSetupIntentMutationVariables = Exact<{
+export type CreateStripeSetupIntentMutationVariables = Exact<{
   projectId: Scalars['String'];
 }>;
 
 
-export type CreateSetupIntentMutation = (
+export type CreateStripeSetupIntentMutation = (
   { __typename?: 'Mutation' }
-  & { createSetupIntent?: Maybe<(
-    { __typename?: 'SetupIntent' }
-    & Pick<SetupIntent, 'clientSecret'>
+  & { createStripeSetupIntent?: Maybe<(
+    { __typename?: 'StripeSetupIntent' }
+    & Pick<StripeSetupIntent, 'clientSecret'>
   )> }
 );
 
@@ -1252,24 +1238,11 @@ export type CurrentProjectSettingsQuery = (
     )>, userInvites: Array<(
       { __typename?: 'UserInvite' }
       & Pick<UserInvite, 'id' | 'createdAt' | 'role' | 'email'>
-    )>, paymentMethods: Array<(
-      { __typename?: 'PaymentMethod' }
+    )>, stripePaymentMethods: Array<(
+      { __typename?: 'StripePaymentMethod' }
       & BasePaymenthMethodFragment
     )> }
     & BaseProjcetFragment
-  )> }
-);
-
-export type DeletePaymentMethodMutationVariables = Exact<{
-  id: Scalars['String'];
-}>;
-
-
-export type DeletePaymentMethodMutation = (
-  { __typename?: 'Mutation' }
-  & { deletePaymentMethod?: Maybe<(
-    { __typename?: 'PaymentMethod' }
-    & Pick<PaymentMethod, 'id'>
   )> }
 );
 
@@ -1283,6 +1256,19 @@ export type DeleteProjectMutation = (
   & { deleteProject?: Maybe<(
     { __typename?: 'Project' }
     & BaseProjcetFragment
+  )> }
+);
+
+export type DeleteStripePaymentMethodMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type DeleteStripePaymentMethodMutation = (
+  { __typename?: 'Mutation' }
+  & { deleteStripePaymentMethod?: Maybe<(
+    { __typename?: 'StripePaymentMethod' }
+    & Pick<StripePaymentMethod, 'id'>
   )> }
 );
 
@@ -1333,16 +1319,11 @@ export type GetPaymentMethodsQuery = (
   & { currentProject?: Maybe<(
     { __typename?: 'Project' }
     & Pick<Project, 'id'>
-    & { paymentMethods: Array<(
-      { __typename?: 'PaymentMethod' }
+    & { stripePaymentMethods: Array<(
+      { __typename?: 'StripePaymentMethod' }
       & BasePaymenthMethodFragment
     )> }
   )> }
-);
-
-export type BasePaymenthMethodFragment = (
-  { __typename?: 'PaymentMethod' }
-  & Pick<PaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'updatedAt'>
 );
 
 export type PingQueryVariables = Exact<{ [key: string]: never; }>;
@@ -1375,17 +1356,9 @@ export type SelfQuery = (
   )> }
 );
 
-export type UpdatePaymentMethodMutationVariables = Exact<{
-  input: UpdatePaymentMethodInput;
-}>;
-
-
-export type UpdatePaymentMethodMutation = (
-  { __typename?: 'Mutation' }
-  & { updatePaymentMethod?: Maybe<(
-    { __typename?: 'PaymentMethod' }
-    & Pick<PaymentMethod, 'id' | 'updatedAt' | 'importance'>
-  )> }
+export type BasePaymenthMethodFragment = (
+  { __typename?: 'StripePaymentMethod' }
+  & Pick<StripePaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'updatedAt'>
 );
 
 export type UpdateProjectMutationVariables = Exact<{
@@ -1398,6 +1371,19 @@ export type UpdateProjectMutation = (
   & { updateProject?: Maybe<(
     { __typename?: 'Project' }
     & BaseProjcetFragment
+  )> }
+);
+
+export type UpdateStripePaymentMethodMutationVariables = Exact<{
+  input: UpdateStripePaymentMethodInput;
+}>;
+
+
+export type UpdateStripePaymentMethodMutation = (
+  { __typename?: 'Mutation' }
+  & { updateStripePaymentMethod?: Maybe<(
+    { __typename?: 'StripePaymentMethod' }
+    & Pick<StripePaymentMethod, 'id' | 'updatedAt' | 'importance'>
   )> }
 );
 
@@ -1427,15 +1413,15 @@ export type UpdateUserProjectMutation = (
   )> }
 );
 
-export type UpsertSubscriptionMutationVariables = Exact<{
-  input: UpsertSubscriptionInput;
+export type UpsertStripeSubscriptionMutationVariables = Exact<{
+  input: UpsertStripeSubscriptionInput;
 }>;
 
 
-export type UpsertSubscriptionMutation = (
+export type UpsertStripeSubscriptionMutation = (
   { __typename?: 'Mutation' }
-  & { upsertSubscription?: Maybe<(
+  & { upsertStripeSubscription?: Maybe<(
     { __typename?: 'StripeSubscription' }
-    & Pick<StripeSubscription, 'id' | 'metadata' | 'status' | 'priceId' | 'quantity' | 'cancelAtPeriodEnd' | 'cancelAt' | 'canceledAt' | 'currentPeriodStart' | 'currentPeriodEnd' | 'created' | 'endedAt'>
+    & Pick<StripeSubscription, 'id' | 'metadata' | 'status' | 'stripePriceId' | 'quantity' | 'cancelAtPeriodEnd' | 'cancelAt' | 'canceledAt' | 'currentPeriodStart' | 'currentPeriodEnd' | 'created' | 'endedAt'>
   )> }
 );

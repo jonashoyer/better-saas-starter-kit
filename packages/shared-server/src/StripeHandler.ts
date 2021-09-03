@@ -72,7 +72,7 @@ export class StripeHandler {
       metadata: product.metadata,
     };
 
-    return this.prisma.product.upsert({
+    return this.prisma.stripeProduct.upsert({
       create: productData,
       update: productData,
       where: {
@@ -95,7 +95,7 @@ export class StripeHandler {
       metadata: price.metadata
     };
 
-    return this.prisma.productPrice.upsert({
+    return this.prisma.stripePrice.upsert({
       create: priceData,
       update: priceData,
       where: { id: price.id }
@@ -136,7 +136,8 @@ export class StripeHandler {
       id: s.id,
       metadata: s.metadata,
       status: s.status.toUpperCase() as any,
-      priceId: s.items.data[0].price.id,
+      stripePriceId: s.items.data[0].price.id,
+      subscriptionPlan: s.items.data[0].plan.metadata?.type as any, //FIXME: ??
       quantity: s.items.data[0].quantity ?? 1,
       cancelAtPeriodEnd: s.cancel_at_period_end,
       cancelAt: s.cancel_at ? secondsToDate(s.cancel_at) : null,
@@ -196,11 +197,10 @@ export class StripeHandler {
   } else {
 
     if (!beginAtNextPeriod) {
-
       const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
         items: [
           {
-            id: subscription.items.data[0].id,
+            id: subscription.items.data[0].price.id,
             deleted: true,
           },
           {
@@ -216,7 +216,7 @@ export class StripeHandler {
 
     const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
       phases: [{
-        items: [{ price: subscription.items.data[0].id, quantity: subscription.items.data[0].quantity }],
+        items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
         start_date: subscription.current_period_start,
         end_date: subscription.current_period_end,
         proration_behavior: 'none',
@@ -228,7 +228,6 @@ export class StripeHandler {
     });
 
     const updatedSubscription = typeof updatedSubscriptionSchedule.subscription == 'string' ? (await this.stripe.subscriptions.retrieve(updatedSubscriptionSchedule.subscription)) : updatedSubscriptionSchedule.subscription!;
-    console.log('updated sub?', stripeSubscriptionId, updatedSubscription);
     return this.formatStripeSubscription(updatedSubscription);
   }
 
@@ -272,7 +271,7 @@ export class StripeHandler {
       projectId: project.id,
       metadata: subscription.metadata,
       status: subscription.status.toUpperCase() as any,
-      priceId: subscription.items.data[0].price.id,
+      stripePriceId: subscription.items.data[0].price.id,
       quantity: subscription.items.data[0].quantity ?? 1,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       cancelAt: subscription.cancel_at ? secondsToDate(subscription.cancel_at) : null,
@@ -329,7 +328,7 @@ export class StripeHandler {
     const project = await this.prisma.project.findUnique({
       where: { stripeCustomerId },
       include: {
-        paymentMethods: true,
+        stripePaymentMethods: true,
       }
     });
 
@@ -338,13 +337,13 @@ export class StripeHandler {
     const getImportance = () => {
       if (paymentMethod.metadata?.importance) {
         const importance = paymentMethod.metadata.importance as PaymentMethodImportance;
-        if (importance == PaymentMethodImportance.PRIMARY && !project.paymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
-        if ((importance == PaymentMethodImportance.PRIMARY || importance == PaymentMethodImportance.BACKUP) && !project.paymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
+        if (importance == PaymentMethodImportance.PRIMARY && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
+        if ((importance == PaymentMethodImportance.PRIMARY || importance == PaymentMethodImportance.BACKUP) && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
         return PaymentMethodImportance.OTHER;
       }
 
-      if (!project.paymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
-      if (!project.paymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
+      if (!project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
+      if (!project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
       return PaymentMethodImportance.OTHER;
     }
 
@@ -368,7 +367,7 @@ export class StripeHandler {
       await this.updateDefaultPaymentMethod(stripeCustomerId, paymentMethod.id);
     }
 
-    return this.prisma.paymentMethod.upsert({
+    return this.prisma.stripePaymentMethod.upsert({
       create: paymentMethodData,
       update: paymentMethodData,
       where: {

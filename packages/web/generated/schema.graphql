@@ -2,13 +2,6 @@
 ### Do not make changes to this file directly
 
 
-type BillingInfomation {
-  currentPrice: String!
-  currentQuantity: Int!
-  latestInvoice: Invoice!
-  upcomingInvoice: Invoice!
-}
-
 type CheckoutSession {
   sessionId: String
 }
@@ -29,24 +22,6 @@ scalar Date
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.
 """
 scalar DateTime
-
-type Invoice {
-  amountDue: Int!
-  amountPaid: Int!
-  amountRemaining: Int!
-  billingReason: InvoiceBillingReason
-  created: DateTime!
-  dueDate: DateTime
-  id: String!
-  invoicePdf: String
-  periodEnd: DateTime!
-  periodStart: DateTime!
-  receiptNumber: String
-  status: InvoiceStatus!
-  subtotal: Int!
-  tax: Int
-  total: Int!
-}
 
 enum InvoiceBillingReason {
   AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE
@@ -80,19 +55,19 @@ type Mutation {
   createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
   createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
-  createSetupIntent(projectId: String!): SetupIntent
-  deletePaymentMethod(id: String!): PaymentMethod
+  createStripeSetupIntent(projectId: String!): StripeSetupIntent
   deleteProject(id: String!): Project
+  deleteStripePaymentMethod(id: String!): StripePaymentMethod
   deleteTaxId(projectId: String!): Ok
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
   sendVerifyEmail(email: String!): StatusResponse
-  updatePaymentMethod(input: UpdatePaymentMethodInput!): PaymentMethod
   updateProject(input: UpdateProjectInput!): Project
+  updateStripePaymentMethod(input: UpdateStripePaymentMethodInput!): StripePaymentMethod
   updateTaxId(input: UpdateTaxIdInput!): Ok
   updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
-  upsertSubscription(input: UpsertSubscriptionInput!): StripeSubscription
+  upsertStripeSubscription(input: UpsertStripeSubscriptionInput!): StripeSubscription
   verifyEmail(token: String!): User
 }
 
@@ -101,33 +76,16 @@ type Ok {
   ok: Boolean!
 }
 
-type PaymentMethod {
-  brand: String!
-  createdAt: DateTime!
-  expMonth: Int!
-  expYear: Int!
-  id: String!
-  importance: PaymentMethodImportance!
-  last4: String!
-  project: Project!
-  type: String!
-  updatedAt: DateTime!
-}
-
 enum PaymentMethodImportance {
   BACKUP
   OTHER
   PRIMARY
 }
 
-input PaymentMethodWhereUniqueInput {
-  id: String
-}
-
 type Project {
   id: String!
   name: String!
-  paymentMethods(cursor: PaymentMethodWhereUniqueInput, skip: Int, take: Int): [PaymentMethod!]!
+  stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
   subscriptionPlan: SubscriptionPlan!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
   users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
@@ -140,20 +98,54 @@ enum ProjectRole {
 
 type Query {
   currentProject(projectId: String): Project
-  getBillingInfomation(subscriptionId: String!): BillingInfomation
   getUserInvites(projectId: String!): [UserInvite]
   ping: String!
   self: User
   selfProjects: [Project]
 }
 
-type SetupIntent {
-  clientSecret: String!
-}
-
 type StatusResponse {
   message: String
   ok: Boolean
+}
+
+type StripeInvoice {
+  amountDue: Int!
+  amountPaid: Int!
+  amountRemaining: Int!
+  billingReason: InvoiceBillingReason
+  created: DateTime!
+  dueDate: DateTime
+  id: String!
+  invoicePdf: String
+  periodEnd: DateTime!
+  periodStart: DateTime!
+  receiptNumber: String
+  status: InvoiceStatus!
+  subtotal: Int!
+  tax: Int
+  total: Int!
+}
+
+type StripePaymentMethod {
+  brand: String!
+  createdAt: DateTime!
+  expMonth: Int!
+  expYear: Int!
+  id: String!
+  importance: PaymentMethodImportance!
+  last4: String!
+  project: Project!
+  type: String!
+  updatedAt: DateTime!
+}
+
+input StripePaymentMethodWhereUniqueInput {
+  id: String
+}
+
+type StripeSetupIntent {
+  clientSecret: String!
 }
 
 type StripeSubscription {
@@ -166,9 +158,9 @@ type StripeSubscription {
   endedAt: DateTime
   id: String!
   metadata: Json!
-  priceId: String!
   quantity: Int!
   status: StripeSubscriptionStatus!
+  stripePriceId: String!
 }
 
 enum StripeSubscriptionStatus {
@@ -229,14 +221,14 @@ enum TaxType {
   ZA_VAT
 }
 
-input UpdatePaymentMethodInput {
-  id: String!
-  importance: PaymentMethodImportance
-}
-
 input UpdateProjectInput {
   id: String!
   name: String
+}
+
+input UpdateStripePaymentMethodInput {
+  id: String!
+  importance: PaymentMethodImportance
 }
 
 input UpdateTaxIdInput {
@@ -255,7 +247,7 @@ input UpdateUserProjectInput {
   role: ProjectRole
 }
 
-input UpsertSubscriptionInput {
+input UpsertStripeSubscriptionInput {
   priceId: String!
   projectId: String!
 }

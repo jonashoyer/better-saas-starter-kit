@@ -1,7 +1,0 @@
-mutation UpdatePaymentMethod($input: UpdatePaymentMethodInput!) {
-  updatePaymentMethod(input: $input) {
-    id
-    updatedAt
-    importance
-  }
-}

@@ -4,8 +4,8 @@ import { requireProjectAccess, requireProjectResource } from './permissions';
 import * as prisma from '@prisma/client';
 import { UserInputError } from 'apollo-server-errors';
 
-export const PaymentMethod = objectType({
-  name: 'PaymentMethod',
+export const StripePaymentMethod = objectType({
+  name: 'StripePaymentMethod',
   definition(t) {
     t.model.id();
     t.model.createdAt();
@@ -26,25 +26,25 @@ export const PaymentMethodImportance = enumType({
 })
 
 
-export const SetupIntent = objectType({
-  name: 'SetupIntent',
+export const StripeSetupIntent = objectType({
+  name: 'StripeSetupIntent',
   definition(t) {
     t.string('clientSecret', { required: true });
   }
 })
 
-const PaymentMethodFetch = (opt?: { include?: prisma.Prisma.PaymentMethodInclude, projectIdFn?: (root: any, args: any, ctx: Context) => string; }) => async (root: any, args: any, ctx: Context) => {
+const PaymentMethodFetch = (opt?: { include?: prisma.Prisma.StripePaymentMethodInclude, projectIdFn?: (root: any, args: any, ctx: Context) => string; }) => async (root: any, args: any, ctx: Context) => {
   const { include, projectIdFn } = opt ?? {};
   const id = projectIdFn?.(root, args, ctx) ?? args?.input?.id ?? args?.id;
   if (!id) throw new Error('Payment method fetch did not get a id!');
-  const paymentMethod = await ctx.prisma.paymentMethod.findUnique({ where: { id }, include })
+  const paymentMethod = await ctx.prisma.stripePaymentMethod.findUnique({ where: { id }, include })
   ctx.entity = paymentMethod;
   return paymentMethod.projectId;
 }
 
 
-export const CreateSetupIntent = mutationField('createSetupIntent', {
-  type: SetupIntent,
+export const CreateStripeSetupIntent = mutationField('createStripeSetupIntent', {
+  type: StripeSetupIntent,
   authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, args) => args.projectId }),
   args: {
     projectId: stringArg({ required: true }),
@@ -68,21 +68,21 @@ export const CreateSetupIntent = mutationField('createSetupIntent', {
   }
 })
 
-export const UpdatePaymentMethodInput = inputObjectType({
-  name: 'UpdatePaymentMethodInput',
+export const UpdateStripePaymentMethodInput = inputObjectType({
+  name: 'UpdateStripePaymentMethodInput',
   definition(t) {
     t.string('id', { required: true });
     t.field('importance', { type: PaymentMethodImportance });
   }
 })
 
-export const UpdatePaymentMethod = mutationField('updatePaymentMethod', {
-  type: 'PaymentMethod',
-  authorize: requireProjectResource({ role: 'ADMIN', projectIdFn: PaymentMethodFetch({ include: { project: { select: { stripeCustomerId: true, paymentMethods: true } } } }) }),
+export const UpdateStripePaymentMethod = mutationField('updateStripePaymentMethod', {
+  type: 'StripePaymentMethod',
+  authorize: requireProjectResource({ role: 'ADMIN', projectIdFn: PaymentMethodFetch({ include: { project: { select: { stripeCustomerId: true, stripePaymentMethods: true } } } }) }),
   args: {
-    input: arg({ type: UpdatePaymentMethodInput, required: true }),
+    input: arg({ type: UpdateStripePaymentMethodInput, required: true }),
   },
-  async resolve(root, { input }, ctx: Context<prisma.PaymentMethod & { project: { stripeCustomerId: string, paymentMethods: prisma.PaymentMethod[] } }>) {
+  async resolve(root, { input }, ctx: Context<prisma.StripePaymentMethod & { project: { stripeCustomerId: string, paymentMethods: prisma.StripePaymentMethod[] } }>) {
 
     
     let peerPaymentMethodUpdate: any;
@@ -98,7 +98,7 @@ export const UpdatePaymentMethod = mutationField('updatePaymentMethod', {
       if (input.importance == prisma.PaymentMethodImportance.PRIMARY) {
         const oldPrimary = otherPaymentMethods.find(e => e.importance == prisma.PaymentMethodImportance.PRIMARY);
         if (oldPrimary) {
-          peerPaymentMethodUpdate = ctx.prisma.paymentMethod.update({
+          peerPaymentMethodUpdate = ctx.prisma.stripePaymentMethod.update({
             where: { id: oldPrimary.id },
             data: { importance: 'BACKUP' },
           });
@@ -107,7 +107,7 @@ export const UpdatePaymentMethod = mutationField('updatePaymentMethod', {
       }
     }
 
-    const updatePaymenthMethod = ctx.prisma.paymentMethod.update({
+    const updatePaymenthMethod = ctx.prisma.stripePaymentMethod.update({
       where: { id: input.id },
       data: {
         importance: input.importance,
@@ -126,15 +126,15 @@ export const UpdatePaymentMethod = mutationField('updatePaymentMethod', {
   }
 })
 
-export const DeletePaymentMethod = mutationField('deletePaymentMethod', {
-  type: 'PaymentMethod',
+export const DeleteStripePaymentMethod = mutationField('deleteStripePaymentMethod', {
+  type: 'StripePaymentMethod',
   authorize: requireProjectResource({ role: 'ADMIN', projectIdFn: PaymentMethodFetch() }),
   args: {
     id: stringArg({ required: true }),
   },
-  async resolve(root, { id }, ctx: Context<prisma.PaymentMethod>) {
+  async resolve(root, { id }, ctx: Context<prisma.StripePaymentMethod>) {
     if (ctx.entity.importance == prisma.PaymentMethodImportance.PRIMARY) throw new Error('A primary payment method is needed!');
     await ctx.stripe.paymentMethods.detach(id);
-    return ctx.prisma.paymentMethod.delete({ where: { id } });
+    return ctx.prisma.stripePaymentMethod.delete({ where: { id } });
   }
 })

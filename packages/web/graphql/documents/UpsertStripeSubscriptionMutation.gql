@@ -1,9 +1,9 @@
-mutation UpsertSubscription($input: UpsertSubscriptionInput!) {
-  upsertSubscription(input: $input) {
+mutation UpsertStripeSubscription($input: UpsertStripeSubscriptionInput!) {
+  upsertStripeSubscription(input: $input) {
     id
     metadata
     status
-    priceId
+    stripePriceId
     quantity
     cancelAtPeriodEnd
     cancelAt

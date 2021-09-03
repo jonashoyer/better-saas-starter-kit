@@ -19,7 +19,7 @@ const prisma = new PrismaClient();
   const filtedProducts = products.data.filter(e => !!e.metadata.type);
   const filtedPrices = prices.data.filter(e => filtedProducts.some(x => x.id == e.product));
 
-  await prisma.product.createMany({
+  await prisma.stripeProduct.createMany({
     data: filtedProducts.map(e => ({
       id: e.id,
       active: e.active,
@@ -32,7 +32,7 @@ const prisma = new PrismaClient();
     skipDuplicates: true,
   });
 
-  await prisma.productPrice.createMany({
+  await prisma.stripePrice.createMany({
     data: filtedPrices.map(e => ({
       id: e.id,
       productId: e.product as string,

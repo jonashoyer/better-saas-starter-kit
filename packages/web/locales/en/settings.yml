@@ -13,3 +13,5 @@ addPaymentMethod: 'Add payment method'
 paymentMethod:
   one: 'Payment method'
   other: 'Payment methods'
+
+billing: 'Billing'

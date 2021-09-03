@@ -16,6 +16,7 @@ import ProjectPlanPaper from 'components/layouts/ProjectPlanPaper';
 import ProjectPaymentMethodPaper from 'components/layouts/ProjectPaymentMethodPaper';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import ProjectBillingPaper from 'components/layouts/ProjectBillingPaper';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
@@ -46,6 +47,7 @@ export default function Settings(props: any) {
         <ProjectMembersPaper project={currentProjectData.currentProject} self={selfData?.self} />
         <ProjectPlanPaper project={currentProjectData.currentProject} products={props.products} />
         <ProjectPaymentMethodPaper project={currentProjectData.currentProject} />
+        <ProjectBillingPaper project={currentProjectData.currentProject} />
         <ProjectDangerZonePaper project={currentProjectData.currentProject} />
 
       </PageLayout>
@@ -58,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const client = initializeApollo({}, ctx.req.headers);
 
-  const products = await prisma.product.findMany({
+  const products = await prisma.stripeProduct.findMany({
     where: { active: true },
     include: {
       prices: {

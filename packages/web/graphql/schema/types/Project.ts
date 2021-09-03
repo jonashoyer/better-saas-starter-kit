@@ -11,7 +11,7 @@ export const Project = objectType({
     t.model.name();
     t.model.users();
     t.model.subscriptionPlan();
-    t.model.paymentMethods();
+    t.model.stripePaymentMethods();
     t.model.userInvites();
   },
 });
@@ -102,7 +102,6 @@ export const CreateProject = mutationField('createProject', {
           ...input,
           id: projectId,
           stripeCustomerId: stripeCustomer.id,
-          stripeSubscriptionId: stripeSubscription.id,
           users: {
             create: {
               role: 'ADMIN',
