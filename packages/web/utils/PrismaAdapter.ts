@@ -53,7 +53,6 @@ export const PrismaAdapter: Adapter<
             projectId,
           },
         });
-
         const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID, 1);
 
         try {
@@ -63,7 +62,6 @@ export const PrismaAdapter: Adapter<
               id: projectId,
               name: `${firstName}'s Project`,
               stripeCustomerId: stripeCustomer.id,
-              stripeSubscriptionId: stripeSubscription.id,
               subscriptionPlan: isJSONValueObject(stripeSubscription.metadata) ? stripeSubscription.metadata.type as any : undefined,
               users: {
                 create: {
@@ -77,6 +75,9 @@ export const PrismaAdapter: Adapter<
                     }
                   }
                 }
+              },
+              stripeSubscriptions: {
+                create: stripeSubscription,
               }
             },
             include: {
@@ -93,6 +94,8 @@ export const PrismaAdapter: Adapter<
             user: project.users[0].user,
           }
         } catch (err) {
+          console.error(err);
+          await stripe.stripe.subscriptions.del(stripeCustomer.id);
           await stripe.deleteCustomer(stripeCustomer.id);
           throw new err;
         }

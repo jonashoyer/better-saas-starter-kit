@@ -7,7 +7,7 @@ import Stripe from 'stripe'
 // TODO: https://stripe.com/docs/billing/subscriptions/metered
 // TODO: https://stripe.com/docs/payments/save-and-reuse?platform=web
 
-export const secondsToDate = (sec: number) => {
+export const secondsToDate = (sec: Date | number) => {
   var t = new Date('1970-01-01T00:30:00Z'); // Unix epoch start.
   t.setSeconds(sec);
   return t;
@@ -131,7 +131,7 @@ export class StripeHandler {
   //   if (error) throw error;
   // };
 
-  formatStripeSubscription(s: Stripe.Subscription): StripeSubscription {
+  static formatStripeSubscription(s: Stripe.Subscription): StripeSubscription {
     return {
       id: s.id,
       metadata: s.metadata,
@@ -146,8 +146,7 @@ export class StripeHandler {
       currentPeriodEnd: secondsToDate(s.current_period_end),
       created: secondsToDate(s.created),
       endedAt: s.ended_at ? secondsToDate(s.ended_at) : null,
-      projectId: 'unknown'
-    }
+    } as Omit<StripeSubscription, 'projectId'> as StripeSubscription;
   }
 
   async createSubscription(stripeCustomerId: string, priceId: string, quantity: number) {
@@ -161,7 +160,7 @@ export class StripeHandler {
       expand: ['latest_invoice.payment_intent', 'plan.product'],
     });
 
-    return  this.formatStripeSubscription(subscription);
+    return  StripeHandler.formatStripeSubscription(subscription);
   }
 
   async updateSubscription(stripeSubscriptionId: string, priceId: string, quantity: number, beginAtNextPeriod?: boolean) {
@@ -193,7 +192,7 @@ export class StripeHandler {
           },
         ],
       });
-    return this.formatStripeSubscription(updatedSubscription);
+    return StripeHandler.formatStripeSubscription(updatedSubscription);
   } else {
 
     if (!beginAtNextPeriod) {
@@ -209,7 +208,7 @@ export class StripeHandler {
           },
         ],
       });
-      return this.formatStripeSubscription(updatedSubscription);
+      return StripeHandler.formatStripeSubscription(updatedSubscription);
     }
       
     const scheduleId = await getScheduleId();
@@ -228,7 +227,7 @@ export class StripeHandler {
     });
 
     const updatedSubscription = typeof updatedSubscriptionSchedule.subscription == 'string' ? (await this.stripe.subscriptions.retrieve(updatedSubscriptionSchedule.subscription)) : updatedSubscriptionSchedule.subscription!;
-    return this.formatStripeSubscription(updatedSubscription);
+    return StripeHandler.formatStripeSubscription(updatedSubscription);
   }
 
     // try {
