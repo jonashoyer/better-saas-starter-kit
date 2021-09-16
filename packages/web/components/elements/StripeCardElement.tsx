@@ -1,7 +1,7 @@
 
 
 import React from "react";
-import { Box, useTheme } from "@material-ui/core";
+import { Box, useTheme } from "@mui/material";
 import { CardElement, useElements } from "@stripe/react-stripe-js";
 
 

@@ -1,7 +1,7 @@
 import React from "react";
-import { Link as MuiLink } from "@material-ui/core";
+import { Link as MuiLink } from "@mui/material";
 import Logo from "../elements/Logo";
-import { Box } from '@material-ui/system';
+import { Box } from '@mui/system';
 import Copyright from "../elements/Copyright";
 import NextLink from 'next/link';
 

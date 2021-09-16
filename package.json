@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@prisma/client": "^2.29.0",
-    "dayjs": "^1.10.6",
+    "dayjs": "^1.10.7",
     "ms": "^2.1.2"
   }
 }

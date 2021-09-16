@@ -1,5 +1,5 @@
 import React from "react"
-import { FormControl, FormHelperText, InputLabel, Select, SelectProps } from "@material-ui/core"
+import { FormControl, FormHelperText, InputLabel, Select, SelectProps } from "@mui/material"
 import { Control, Controller, ControllerProps } from "react-hook-form"
 
 export type FormSelectProps = SelectProps & {

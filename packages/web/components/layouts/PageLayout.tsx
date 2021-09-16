@@ -1,5 +1,5 @@
 import React from "react";
-import { Box } from "@material-ui/system";
+import { Box } from "@mui/system";
 import AppFooter from "./AppFooter";
 import AppAppBar from "./AppAppBar";
 import Banner from "./Banner";

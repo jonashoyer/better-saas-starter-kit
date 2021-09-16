@@ -1,17 +1,17 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
 import useTranslation from 'next-translate/useTranslation';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useCreateStripeSetupIntentMutation } from 'types/gql';
 import useProject from 'hooks/useProject';
 import FormTextField from './FormTextField';
 import { useForm } from 'react-hook-form';
-import { Box } from '@material-ui/core';
-import { LoadingButton } from '@material-ui/lab';
+import { Box } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import PaymentMethodForm from './PaymentMethodForm';
 
 export type DialogPaymentMethodProps = {

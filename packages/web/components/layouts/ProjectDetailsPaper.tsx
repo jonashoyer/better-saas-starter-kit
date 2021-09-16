@@ -1,5 +1,5 @@
-import { Paper, TextField, Typography } from '@material-ui/core';
-import { LoadingButton } from '@material-ui/lab';
+import { Paper, TextField, Typography } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
 import { CurrentProjectSettingsQuery, Project, useUpdateProjectMutation } from 'types/gql';

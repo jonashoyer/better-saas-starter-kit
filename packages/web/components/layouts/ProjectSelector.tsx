@@ -1,11 +1,11 @@
-import { Button, IconButton } from "@material-ui/core";
+import { Button, IconButton } from "@mui/material";
 import useProject from "hooks/useProject";
 import React from "react";
 import ProjectButton from "../elements/ProjectButton";
 import Selector from "../elements/Selector";
-import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
-import AddIcon from '@material-ui/icons/Add';
-import SettingsIcon from '@material-ui/icons/Settings';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import AddIcon from '@mui/icons-material/Add';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useRouter } from "next/router";
 import DialogCreateProject from "../elements/DialogCreateProject";
 

@@ -1,6 +1,6 @@
 import React from "react"
-import { TextFieldProps } from "@material-ui/core"
-import { TextField } from "@material-ui/core"
+import { TextFieldProps } from "@mui/material"
+import { TextField } from "@mui/material"
 import { Control, Controller, ControllerProps } from "react-hook-form"
 
 export type FormTextFieldProps = TextFieldProps & {

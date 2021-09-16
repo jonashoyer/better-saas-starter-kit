@@ -1,15 +1,15 @@
 import React from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import { useForm } from 'react-hook-form';
-import { LoadingButton } from '@material-ui/lab';
+import { LoadingButton } from '@mui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import { ProjectRole, UserProject, useUpdateUserProjectMutation } from 'types/gql';
-import { Box, MenuItem } from '@material-ui/core';
+import { Box, MenuItem } from '@mui/material';
 import FormSelect from './FormSelect';
 
 export interface DialogEditMemberProps {

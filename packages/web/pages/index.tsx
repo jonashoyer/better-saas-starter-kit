@@ -2,7 +2,7 @@ import React from 'react';
 import Head from 'next/head';
 import PageLayout from '../components/layouts/PageLayout';
 import { useSession, signIn, signOut, getSession  } from "next-auth/client";
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import { CurrentProjectDocument, SelfProjectsDocument, useCurrentProjectQuery, useSelfProjectsQuery } from 'types/gql';
 import ProductPricingsTable from 'components/layouts/ProductPricingsTable';
 import prisma from 'utils/prisma';

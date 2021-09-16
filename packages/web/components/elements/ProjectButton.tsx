@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Paper, PaperProps, Typography } from "@material-ui/core";
+import { Avatar, Paper, PaperProps, Typography } from "@mui/material";
 
 
 interface ProjectButtonProps extends PaperProps {

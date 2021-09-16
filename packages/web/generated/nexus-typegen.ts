@@ -203,7 +203,7 @@ export interface NexusGenFieldTypes {
     periodEnd: NexusGenScalars['DateTime']; // DateTime!
     periodStart: NexusGenScalars['DateTime']; // DateTime!
     receiptNumber: string | null; // String
-    status: NexusGenEnums['InvoiceStatus']; // InvoiceStatus!
+    status: NexusGenEnums['InvoiceStatus'] | null; // InvoiceStatus
     subtotal: number; // Int!
     tax: number | null; // Int
     total: number; // Int!

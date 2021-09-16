@@ -121,7 +121,7 @@ type StripeInvoice {
   periodEnd: DateTime!
   periodStart: DateTime!
   receiptNumber: String
-  status: InvoiceStatus!
+  status: InvoiceStatus
   subtotal: Int!
   tax: Int
   total: Int!

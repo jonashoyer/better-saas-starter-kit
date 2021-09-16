@@ -1,10 +1,10 @@
-import { Box, Button, capitalize, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Typography } from '@material-ui/core';
+import { Box, Button, capitalize, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
 import { CurrentProjectSettingsQuery, PaymentMethodImportance, useDeleteStripePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdateStripePaymentMethodMutation } from 'types/gql';
-import PaymentIcon from '@material-ui/icons/Payment';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
+import PaymentIcon from '@mui/icons-material/Payment';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import dynamic from 'next/dynamic';
 import Lazy from 'components/elements/Lazy';
 import { snakeToReadable } from 'utils';

@@ -1,8 +1,8 @@
-import { IconButton, Typography } from '@material-ui/core';
-import { Box } from '@material-ui/system';
+import { IconButton, Typography } from '@mui/material';
+import { Box } from '@mui/system';
 import React from 'react';
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 export enum Position {
   TopLeft = 'TOP_LEFT',

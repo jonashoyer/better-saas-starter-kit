@@ -1,13 +1,13 @@
 import React from "react";
 import dynamic from 'next/dynamic';
-import { Box } from "@material-ui/system";
+import { Box } from "@mui/system";
 import Logo from "../elements/Logo";
-import { Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@material-ui/core";
+import { Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
 import { useSession } from "next-auth/client";
-import LogoutIcon from "@material-ui/icons/Logout";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { signOut } from "next-auth/client"
 import useTranslation from "next-translate/useTranslation";
-import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Lazy from "../elements/Lazy";
 
 const LazyDialogAccountSettings = dynamic(() => import('../elements/DialogAccountSettings'));

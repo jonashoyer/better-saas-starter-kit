@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Stack, ClickAwayListener, Paper } from "@material-ui/core";
+import { Box, Stack, ClickAwayListener, Paper } from "@mui/material";
 
 
 export interface SelectorProps {

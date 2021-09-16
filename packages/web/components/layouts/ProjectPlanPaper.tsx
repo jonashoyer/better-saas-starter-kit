@@ -1,6 +1,6 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { Box, Button, Paper, Typography } from '@material-ui/core';
+import { Box, Button, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import { Product, ProductPrice } from '@prisma/client';
 import { formatCurrency } from 'bs-shared-kit';

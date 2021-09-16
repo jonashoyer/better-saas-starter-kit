@@ -1,12 +1,12 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
-import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography, IconButton, Menu, MenuItem, ListItemIcon } from '@material-ui/core';
+import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography, IconButton, Menu, MenuItem, ListItemIcon } from '@mui/material';
 import { CurrentProjectSettingsQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation, User, SelfQuery } from 'types/gql';
 import useTranslation from 'next-translate/useTranslation';
-import EmailIcon from '@material-ui/icons/Email';
-import CancelIcon from '@material-ui/icons/Cancel';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import AddIcon from '@material-ui/icons/Add';
+import EmailIcon from '@mui/icons-material/Email';
+import CancelIcon from '@mui/icons-material/Cancel';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import AddIcon from '@mui/icons-material/Add';
 import Lazy from '../elements/Lazy';
 
 export interface ProjectMembersPaperProps {

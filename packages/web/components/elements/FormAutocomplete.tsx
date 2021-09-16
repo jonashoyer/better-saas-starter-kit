@@ -1,5 +1,5 @@
 import React from "react"
-import { AutocompleteProps, Autocomplete, TextField } from "@material-ui/core"
+import { AutocompleteProps, Autocomplete, TextField } from "@mui/material"
 import { Control, Controller, ControllerProps } from "react-hook-form";
 
 export type FormAutocompleteProps<

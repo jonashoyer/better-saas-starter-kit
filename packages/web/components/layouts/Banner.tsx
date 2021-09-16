@@ -1,6 +1,6 @@
 import React from 'react'
-import { Box } from '@material-ui/system'
-import { Typography } from '@material-ui/core'
+import { Box } from '@mui/system'
+import { Typography } from '@mui/material'
 import useTranslation from 'next-translate/useTranslation'
 
 function Banner() {

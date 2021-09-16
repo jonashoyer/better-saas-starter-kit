@@ -952,7 +952,7 @@ export type StripeInvoice = {
   id: Scalars['String'];
   created: Scalars['DateTime'];
   dueDate?: Maybe<Scalars['DateTime']>;
-  status: InvoiceStatus;
+  status?: Maybe<InvoiceStatus>;
   amountDue: Scalars['Int'];
   amountPaid: Scalars['Int'];
   amountRemaining: Scalars['Int'];

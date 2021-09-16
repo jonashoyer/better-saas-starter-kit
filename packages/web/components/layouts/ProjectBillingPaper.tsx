@@ -1,7 +1,7 @@
 import React from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Paper, Typography } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Paper, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { CurrentProjectSettingsQuery } from "types/gql";
 
 
