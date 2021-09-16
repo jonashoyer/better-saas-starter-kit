@@ -116,6 +116,7 @@ model StripeSubscription {
   currentPeriodStart DateTime
   currentPeriodEnd   DateTime
   created            DateTime
+  startDate          DateTime
   endedAt            DateTime?
 
   projectId   String
@@ -236,7 +237,7 @@ model StripeInvoice {
   id              String                @id
   created         DateTime
   dueDate         DateTime?
-  status          InvoiceStatus
+  status          InvoiceStatus?
   amountDue       Int
   amountPaid      Int
   amountRemaining Int

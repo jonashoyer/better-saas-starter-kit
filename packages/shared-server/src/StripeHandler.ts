@@ -1,4 +1,4 @@
-import { PaymentMethodImportance, StripeSubscription, PrismaClient } from '@prisma/client';
+import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice } from '@prisma/client';
 import dayjs from 'dayjs';
 import Stripe from 'stripe'
 
@@ -7,7 +7,7 @@ import Stripe from 'stripe'
 // TODO: https://stripe.com/docs/billing/subscriptions/metered
 // TODO: https://stripe.com/docs/payments/save-and-reuse?platform=web
 
-export const secondsToDate = (sec: Date | number) => {
+export const secondsToDate = (sec: number) => {
   var t = new Date('1970-01-01T00:30:00Z'); // Unix epoch start.
   t.setSeconds(sec);
   return t;
@@ -278,6 +278,7 @@ export class StripeHandler {
       currentPeriodStart: secondsToDate(subscription.current_period_start),
       currentPeriodEnd: secondsToDate(subscription.current_period_end),
       created: secondsToDate(subscription.created),
+      startDate: secondsToDate(subscription.start_date),
       endedAt: subscription.ended_at ? secondsToDate(subscription.ended_at) : null,
     };
 
@@ -287,7 +288,9 @@ export class StripeHandler {
       where: { id: subscriptionData.id },
     });
 
-    if (product && product.metadata?.type) {
+    const unix = new Date().getTime() / 1000;
+
+    if (product && product.metadata?.type && (!subscription.ended_at || unix < subscription.ended_at) && unix >= subscription.start_date) {
       await this.prisma.project.update({
         where: { stripeCustomerId: subscription.customer },
         data: { subscriptionPlan: product.metadata.type as any },
@@ -389,5 +392,47 @@ export class StripeHandler {
 
   manageChargeSucceeded(charge: Stripe.Charge) {
     
+  }
+
+
+  static formatStripeInvoice(invoice: Stripe.Invoice): StripeInvoice {
+    return {
+      id: invoice.id,
+      created: secondsToDate(invoice.created),
+      dueDate: invoice.due_date && secondsToDate(invoice.due_date),
+      status: invoice.status && invoice.status.toUpperCase(),
+      amountDue: invoice.amount_due,
+      amountPaid: invoice.amount_paid,
+      amountRemaining: invoice.amount_remaining,
+      billingReason: invoice.billing_reason && invoice.billing_reason.toUpperCase(),
+      invoicePdf: invoice.invoice_pdf,
+      periodStart: secondsToDate(invoice.period_start),
+      periodEnd: secondsToDate(invoice.period_end),
+      receiptNumber: invoice.receipt_number,
+      subtotal: invoice.subtotal,
+      tax: invoice.tax,
+      total: invoice.total,
+    } as Omit<StripeInvoice, 'projectId'> as StripeInvoice;
+  }
+
+  async upsertInvoice(invoice: Stripe.Invoice) {
+
+    const customerId = typeof invoice.customer == 'string' ? invoice.customer : invoice.customer!.id;
+    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId: customerId }, select: { id: true } });
+    if (!project) return;
+
+    const i = StripeHandler.formatStripeInvoice(invoice);
+    const data: any = {
+      ...i,
+      project: {
+        connect: { id: project.id }
+      }
+    }
+
+    return this.prisma.stripeInvoice.upsert({
+      create: data,
+      update: data,
+      where: { id: invoice.id },
+    })
   }
 }

@@ -48,6 +48,6 @@ const prisma = new PrismaClient();
     skipDuplicates: true,
   });
 
-  console.log('done');
+  console.log(`Imported ${filtedProducts.length} products and ${filtedPrices.length} prices`);
   process.exit();
 })();

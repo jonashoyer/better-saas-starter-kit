@@ -95,6 +95,7 @@ CREATE TABLE "StripeSubscription" (
     "currentPeriodStart" TIMESTAMP(3) NOT NULL,
     "currentPeriodEnd" TIMESTAMP(3) NOT NULL,
     "created" TIMESTAMP(3) NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL,
     "endedAt" TIMESTAMP(3),
     "projectId" TEXT NOT NULL,
 
@@ -186,7 +187,7 @@ CREATE TABLE "StripeInvoice" (
     "id" TEXT NOT NULL,
     "created" TIMESTAMP(3) NOT NULL,
     "dueDate" TIMESTAMP(3),
-    "status" "InvoiceStatus" NOT NULL,
+    "status" "InvoiceStatus",
     "amountDue" INTEGER NOT NULL,
     "amountPaid" INTEGER NOT NULL,
     "amountRemaining" INTEGER NOT NULL,

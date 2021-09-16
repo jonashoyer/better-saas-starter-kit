@@ -1,5 +1,5 @@
 import { capitalize } from '@material-ui/core';
-import { Prisma, Product } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const getURL = () => {
   const url =
