@@ -232,7 +232,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
                 label={`Yealy billing (-${yearlyDiscount}%)`}
               />
             }
-
             <Box>
               <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
               {currentPaymentMethod &&
