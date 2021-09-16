@@ -77,7 +77,14 @@ export const PrismaAdapter: Adapter<
                 }
               },
               stripeSubscriptions: {
-                create: stripeSubscription,
+                create: {
+                  ...stripeSubscription,
+                  stripePriceId: undefined,
+                  stripePrice: {
+                    connect: { id: stripeSubscription.stripePriceId },
+                  },
+                  startDate: new Date(),
+                },
               }
             },
             include: {
