@@ -213,15 +213,17 @@ export class StripeHandler {
       
     const scheduleId = await getScheduleId();
 
+    const nowUnix = dayjs().unix();
+
     const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
       phases: [{
         items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
         start_date: subscription.current_period_start,
-        end_date: subscription.current_period_end,
+        end_date: nowUnix,
         proration_behavior: 'none',
       }, {
         items: [{ price: priceId, quantity }],
-        start_date: subscription.current_period_end,
+        start_date: nowUnix,
         proration_behavior: 'none',
       }],
     });

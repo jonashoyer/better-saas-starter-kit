@@ -44,6 +44,7 @@ Monorepo using npm workspace
    - [ ] Landing page template
  - [ ] Work quene management
  - [ ] Platform admin page
+ - [ ] Replace NextAuth.js
  - [ ] [Going to production](https://nextjs.org/docs/going-to-production)
    - [ ] Caching
    - [ ] Reducing JavaScript Size

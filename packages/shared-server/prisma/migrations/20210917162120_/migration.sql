@@ -29,7 +29,7 @@ CREATE TABLE "Account" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Account_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -41,7 +41,7 @@ CREATE TABLE "Session" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -54,7 +54,7 @@ CREATE TABLE "User" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -65,7 +65,7 @@ CREATE TABLE "UserProject" (
     "projectId" TEXT NOT NULL,
     "role" "ProjectRole" NOT NULL DEFAULT E'USER',
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "UserProject_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -78,7 +78,7 @@ CREATE TABLE "Project" (
     "stripeTaxId" TEXT,
     "subscriptionPlan" "SubscriptionPlan" NOT NULL DEFAULT E'FREE',
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "Project_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -99,7 +99,7 @@ CREATE TABLE "StripeSubscription" (
     "endedAt" TIMESTAMP(3),
     "projectId" TEXT NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "StripeSubscription_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -111,7 +111,7 @@ CREATE TABLE "UserInvite" (
     "role" "ProjectRole" NOT NULL,
     "projectId" TEXT NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "UserInvite_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -127,7 +127,7 @@ CREATE TABLE "StripePaymentMethod" (
     "importance" "PaymentMethodImportance" NOT NULL,
     "projectId" TEXT NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "StripePaymentMethod_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -139,7 +139,7 @@ CREATE TABLE "VerificationRequest" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "VerificationRequest_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -151,7 +151,7 @@ CREATE TABLE "VerificationEmail" (
     "expires" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "VerificationEmail_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -163,7 +163,7 @@ CREATE TABLE "StripeProduct" (
     "image" TEXT,
     "metadata" JSONB NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "StripeProduct_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -179,7 +179,7 @@ CREATE TABLE "StripePrice" (
     "trialPeriodDays" INTEGER,
     "metadata" JSONB NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "StripePrice_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -201,77 +201,77 @@ CREATE TABLE "StripeInvoice" (
     "total" INTEGER NOT NULL,
     "projectId" TEXT NOT NULL,
 
-    PRIMARY KEY ("id")
+    CONSTRAINT "StripeInvoice_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Account.providerId_providerAccountId_unique" ON "Account"("providerId", "providerAccountId");
+CREATE UNIQUE INDEX "Account_providerId_providerAccountId_key" ON "Account"("providerId", "providerAccountId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Session.sessionToken_unique" ON "Session"("sessionToken");
+CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User.email_unique" ON "User"("email");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "UserProject.projectId_userId_unique" ON "UserProject"("projectId", "userId");
+CREATE UNIQUE INDEX "UserProject_projectId_userId_key" ON "UserProject"("projectId", "userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Project.stripeCustomerId_unique" ON "Project"("stripeCustomerId");
+CREATE UNIQUE INDEX "Project_stripeCustomerId_key" ON "Project"("stripeCustomerId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "UserInvite.token_unique" ON "UserInvite"("token");
+CREATE UNIQUE INDEX "UserInvite_token_key" ON "UserInvite"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "UserInvite.projectId_email_unique" ON "UserInvite"("projectId", "email");
+CREATE UNIQUE INDEX "UserInvite_projectId_email_key" ON "UserInvite"("projectId", "email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "VerificationRequest.token_unique" ON "VerificationRequest"("token");
+CREATE UNIQUE INDEX "VerificationRequest_token_key" ON "VerificationRequest"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "VerificationRequest.identifier_token_unique" ON "VerificationRequest"("identifier", "token");
+CREATE UNIQUE INDEX "VerificationRequest_identifier_token_key" ON "VerificationRequest"("identifier", "token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "VerificationEmail.token_unique" ON "VerificationEmail"("token");
+CREATE UNIQUE INDEX "VerificationEmail_token_key" ON "VerificationEmail"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "VerificationEmail.accountId_token_unique" ON "VerificationEmail"("accountId", "token");
+CREATE UNIQUE INDEX "VerificationEmail_accountId_token_key" ON "VerificationEmail"("accountId", "token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationEmail_accountId_unique" ON "VerificationEmail"("accountId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "StripeProduct.type_unique" ON "StripeProduct"("type");
+CREATE UNIQUE INDEX "StripeProduct_type_key" ON "StripeProduct"("type");
 
 -- AddForeignKey
-ALTER TABLE "Account" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Session" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserProject" ADD FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserProject" ADD CONSTRAINT "UserProject_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserProject" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserProject" ADD CONSTRAINT "UserProject_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StripeSubscription" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripeSubscription" ADD CONSTRAINT "StripeSubscription_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StripeSubscription" ADD FOREIGN KEY ("stripePriceId") REFERENCES "StripePrice"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripeSubscription" ADD CONSTRAINT "StripeSubscription_stripePriceId_fkey" FOREIGN KEY ("stripePriceId") REFERENCES "StripePrice"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserInvite" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "UserInvite" ADD CONSTRAINT "UserInvite_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StripePaymentMethod" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripePaymentMethod" ADD CONSTRAINT "StripePaymentMethod_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "VerificationEmail" ADD FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "VerificationEmail" ADD CONSTRAINT "VerificationEmail_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StripePrice" ADD FOREIGN KEY ("productId") REFERENCES "StripeProduct"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripePrice" ADD CONSTRAINT "StripePrice_productId_fkey" FOREIGN KEY ("productId") REFERENCES "StripeProduct"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StripeInvoice" ADD FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "StripeInvoice" ADD CONSTRAINT "StripeInvoice_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;

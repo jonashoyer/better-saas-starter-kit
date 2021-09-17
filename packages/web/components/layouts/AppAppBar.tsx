@@ -2,8 +2,8 @@ import React from "react";
 import dynamic from 'next/dynamic';
 import { Box } from "@mui/system";
 import Logo from "../elements/Logo";
-import { Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
-import { useSession } from "next-auth/client";
+import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
+import { signIn, useSession } from "next-auth/client";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { signOut } from "next-auth/client"
 import useTranslation from "next-translate/useTranslation";
@@ -46,21 +46,28 @@ const AppAppBar = (props: any) => {
         <Logo />
       </Box>
       <Box sx={{ flexBasis: '200px', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
-        <IconButton
-          edge="end"
-          onClick={handleProfileMenuOpen}
-          color="inherit"
-        >
-          <Avatar
-            sx={{ width: 32, height: 32 }}
-            alt='profile'
-            src={session?.user.image}
-          />
-        </IconButton>
-        <UserMenu
-          anchorEl={profileMenuAnchorEl}
-          handleClose={() => setProfileMenuAnchorEl(null)}
-        />
+        {(!loading && session) &&
+          <React.Fragment>
+            <IconButton
+              edge="end"
+              onClick={handleProfileMenuOpen}
+              color="inherit"
+            >
+              <Avatar
+                sx={{ width: 32, height: 32 }}
+                alt='profile'
+                src={session?.user.image}
+              />
+            </IconButton>
+            <UserMenu
+              anchorEl={profileMenuAnchorEl}
+              handleClose={() => setProfileMenuAnchorEl(null)}
+            />
+          </React.Fragment>
+        }
+        {(!loading && !session) &&
+          <Button onClick={() => signIn()} variant='contained' color='primary'>Login</Button>
+        }
       </Box>
     </Box>
   )

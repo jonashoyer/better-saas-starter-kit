@@ -16,8 +16,8 @@ const ProjectBillingPaper = ({ project }: ProjectBillingPaperProps) => {
   return (
     <React.Fragment>
 
-      <Paper sx={{ p: 3, maxWidth: 768, margin: 'auto' }} elevation={0}>
-        <Typography variant='h6' color='error' gutterBottom>{t('settings:billing')}</Typography>
+      <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
+        <Typography variant='h6' gutterBottom>{t('settings:billing')}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography></Typography>
         </Box>

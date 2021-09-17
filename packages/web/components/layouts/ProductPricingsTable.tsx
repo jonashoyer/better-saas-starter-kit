@@ -1,5 +1,5 @@
 import React from "react";
-import { Product, ProductPrice, SubscriptionPlan } from "@prisma/client";
+import { StripeProduct, StripePrice, SubscriptionPlan } from "@prisma/client";
 import { Box,  Button,  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import CheckIcon from '@mui/icons-material/Check';
@@ -7,10 +7,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { formatCurrency } from "bs-shared-kit";
 
 export interface ProductPricingsLayoutProps {
-  products: (Product & { prices: ProductPrice[] })[];
-  currentProduct: (Product & { prices: ProductPrice[] });
+  products: (StripeProduct & { prices: StripePrice[] })[];
+  currentProduct: (StripeProduct & { prices: StripePrice[] });
   component?: any;
-  onPlanSwitch?: (product: Product & { prices: ProductPrice[] }) => any;
+  onPlanSwitch?: (product: StripeProduct & { prices: StripePrice[] }) => any;
 }
 
 const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduct }: ProductPricingsLayoutProps) => {

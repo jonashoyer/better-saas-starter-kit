@@ -1,3 +1,4 @@
+import { SubscriptionPlan } from '@prisma/client';
 import { arg, enumType, inputObjectType, intArg, mutationField, objectType, queryField, stringArg } from 'nexus';
 import Stripe from 'stripe';
 import { secondsToDate } from '../../../../shared-server/lib';
@@ -120,21 +121,36 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
 
     const { projectId, priceId } = input;
 
-    throw new Error('Help...');
-    // const project = await ctx.prisma.project.findUnique({
-    //   where: { id: projectId },
-    //   select: { stripeCustomerId: true, stripeSubscriptionId: true },
-    // });
+    const project = await ctx.prisma.project.findUnique({
+      where: { id: projectId },
+      select: { stripeCustomerId: true },
+    });
 
-    // const userProjectCount = await ctx.prisma.userProject.count({
-    //   where: { projectId },
-    // });
-    // const quantity = userProjectCount;
+    const subscriptions = await ctx.prisma.stripeSubscription.findMany({
+      where: { projectId },
+    });
 
-    // if (project.stripeSubscriptionId) {
-    //   return ctx.getStripeHandler().updateSubscription(project.stripeSubscriptionId, priceId, quantity, true);
-    // }
+    const quantity = await ctx.prisma.userProject.count({
+      where: { projectId },
+    });
+    
+    
+    
+    if (subscriptions.length != 0) {
+      const currentPriceType = subscriptions[0].subscriptionPlan;
+      const price = await ctx.prisma.stripePrice.findUnique({ where: { id: priceId } });
+      if (!price) {
+        throw new Error('Price do not exists!');
+      }
 
-    // return ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
+      const planOrder: SubscriptionPlan[] = ['FREE', 'BASIC', 'PREMIUM'];
+      const currentPlanIndex = planOrder.indexOf(currentPriceType);
+      const planIndex = planOrder.indexOf(price.type as any);
+      const beginAtNextPeriod = planIndex <= currentPlanIndex;
+
+      return ctx.getStripeHandler().updateSubscription(subscriptions[0].id, priceId, quantity, beginAtNextPeriod);
+    }
+
+    return ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
   }
 })

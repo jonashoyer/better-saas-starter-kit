@@ -2,7 +2,7 @@ import type { AppProps } from 'next/app'
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from '../constants/theme';
+import { defaultTheme } from '../constants/theme';
 import { useApollo } from '../utils/GraphqlClient';
 import { ApolloProvider } from '@apollo/client';
 import { Provider as NextAuthProvider } from 'next-auth/client'
@@ -30,7 +30,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       session={pageProps.session}
     >
         <ApolloProvider client={apolloClient}>
-          <ThemeProvider theme={theme}>
+          <ThemeProvider theme={defaultTheme}>
             <ProjectValueProvider initialValue={pageProps.projectId}>
               <CssBaseline />
               <Component {...pageProps} />

@@ -143,6 +143,10 @@ export const UpdateProject = mutationField('updateProject', {
       data: { name },
     });
 
+    if (name) {
+      await ctx.stripe.customers.update(project.stripeCustomerId, { name }).catch(err => console.error('Failed updating stripe customer name!', err));
+    }
+
     return project;
   }
 })
