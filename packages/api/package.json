@@ -17,7 +17,6 @@
   "dependencies": {
     "@bull-board/api": "^3.5.2",
     "@bull-board/express": "^3.5.2",
-    "@prisma/client": "^2.29.0",
     "apollo-server-core": "^3.1.2",
     "apollo-server-express": "^3.1.2",
     "cookie": "^0.4.1",
@@ -47,7 +46,7 @@
     "@types/rate-limit-redis": "^1.7.2",
     "nexus-plugin-prisma": "^0.35.0",
     "prettier": "^2.3.2",
-    "prisma": "^2.27.0",
+    "prisma": "^2.30.3",
     "ts-node": "^10.1.0",
     "ts-node-dev": "^1.1.8"
   },

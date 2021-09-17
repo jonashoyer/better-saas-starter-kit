@@ -7,7 +7,7 @@
     "@types/mjml": "^4.7.0",
     "@types/node-mailjet": "^3.3.7",
     "@types/nodemailer": "^6.4.4",
-    "prisma": "^2.27.0"
+    "prisma": "^3.0.2"
   },
   "scripts": {
     "clean": "rm -rf lib",
@@ -16,7 +16,7 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@prisma/client": "^2.27.0",
+    "@prisma/client": "^3.0.2",
     "@sendgrid/mail": "^7.4.6",
     "bullmq": "^1.39.3",
     "handlebars": "^4.7.7",
