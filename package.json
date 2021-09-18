@@ -8,6 +8,9 @@
     "npm": "7.20.0",
     "node": "16.5.0"
   },
+  "prisma": {
+    "seed": "ts-node ./packages/shared-server/prisma/seed.ts"
+  },
   "scripts": {
     "clean": "rimraf \"packages/**/lib\" \"packages/**/*.tsbuildinfo\"",
     "compile": "tsc -b tsconfig.build.json",

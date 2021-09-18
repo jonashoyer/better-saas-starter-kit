@@ -1,17 +1,17 @@
-import { createStripe, StripeHandler } from "../../shared-server/lib";
+import { createStripe, StripeHandler } from "bs-shared-server-kit";
 import { config } from 'dotenv';
-import path from 'path';
 import { PrismaClient } from '@prisma/client';
+import path from 'path';
+
+const prisma = new PrismaClient();
 
 config({
   path: path.join(process.cwd(), '.env'),
 });
 
 const stripe = createStripe();
-const prisma = new PrismaClient();
 
-(async () => {
-  
+async function main() {
   const handler = new StripeHandler(stripe, prisma);
   const products = await handler.fetchProductList();
   const prices = await handler.fetchPriceList();
@@ -49,5 +49,13 @@ const prisma = new PrismaClient();
   });
 
   console.log(`Imported ${filtedProducts.length} products and ${filtedPrices.length} prices`);
-  process.exit();
-})();
+}
+
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })
