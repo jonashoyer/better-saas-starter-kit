@@ -2,13 +2,21 @@
   "name": "bs-root",
   "private": true,
   "workspaces": [
-    "./packages/*"
+    "packages/*"
   ],
   "engines": {
     "npm": "7.20.0",
     "node": "16.5.0"
   },
   "scripts": {
+    "clean": "rimraf \"packages/**/lib\" \"packages/**/*.tsbuildinfo\"",
+    "compile": "tsc -b tsconfig.build.json",
+    "prettier": "prettier \"*.{js,json,yml,md}\" \"packages/**/*\"",
+    "format": "npm run prettier -- --write",
+    "format:check": "npm run prettier -- --check",
+    "lint": "npm run format:check",
+    "prepare": "npm run compile",
+
     "reinstall": "rm -rf module_name && npm i",
     "dev": "npm-run-all -l -p -r *:dev",
     "watch": "npm-run-all -l -p -r *:watch",
@@ -21,6 +29,7 @@
     "prisma:reset": "npx prisma migrate reset --schema packages/shared-server/prisma/schema.prisma",
     "prisma:deploy": "npx prisma migrate deploy --schema packages/shared-server/prisma/schema.prisma",
     "prisma:format": "npx prisma format --schema packages/shared-server/prisma/schema.prisma",
+    "prisma:seed": "npx prisma db seed",
     "api:generate": "npm run generate -w bs-api-kit",
     "web:generate": "npm run generate -w bs-web-kit",
     "api:build": "npm run build -w bs-api-kit",

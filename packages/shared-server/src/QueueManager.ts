@@ -1,7 +1,7 @@
 import { Queue, Worker, QueueOptions, Processor, WorkerOptions, JobsOptions, QueueScheduler, QueueSchedulerOptions, ConnectionOptions, QueueEvents, QueueEventsOptions } from 'bullmq';
 import { createRedisClient } from './redisClient';
 
-export interface QueueManagerEntity<T = any, R = any, N extends string = string> {
+export interface QueueManagerEntity<T = any, R = any, N extends string = any> {
   queueOptions?: QueueOptions;
   repeatableJobs?: {
     name: string;

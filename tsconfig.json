@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
     "incremental": true,
+    "target": "es2019",
+    "module": "commonjs",
+    "declaration": true,
     "sourceMap": true,
     "composite": true,
     "strict": true,
-    "baseUrl": "./packages",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true
+    "forceConsistentCasingInFileNames": true
   }
 }
