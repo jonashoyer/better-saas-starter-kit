@@ -1,8 +1,10 @@
 {
-  "name": "bs-shared-server-kit",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "sideEffects": false,
+  "name": "shared-server",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "source": "./src/index.ts",
+  "version": "0.0.0",
   "devDependencies": {
     "@types/mjml": "^4.7.0",
     "@types/node-mailjet": "^3.3.7",
@@ -10,8 +12,9 @@
     "prisma": "^3.0.2"
   },
   "scripts": {
-    "clean": "rm -rf lib",
-    "build": "npm run clean && npx tsc",
+    "dev": "tsc -w",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "build": "tsc",
     "tsc": "tsc",
     "watch": "tsc --watch"
   },
@@ -23,6 +26,8 @@
     "mjml": "^4.10.2",
     "node-mailjet": "^3.3.4",
     "nodemailer": "^6.6.3",
-    "stripe": "^8.169.0"
+    "stripe": "^8.169.0",
+    "tsconfig": "*",
+    "shared": "*"
   }
 }

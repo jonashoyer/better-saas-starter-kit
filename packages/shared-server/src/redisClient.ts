@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { NodeEnv } from 'bs-shared-kit';
+import { NodeEnv } from 'shared';
 
 type clientTypes = 'client' | 'subscriber' | 'new' | 'bclient';
 

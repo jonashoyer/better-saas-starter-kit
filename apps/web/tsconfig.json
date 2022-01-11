@@ -1,0 +1,13 @@
+{
+  "extends": "tsconfig/nextjs.json",
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+    }
+  },
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.json"],
+  "exclude": ["node_modules"]
+}

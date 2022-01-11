@@ -6,7 +6,7 @@ import { compile } from 'handlebars';
 import { Email } from 'node-mailjet';
 import { MailService } from '@sendgrid/mail';
 import { Transporter } from 'nodemailer';
-import { asArray } from 'bs-shared-kit';
+import { asArray } from 'shared';
 
 export const generateEmailFromTemplate = (templateName: string, options: { language?: string, context?: any, handlebarsOptions?: RuntimeOptions, mjmlOption?: MJMLParsingOptions}) => {
   const p = path.join(__dirname, 'mjmls', `${templateName}.${options.language ?? 'en'}.mjml`);

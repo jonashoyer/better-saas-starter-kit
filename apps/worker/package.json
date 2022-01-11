@@ -1,0 +1,27 @@
+{
+  "name": "worker",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc",
+    "style": "prettier --write 'src/**/*'",
+    "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/index.ts"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "prisma": {
+    "schema": "../../prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "tsconfig": "*",
+    "config": "*"
+  },
+  "author": "",
+  "license": "ISC"
+}

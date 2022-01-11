@@ -1,11 +1,16 @@
 {
-  "name": "bs-shared-kit",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "sideEffects": false,
+  "name": "shared",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "source": "./src/index.ts",
+  "version": "0.0.0",
   "scripts": {
-    "clean": "rm -rf lib",
-    "build": "npm run clean && tsc",
-    "watch": "tsc --watch"
+    "dev": "tsc -w",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "tsconfig": "*"
   }
 }

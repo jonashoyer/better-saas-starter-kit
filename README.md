@@ -4,55 +4,19 @@
 
 Monorepo using npm workspace
 
-### NextJS
-- NextJS
-- Material UI
-- NextAuth.js
-- Apollo Client
-- Stripe
-- Next Translate (i18n)
-  
-### NextJS Serverless API
-- Apollo Server
-- Prisma, Nexus
-- BullMQ
-- Redis
+## What's inside?
 
-### Apollo Server, Express API
-- Apollo Server
-- Prisma, Nexus
-- Express
-- BullMQ
-- Redis
+This Turborepo includes the following packages and apps:
 
-### BullMQ Worker
-- BullMQ
-- Prisma
-- Redis
+### Apps and Packages
 
-### To do list:
- - [x] Basic project management
- - [ ] Basic user management
-   - [ ] Account linking
- - [x] Better error handling
- - [ ] Stripe subscription integration
-   - [ ] Basic subscription management
- - [ ] Stripe charge integration
-   - [ ] Basic charge management
- - [ ] Custom theme
-   - [ ] Web app layout template
-   - [ ] Landing page template
- - [ ] Work quene management
- - [ ] Platform admin page
- - [ ] Replace NextAuth.js
- - [ ] [Going to production](https://nextjs.org/docs/going-to-production)
-   - [ ] Caching
-   - [ ] Reducing JavaScript Size
-   - [ ] Logging
-   - [ ] Sentry
-
-### Bugs
-  - [ ] Old project id in cookies
+- `api`: an Apollo Server, Express API server
+- `web`: a NextJS app with a NextJS Serverless Apollo Server
+- `worker`: a BullMQ Worker
+- `shared`: Shared functions
+- `shared-server`: Shared Server functions
+- `config`: Eslint configurations
+- `tsconfig`: tsconfig.json's used throughout the monorepo
 
 #### Shared environment variables
 - REDIS_URL

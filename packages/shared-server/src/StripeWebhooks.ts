@@ -47,7 +47,8 @@ const relevantEvents = new Set([
 export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): NextApiHandler => async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
-    return res.status(405).end('Method Not Allowed');
+    res.status(405).end('Method Not Allowed');
+    return;
   }
 
   const buf = await reqToBuffer(req);
@@ -58,8 +59,14 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
   try {
     event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
   } catch (err) {
-    console.log(`❌ Error message: ${err.message}`);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
+    if (err instanceof Error) {
+
+      console.log(`❌ Error message: ${err.message}`);
+      res.status(400).send(`Webhook Error: ${err.message}`);
+      return;
+    }
+    res.status(500).send(`Webhook Error: ${String(err)}`);
+    return;
   }
 
   const handler = new StripeHandler(stripe, prisma);
@@ -129,7 +136,8 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
       }
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ error: 'Webhook handler failed. View logs.' });
+      res.status(500).json({ error: 'Webhook handler failed. View logs.' });
+      return;
     }
   }
 

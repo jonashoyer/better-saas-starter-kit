@@ -1,37 +1,35 @@
 {
-  "name": "bs-root",
+  "name": "better-saas-starter-kit",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
-  "engines": {
-    "npm": "7.20.0",
-    "node": "16.5.0"
-  },
   "prisma": {
-    "seed": "ts-node ./packages/shared-server/prisma/seed.ts"
+    "seed": "ts-node ./prisma/seed.ts"
   },
   "scripts": {
-    "clean": "rimraf \"packages/**/lib\" \"packages/**/*.tsbuildinfo\"",
-    "compile": "tsc -b tsconfig.build.json",
+    "build": "turbo run build",
+    "dev": "turbo run dev --no-cache --parallel --continue",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "prettier": "prettier \"*.{js,json,yml,md}\" \"packages/**/*\"",
-    "format": "npm run prettier -- --write",
     "format:check": "npm run prettier -- --check",
-    "lint": "npm run format:check",
-    "prepare": "npm run compile",
-
     "reinstall": "rm -rf module_name && npm i",
-    "dev": "npm-run-all -l -p -r *:dev",
     "watch": "npm-run-all -l -p -r *:watch",
     "generate": "npm-run-all *:generate",
-    "build": "npm-run-all -p -r *:build",
+    "lib:build": "npm-run-all -s prisma:generate shared:build shared-server:build",
+    "app:build": "npm-run-all -s api:build worker:build web:build",
     "web:dev": "npm run dev -w bs-web-kit",
     "api:dev": "npm run dev -w bs-api-kit",
-    "prisma:generate": "npx prisma generate --schema packages/shared-server/prisma/schema.prisma",
-    "prisma:dev": "npx prisma migrate dev --schema packages/shared-server/prisma/schema.prisma",
-    "prisma:reset": "npx prisma migrate reset --schema packages/shared-server/prisma/schema.prisma",
-    "prisma:deploy": "npx prisma migrate deploy --schema packages/shared-server/prisma/schema.prisma",
-    "prisma:format": "npx prisma format --schema packages/shared-server/prisma/schema.prisma",
+    "worker:dev": "npm run dev -w bs-worker-kit",
+    "prisma:generate": "npx prisma generate",
+    "prisma:dev": "npx prisma migrate dev",
+    "prisma:reset": "npx prisma migrate reset",
+    "prisma:deploy": "npx prisma migrate deploy",
+    "prisma:format": "npx prisma format",
     "prisma:seed": "npx prisma db seed",
     "api:generate": "npm run generate -w bs-api-kit",
     "web:generate": "npm run generate -w bs-web-kit",
@@ -56,11 +54,36 @@
     "npm-run-all": "^4.1.5",
     "ora": "^6.0.1",
     "prisma": "^3.0.2",
+    "turbo": "^1.0.25",
     "typescript": "^4.3.5"
   },
   "dependencies": {
     "@prisma/client": "^3.0.2",
     "dayjs": "^1.10.7",
     "ms": "^2.1.2"
+  },
+  "turbo": {
+    "npmClient": "npm",
+    "baseBranch": "origin/main",
+    "pipeline": {
+      "build": {
+        "outputs": [
+          "dist/**",
+          ".next/**",
+          "public/dist/**"
+        ],
+        "dependsOn": [
+          "^build"
+        ]
+      },
+      "test": { },
+      "lint": { },
+      "dev": {
+        "cache": false
+      },
+      "clean": {
+        "cache": false
+      }
+    }
   }
 }

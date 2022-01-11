@@ -1,0 +1,65 @@
+{
+  "name": "api",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && npm run generate && tsc",
+    "style": "prettier --write 'src/**/*'",
+    "dev": "ts-node-dev --tree-kill --no-notify --respawn --transpile-only src/server.ts",
+    "generate": "npm-run-all generate:nexus",
+    "generate:nexus": "ts-node --transpile-only src/schema"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@bull-board/api": "^3.5.2",
+    "@bull-board/express": "^3.5.2",
+    "apollo-server-core": "^3.1.2",
+    "apollo-server-express": "^3.1.2",
+    "cookie": "^0.4.1",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.3.0",
+    "graphql": "^15.5.1",
+    "graphql-depth-limit": "^1.1.0",
+    "graphql-redis-subscriptions": "^2.4.0",
+    "graphql-scalars": "^1.10.0",
+    "ioredis": "^4.27.7",
+    "jose": "^1.28.1",
+    "jsonwebtoken": "^8.5.1",
+    "nexus": "^1.1.0",
+    "npm-run-all": "^4.1.5",
+    "rate-limit-redis": "^2.1.0",
+    "subscriptions-transport-ws": "^0.9.19",
+    "tsconfig": "*",
+    "shared": "*",
+    "shared-server": "*"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.4.1",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/express-rate-limit": "^5.1.3",
+    "@types/graphql-depth-limit": "^1.1.2",
+    "@types/ioredis": "^4.26.5",
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/rate-limit-redis": "^1.7.2",
+    "nexus-plugin-prisma": "^0.35.0",
+    "prettier": "^2.3.2",
+    "prisma": "^2.30.3",
+    "ts-node": "^10.1.0",
+    "ts-node-dev": "^1.1.8"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "prisma": {
+    "schema": "../../prisma/schema.prisma"
+  }
+}
