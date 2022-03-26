@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import features, { Feature } from './features';
+import modules, { Module } from './modules';
 
 function getFiles (dir: string, options: { disallowList: string[], onFile: (p: string) => any }, files_?: string[]){
   files_ = files_ || [];
@@ -22,19 +22,19 @@ interface InterpretFileOptions {
   mode: 'REMOVE' | 'COMMENT_OUT';
 }
 
-const FEATURE_COMMAND_STRING = 'FEATURE: ';
-const FEATURE_END_COMMAND_STRING = 'END FEATURE: ';
+const MODULE_COMMAND_STRING = 'MODULE ';
+const MODULE_END_COMMAND_STRING = 'END_MODULE ';
 
-const interpretFile = (p: string, fileType: string, features: Feature[], options: InterpretFileOptions) => {
+const interpretFile = (p: string, fileType: string, features: Module[], options: InterpretFileOptions) => {
   try {
     const file = fs.readFileSync(p, 'utf8')
     const lines = file.split('\n');
 
-    const newFile = lines.reduce<{ lines: string[], dirty: boolean, activeRemovalFeature: string | null, clearNewLine: boolean, commentMode: 'DEFAULT' | 'JSX' | null }>((meta, line) => {
+    const newFile = lines.reduce<{ lines: string[], dirty: boolean, activeRemovalFeature: string | null, clearNewLine: boolean, commentMode: 'DEFAULT' | 'JSX' | null }>((meta, line) => {
 
       if (meta.activeRemovalFeature) {
         
-        if (!line.includes(`${FEATURE_END_COMMAND_STRING}${meta.activeRemovalFeature}`)) {
+        if (!line.includes(`${MODULE_END_COMMAND_STRING}${meta.activeRemovalFeature}`)) {
           if (options.mode == 'REMOVE') return meta;
           if (meta.commentMode == 'JSX') {
             meta.lines.push(line);
@@ -55,8 +55,8 @@ const interpretFile = (p: string, fileType: string, features: Feature[], options
         }
       }
 
-      if (line.includes(FEATURE_COMMAND_STRING)) {
-        const feature = line.match(`/(?<=${FEATURE_COMMAND_STRING})[a-z-]+/g`)?.[0];
+      if (line.includes(MODULE_COMMAND_STRING)) {
+        const feature = line.match(`/(?<=${MODULE_COMMAND_STRING})[a-z-]+/g`)?.[0];
         if (!feature) {
           console.error(`Feature could not be extracted!\nLine: ${line}`);
         }
@@ -90,7 +90,7 @@ const interpretFile = (p: string, fileType: string, features: Feature[], options
         }
       }
 
-      if (options.mode == 'REMOVE' && line.startsWith(FEATURE_END_COMMAND_STRING)) return meta;
+      if (options.mode == 'REMOVE' && line.startsWith(MODULE_END_COMMAND_STRING)) return meta;
 
       meta.lines.push(line);
       return meta;
@@ -105,7 +105,7 @@ const interpretFile = (p: string, fileType: string, features: Feature[], options
   }
 }
 
-export const interpret = (features: Feature[], options: InterpretFileOptions) => {
+export const interpret = (features: Module[], options: InterpretFileOptions) => {
 
   getFiles(path.join(process.cwd(), 'packages'), {
     disallowList: ['node_modules', 'lib', '.next'],
@@ -124,4 +124,4 @@ export const interpret = (features: Feature[], options: InterpretFileOptions) =>
 
 }
 
-interpret(features.slice(0, 1), { mode: 'REMOVE' });
+interpret(modules.slice(0, 1), { mode: 'REMOVE' });

@@ -40,7 +40,7 @@
     "shared-server:build": "npm run build -w bs-shared-server-kit",
     "shared-server:watch": "npm run watch -w bs-shared-server-kit",
     "stripe:relay": "stripe listen --forward-to 127.0.0.1:3000/api/webhook",
-    "cli": "ts-node bin/cli"
+    "cli": "ts-node apps/cli"
   },
   "devDependencies": {
     "@types/inquirer": "^8.1.1",

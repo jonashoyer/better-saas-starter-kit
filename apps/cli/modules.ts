@@ -1,15 +1,17 @@
 
-export interface Feature {
+export interface Module {
   name: string;
   value: string;
-  dependencies: string[];
+  dependencies?: string[];
 }
 
-const features: Feature[] = [
+const modules: Module[] = [
   { name: 'OAuth', value: 'oauth', dependencies: [] },
   { name: 'Stripe', value: 'stripe', dependencies: [] },
   { name: 'Queue System', value: 'queue-system', dependencies: [] },
   { name: 'Web3', value: 'web3', dependencies: [] },
 ]
 
-export default features;
+// dependencies: npm un && comment import
+
+export default modules;
