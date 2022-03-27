@@ -42,10 +42,12 @@ export default function Home(props: any) {
       <PageLayout padded>
         {!session && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
         {session && <Button onClick={() => signOut() } variant='contained'>Logout</Button>}
-        <Box sx={{ py: 1 }}>
-          <Typography>{currentProjectData?.currentProject?.id} {currentProjectData?.currentProject?.name}</Typography>
-          <Typography>{loading ? 'Loading...' : (session ? JSON.stringify(session, null, 2) : 'No session')}</Typography>
-        </Box>
+        <Paper sx={{ p: 2 , my: 2}}>
+          <Typography variant='subtitle1' color='textSecondary'>Project</Typography>
+          {currentProjectData && <Typography sx={{ mb: 1 }}>{currentProjectData.currentProject?.id} {currentProjectData.currentProject?.name}</Typography>}
+          <Typography variant='subtitle1' color='textSecondary'>Session data</Typography>
+          <Typography variant='body2'>{loading ? 'Loading...' : (session ? JSON.stringify(session, null, 2) : 'No session')}</Typography>
+        </Paper>
 
         <Box sx={{ py: 1 }}>
           <ProductPricingsTable component={Paper} products={props.products} />

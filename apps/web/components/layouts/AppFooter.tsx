@@ -29,7 +29,7 @@ const AppAppBar = (props: any) => {
         ].map(([label, href], index) => (
           <Box key={index} sx={{ mr: 2 }}>
             <NextLink href={href}>
-              <MuiLink sx={{ color: '#fff', cursor: 'pointer' }}>{label}</MuiLink>
+              <MuiLink sx={{ color: '#fff', cursor: 'pointer' }} underline='none'>{label}</MuiLink>
             </NextLink>
           </Box>
         ))}

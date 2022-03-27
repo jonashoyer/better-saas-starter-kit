@@ -1,5 +1,5 @@
 {
-  "name": "better-saas-starter-kit",
+  "name": "better-saas-starter",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -18,27 +18,29 @@
     "prettier": "prettier \"*.{js,json,yml,md}\" \"packages/**/*\"",
     "format:check": "npm run prettier -- --check",
     "reinstall": "rm -rf module_name && npm i",
+    "postinstall": "npm run prisma:fix",
     "watch": "npm-run-all -l -p -r *:watch",
     "generate": "npm-run-all *:generate",
     "lib:build": "npm-run-all -s prisma:generate shared:build shared-server:build",
     "app:build": "npm-run-all -s api:build worker:build web:build",
-    "web:dev": "npm run dev -w bs-web-kit",
-    "api:dev": "npm run dev -w bs-api-kit",
-    "worker:dev": "npm run dev -w bs-worker-kit",
+    "web:dev": "npm run dev -w web",
+    "api:dev": "npm run dev -w api",
+    "worker:dev": "npm run dev -w worker",
     "prisma:generate": "npx prisma generate",
     "prisma:dev": "npx prisma migrate dev",
     "prisma:reset": "npx prisma migrate reset",
     "prisma:deploy": "npx prisma migrate deploy",
     "prisma:format": "npx prisma format",
     "prisma:seed": "npx prisma db seed",
-    "api:generate": "npm run generate -w bs-api-kit",
-    "web:generate": "npm run generate -w bs-web-kit",
-    "api:build": "npm run build -w bs-api-kit",
-    "web:build": "npm run build -w bs-web-kit",
-    "shared:build": "npm run build -w bs-shared-kit",
-    "shared:watch": "npm run watch -w bs-shared-kit",
-    "shared-server:build": "npm run build -w bs-shared-server-kit",
-    "shared-server:watch": "npm run watch -w bs-shared-server-kit",
+    "prisma:fix": "rm -rf apps/api/node_modules/.prisma && rm -rf apps/web/node_modules/.prisma",
+    "api:generate": "npm run generate -w api",
+    "web:generate": "npm run generate -w web",
+    "api:build": "npm run build -w api",
+    "web:build": "npm run build -w web",
+    "shared:build": "npm run build -w shared",
+    "shared:watch": "npm run watch -w shared",
+    "shared-server:build": "npm run build -w shared-server",
+    "shared-server:watch": "npm run watch -w shared-server",
     "stripe:relay": "stripe listen --forward-to 127.0.0.1:3000/api/webhook",
     "cli": "ts-node apps/cli"
   },
@@ -53,12 +55,12 @@
     "meow": "^10.1.1",
     "npm-run-all": "^4.1.5",
     "ora": "^6.0.1",
-    "prisma": "^3.0.2",
+    "prisma": "^3.11.1",
     "turbo": "^1.0.25",
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@prisma/client": "^3.0.2",
+    "@prisma/client": "^3.11.1",
     "dayjs": "^1.10.7",
     "ms": "^2.1.2"
   },
@@ -76,8 +78,8 @@
           "^build"
         ]
       },
-      "test": { },
-      "lint": { },
+      "test": {},
+      "lint": {},
       "dev": {
         "cache": false
       },

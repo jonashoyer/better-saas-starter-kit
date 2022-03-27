@@ -2,13 +2,14 @@ import React from "react";
 import dynamic from 'next/dynamic';
 import { Box } from "@mui/system";
 import Logo from "../elements/Logo";
-import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem } from "@mui/material";
+import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem, Link as MuiLink } from "@mui/material";
 import { signIn, useSession } from "next-auth/client";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { signOut } from "next-auth/client"
 import useTranslation from "next-translate/useTranslation";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Lazy from "../elements/Lazy";
+import Link from "next/link";
 
 const LazyDialogAccountSettings = dynamic(() => import('../elements/DialogAccountSettings'));
 
@@ -32,18 +33,23 @@ const AppAppBar = (props: any) => {
         top: 0,
         background: '#ffffff44',
         px: 2,
-        py: 3,
+        py: 1,
         color: '#000',
         justifyContent: 'center',
         display: 'flex',
         backdropFilter: 'saturate(180%) blur(5px)',
         zIndex: (theme: any) => theme.zIndex.appBar,
         borderBottom: '1px solid #00000044',
+        alignItems: 'center',
       }}
     >
       <Box sx={{ flexBasis: '200px', px: 2 }} />
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <Logo />
+        <Link href='/' passHref>
+          <MuiLink color='inherit' underline='none'>
+            <Logo />
+          </MuiLink>
+        </Link>
       </Box>
       <Box sx={{ flexBasis: '200px', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
         {(!loading && session) &&
@@ -52,6 +58,7 @@ const AppAppBar = (props: any) => {
               edge="end"
               onClick={handleProfileMenuOpen}
               color="inherit"
+              size='small'
             >
               <Avatar
                 sx={{ width: 32, height: 32 }}

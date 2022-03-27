@@ -37,6 +37,7 @@ const ProjectDetailsPaper = ({ project }: ProjectDetailsPaperProps) => {
         <TextField
           size='small'
           margin='normal'
+          inputProps={{ readOnly: true }}
           label={t('settings:projectId')}
           fullWidth
           value={project.id ?? ''}

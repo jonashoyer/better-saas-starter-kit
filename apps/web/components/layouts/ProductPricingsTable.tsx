@@ -8,7 +8,7 @@ import { formatCurrency } from "shared";
 
 export interface ProductPricingsLayoutProps {
   products: (StripeProduct & { prices: StripePrice[] })[];
-  currentProduct: (StripeProduct & { prices: StripePrice[] });
+  currentProduct?: (StripeProduct & { prices: StripePrice[] });
   component?: any;
   onPlanSwitch?: (product: StripeProduct & { prices: StripePrice[] }) => any;
 }

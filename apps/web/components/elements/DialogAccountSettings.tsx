@@ -9,6 +9,7 @@ import useTranslation from 'next-translate/useTranslation';
 import { TextField } from '@mui/material';
 import { useSelfQuery, useUpdateUserMutation } from 'types/gql';
 import { LoadingButton } from '@mui/lab';
+import SpinnerOverlay from './SpinnerOverlay';
 
 export type DialogAccountSettingsProps = {
   open: boolean;
@@ -52,7 +53,8 @@ export default function DialogAccountSettings({ open,  handleClose }: DialogAcco
   return (
     <Dialog open={open} onClose={innerHandleClose} maxWidth='sm' fullWidth>
       <DialogTitle>{t('common:accountSettings')}</DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ position: 'relative' }}>
+        <SpinnerOverlay loading={selfLoading} />
         <DialogContentText>{}</DialogContentText>
         <form onSubmit={onNameSave}>
           <TextField

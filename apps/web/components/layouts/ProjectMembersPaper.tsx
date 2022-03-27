@@ -185,11 +185,11 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
               <ListItemText primary={e.email} secondary={e.role} />
             </ListItem>
           ))}
-          <ListItem button>
+          <ListItem button onClick={() => setInviteDialogOpen(true)}>
             <ListItemIcon>
               <AddIcon />
             </ListItemIcon>
-            <ListItemText primary='Invite new member' onClick={() => setInviteDialogOpen(true)} />
+            <ListItemText primary={t('settings:inviteNewMember')} />
           </ListItem>
         </List>
       </Paper>

@@ -15,3 +15,5 @@ paymentMethod:
   other: 'Payment methods'
 
 billing: 'Billing'
+
+inviteNewMember: 'Invite new member'

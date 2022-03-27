@@ -8,7 +8,7 @@ const Copyright = (props: any) => {
     <React.Fragment>
       {'© '}
       {new Date().getFullYear()},{' '}
-      <Link color="inherit">
+      <Link color="inherit" underline="none">
         APP
       </Link>
     </React.Fragment>
