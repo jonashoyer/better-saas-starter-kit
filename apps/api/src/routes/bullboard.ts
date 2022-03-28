@@ -1,3 +1,4 @@
+// !MODULE worker
 import { createBullBoard } from '@bull-board/api';
 import { BullMQAdapter } from '@bull-board/api/BullMQAdapter';
 import { ExpressAdapter } from '@bull-board/express';
@@ -10,7 +11,7 @@ const router = express.Router()
 const serverAdapter = new ExpressAdapter();
 
 const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-  queues: Object.values(queueManager.queues).map(q => new BullMQAdapter(q)),
+  queues: Object.values(queueManager.queues).map((q: any) => new BullMQAdapter(q)),
   serverAdapter:serverAdapter
 })
 

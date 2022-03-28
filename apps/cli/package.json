@@ -1,0 +1,26 @@
+{
+  "name": "cli",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "start": "ts-node src/index"
+  },
+  "dependencies": {
+    "shared": "*",
+    "tsconfig": "*"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/inquirer": "^8.2.0",
+    "boxen": "^6.2.1",
+    "chalk": "^5.0.1",
+    "commander": "^9.1.0",
+    "inquirer": "^8.2.2",
+    "listr": "^0.14.3",
+    "meow": "^10.1.2",
+    "ora": "^6.1.0"
+  }
+}

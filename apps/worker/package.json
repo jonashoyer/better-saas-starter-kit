@@ -19,8 +19,8 @@
     "schema": "../../prisma/schema.prisma"
   },
   "devDependencies": {
-    "tsconfig": "*",
-    "config": "*"
+    "config": "*",
+    "tsconfig": "*"
   },
   "author": "",
   "license": "ISC"

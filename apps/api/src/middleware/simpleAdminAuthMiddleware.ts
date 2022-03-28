@@ -1,3 +1,4 @@
+// !MODULE oauth
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { ADMIN_KEY, JWT_SECRET } from '../config';

@@ -26,8 +26,8 @@
     "mjml": "^4.10.2",
     "node-mailjet": "^3.3.4",
     "nodemailer": "^6.6.3",
+    "shared": "*",
     "stripe": "^8.169.0",
-    "tsconfig": "*",
-    "shared": "*"
+    "tsconfig": "*"
   }
 }

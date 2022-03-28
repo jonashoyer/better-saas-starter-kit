@@ -2,7 +2,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
-import { Product, ProductPrice } from '@prisma/client';
+import { StripeProduct, StripePrice } from '@prisma/client';
 import { formatCurrency } from 'shared';
 import { isJSONValueObject } from 'utils';
 import Lazy from 'components/elements/Lazy';
@@ -15,7 +15,7 @@ const LazyDialogPlanCompare = dynamic(() => import('../elements/DialogPlanCompar
 
 interface ProjectPlanPaperProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
-  products: (Product & { prices: ProductPrice[] })[];
+  products: (StripeProduct & { prices: StripePrice[] })[];
 }
 
 const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
@@ -86,11 +86,11 @@ export default ProjectPlanPaper;
 
 interface ProjectPlanListProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
-  sortedProducts: (Product & { prices: ProductPrice[] })[];
-  priceFindFn: (price: ProductPrice) => boolean;
+  sortedProducts: (StripeProduct & { prices: StripePrice[] })[];
+  priceFindFn: (price: StripePrice) => boolean;
   t: Translate;
   lang: string;
-  setChangePlan: React.Dispatch<Product & { prices: ProductPrice[] }>;
+  setChangePlan: React.Dispatch<StripeProduct & { prices: StripePrice[] }>;
   setShowDialogPlanCompare: (show: boolean) => any;
 }
 
@@ -139,11 +139,11 @@ const ProjectPlanList = ({ project, sortedProducts, priceFindFn, setChangePlan, 
 
 interface ProjectPlanCurrentProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
-  sortedProducts: (Product & { prices: ProductPrice[] })[];
-  priceFindFn: (price: ProductPrice) => boolean;
+  sortedProducts: (StripeProduct & { prices: StripePrice[] })[];
+  priceFindFn: (price: StripePrice) => boolean;
   t: Translate;
   lang: string;
-  setChangePlan: React.Dispatch<Product & { prices: ProductPrice[] }>;
+  setChangePlan: React.Dispatch<StripeProduct & { prices: StripePrice[] }>;
   setShowDialogPlanCompare: (show: boolean) => any;
 }
 

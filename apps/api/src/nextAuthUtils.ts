@@ -1,3 +1,4 @@
+// !MODULE oauth
 import { Session, User } from "@prisma/client"
 import { prisma } from "./context"
 import cookie from 'cookie';
@@ -36,7 +37,7 @@ export async function getSession({ req, sessionToken }: { req?: {  headers: http
     return findSession(sessionToken!);
   }
   if (req) {
-    const parsed = cookie.parse(req.headers.cookie || '');
+    const parsed = cookie.parse(req.headers.cookie || '');
     const sessionToken = parsed[SESSION_TOKEN_NAME];
     if (sessionToken) {
       return findSession(sessionToken);
