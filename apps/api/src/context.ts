@@ -23,6 +23,7 @@ export type Context = {
   pubsub: RedisPubSub;
   redis: Redis.Redis;
   user: User | null;
+  queueManager: typeof queueManager; // :MODULE worker
 };
 
 export const createContext: ContextFunction<ExpressContext, Context> = async (ctx)  => {
@@ -34,6 +35,7 @@ export const createContext: ContextFunction<ExpressContext, Context> = async (ct
     pubsub,
     redis,
     user,
+    queueManager, // :MODULE worker
   }
 }
 
@@ -46,5 +48,6 @@ export const createSubscriptionContext = async (connectionParams: any, websocket
     pubsub,
     redis,
     user,
+    queueManager, // :MODULE worker
   }
 }
