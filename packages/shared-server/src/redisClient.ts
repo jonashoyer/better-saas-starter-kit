@@ -17,6 +17,8 @@ export function createRedisClient (type: clientTypes, redisUrl?: string) {
       return new Redis(redisUrl || process.env.REDIS_URL, {
         showFriendlyErrorStack: (process.env.NODE_ENV !== NodeEnv.Production),
         connectTimeout: 10e3,
+        maxRetriesPerRequest: null,
+        enableReadyCheck: false,
         retryStrategy(times) {
           return Math.min(times * 50, 3000);
         },

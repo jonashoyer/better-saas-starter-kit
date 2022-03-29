@@ -4,7 +4,7 @@ import Redis from 'ioredis';
 import {
   createRedisClient,
   createPubsub,
-  createQueueMananger, // :MODULE worker
+  createAppQueueManager, // :MODULE worker
 } from 'shared-server';
 import { ContextFunction } from 'apollo-server-core'
 import { RedisPubSub } from 'graphql-redis-subscriptions';
@@ -14,7 +14,7 @@ import { Request } from 'express';
 export const pubsub = createPubsub();
 export const prisma = new PrismaClient();
 export const redis = createRedisClient('client');
-export const queueManager = createQueueMananger(); // :MODULE worker
+export const queueManager = createAppQueueManager(); // :MODULE worker
 
 
 export type Context = {

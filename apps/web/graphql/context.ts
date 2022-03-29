@@ -1,6 +1,6 @@
 import { PrismaClient, User } from '@prisma/client';
 import Redis from 'ioredis';
-import { createRedisClient, createStripe, createQueueMananger, StripeHandler, QueueManagerType } from 'shared-server';
+import { createRedisClient, createStripe, createAppQueueManager, StripeHandler } from 'shared-server';
 import { ContextFunction } from 'apollo-server-core'
 import { getSession } from 'next-auth/client';
 import Stripe from 'stripe';
@@ -10,14 +10,14 @@ import { Session } from '../pages/api/auth/[...nextauth]';
 export const stripe = createStripe();
 export const prisma = new PrismaClient();
 export const redis = createRedisClient('client');
-export const queueManager = createQueueMananger();
+export const queueManager = createAppQueueManager();
 
 export type Context<E = any> = {
-  req: IncomingMessage & { cookies: Record<string, string> };
+  req: IncomingMessage & { cookies: Record<string, string> };
   res: OutgoingMessage;
   prisma: PrismaClient;
   redis: Redis.Redis;
-  queueManager: QueueManagerType,
+  queueManager: typeof queueManager,
   stripe: Stripe;
   getStripeHandler: () => StripeHandler;
   user?: User;

@@ -11,7 +11,7 @@ const router = express.Router()
 const serverAdapter = new ExpressAdapter();
 
 const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-  queues: Object.values(queueManager.queues).map((q: any) => new BullMQAdapter(q)),
+  queues: Object.values(queueManager).map(e => new BullMQAdapter(e.queue)),
   serverAdapter:serverAdapter
 })
 
