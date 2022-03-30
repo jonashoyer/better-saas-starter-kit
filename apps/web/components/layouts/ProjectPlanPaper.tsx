@@ -9,24 +9,27 @@ import Lazy from 'components/elements/Lazy';
 import { CurrentProjectSettingsQuery, Project } from 'types/gql';
 import { Translate } from 'next-translate';
 import ComponentPreview from './ComponentPreview';
+import { StripeProductWithPricing } from '../../types/types';
 
 const LazyDialogChangePlan = dynamic(() => import('../elements/DialogChangePlan'));
 const LazyDialogPlanCompare = dynamic(() => import('../elements/DialogPlanCompare'));
 
 interface ProjectPlanPaperProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
-  products: (StripeProduct & { prices: StripePrice[] })[];
+  products: StripeProductWithPricing[];
 }
 
 const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
 
   const { t, lang } = useTranslation();
-  const priceFindFn = e => e.interval == 'month';
+  const monthlyPriceFindFn = e => e.interval == 'month';
+  const yearlyPriceFindFn = e => e.interval == 'year';
 
   const [changePlan, setChangePlan] = React.useState(null);
   const [showDialogPlanCompare, setShowDialogPlanCompare] = React.useState(false);
 
-  const sortedProducts = products.sort((a, b) => (a.prices.find(priceFindFn).unitAmount ?? Infinity) - (b.prices.find(priceFindFn).unitAmount ?? Infinity) );
+  const productPricingFn = (product: StripeProductWithPricing) => (product.prices.find(yearlyPriceFindFn) || product.prices.find(monthlyPriceFindFn));
+  const sortedProducts = products.sort((a, b) => (productPricingFn(a).unitAmount ?? Infinity) - (productPricingFn(b).unitAmount ?? Infinity) );
 
   return (
     <React.Fragment>
@@ -57,7 +60,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
                 key={0}
                 project={project}
                 sortedProducts={sortedProducts}
-                priceFindFn={priceFindFn}
+                productPricingFn={productPricingFn}
                 t={t}
                 lang={lang}
                 setChangePlan={setChangePlan}
@@ -67,7 +70,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
                 key={1}
                 project={project}
                 sortedProducts={sortedProducts}
-                priceFindFn={priceFindFn}
+                productPricingFn={productPricingFn}
                 t={t}
                 lang={lang}
                 setChangePlan={setChangePlan}
@@ -87,21 +90,21 @@ export default ProjectPlanPaper;
 interface ProjectPlanListProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
   sortedProducts: (StripeProduct & { prices: StripePrice[] })[];
-  priceFindFn: (price: StripePrice) => boolean;
+  productPricingFn: (product: StripeProductWithPricing) => StripePrice;
   t: Translate;
   lang: string;
   setChangePlan: React.Dispatch<StripeProduct & { prices: StripePrice[] }>;
   setShowDialogPlanCompare: (show: boolean) => any;
 }
 
-const ProjectPlanList = ({ project, sortedProducts, priceFindFn, setChangePlan, setShowDialogPlanCompare, t, lang }: ProjectPlanListProps) => {
+const ProjectPlanList = ({ project, sortedProducts, productPricingFn, setChangePlan, setShowDialogPlanCompare, t, lang }: ProjectPlanListProps) => {
 
   const currentProductIndex = sortedProducts.findIndex(e => e.type == project?.subscriptionPlan);
 
   return (
     <React.Fragment>
       {sortedProducts.map((e, i) => {
-        const price = e.prices.find(priceFindFn);
+        const price = productPricingFn(e);
         const isCurrentProduct = i == currentProductIndex;
 
         const isFeatured = isJSONValueObject(e.metadata) && !!e.metadata.featured;
@@ -116,12 +119,11 @@ const ProjectPlanList = ({ project, sortedProducts, priceFindFn, setChangePlan, 
             <Box sx={{ pr: 1 }}>
               {isFeatured && <Typography variant='caption' color='primary'>{t('pricing:recommended')}</Typography>}
               <Typography variant='subtitle1'>{e.name}</Typography>
-              <Typography variant='body2' color='textSecondary'>{t(`pricing:${e.type.toLowerCase()}_description`)}</Typography>
+              <Typography variant='body2' color='textSecondary'>{t(`pricing:${e.type.toLowerCase()}Description`)}</Typography>
             </Box>
             <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
               <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
-                <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
+                <PricingDisplay t={t} lang={lang} price={price} hideFree />
               </Box>
               <Box>
                 <Button sx={{ minWidth: 92 }} disabled={isCurrentProduct} variant='outlined' onClick={() => setChangePlan(e)}>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>
@@ -140,17 +142,21 @@ const ProjectPlanList = ({ project, sortedProducts, priceFindFn, setChangePlan, 
 interface ProjectPlanCurrentProps {
   project?: CurrentProjectSettingsQuery['currentProject'] | Project;
   sortedProducts: (StripeProduct & { prices: StripePrice[] })[];
-  priceFindFn: (price: StripePrice) => boolean;
+  productPricingFn: (product: StripeProductWithPricing) => StripePrice;
   t: Translate;
   lang: string;
   setChangePlan: React.Dispatch<StripeProduct & { prices: StripePrice[] }>;
   setShowDialogPlanCompare: (show: boolean) => any;
 }
 
-const ProjectPlanCurrent = ({ project, sortedProducts, priceFindFn, setChangePlan, setShowDialogPlanCompare, t, lang }: ProjectPlanCurrentProps) => {
+const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChangePlan, setShowDialogPlanCompare, t, lang }: ProjectPlanCurrentProps) => {
   const currentProduct = sortedProducts.find(e => e.type == project?.subscriptionPlan);
 
-  const price = currentProduct.prices.find(priceFindFn);
+  const price = productPricingFn(currentProduct);
+
+  if (!price) {
+    return <Typography>Missing price data</Typography>
+  }
 
   return (
     <Box>
@@ -158,16 +164,37 @@ const ProjectPlanCurrent = ({ project, sortedProducts, priceFindFn, setChangePla
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, mb: 2 }}>
         <Box sx={{ pr: 1 }}>
           <Typography variant='subtitle1'>{currentProduct.name}</Typography>
-          <Typography variant='body2' color='textSecondary'>{t(`pricing:${currentProduct?.type.toLowerCase()}_description`)}</Typography>
+          <Typography variant='body2' color='textSecondary'>{t(`pricing:${currentProduct?.type.toLowerCase()}Description`)}</Typography>
         </Box>
         <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
           <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
-            <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
+            <PricingDisplay t={t} lang={lang} price={price} hideFree />
           </Box>
         </Box>
       </Box>
       <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setShowDialogPlanCompare(true)}>{currentProduct?.type == 'FREE' ? t('pricing:upgrade') : t('pricing:switch')}</Button>
     </Box>
+  )
+}
+
+export const PricingDisplay = ({ t, lang, price, hideFree }: { t: Translate, lang: string, price: StripePrice, hideFree?: boolean }) => {
+
+  if (price.unitAmount == 0) return hideFree ? null : <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{t('pricing:free')}</Typography>;
+
+  if (price.interval == 'year' && price.intervalCount == 1) {
+    return (
+      <React.Fragment>
+        <Typography sx={{ lineHeight: '1.15' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 12 / 100, { shortFraction: true })}</Typography>
+        <Typography sx={{ lineHeight: '1.15' }} component='p' variant='caption' color='textSecondary'>{t('pricing:perMember')} / {t(`pricing:month`, { count: 1 })}</Typography>
+        <Typography sx={{ lineHeight: '1.15' }} component='p' variant='caption' color='textSecondary'>{t('pricing:billedAnnually')}</Typography>
+      </React.Fragment>
+    )
+  }
+
+  return (
+    <React.Fragment>
+      <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
+      <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
+    </React.Fragment>
   )
 }

@@ -33,6 +33,7 @@
     "prisma:format": "npx prisma format",
     "prisma:seed": "npx prisma db seed",
     "prisma:fix": "rm -rf apps/api/node_modules/.prisma && rm -rf apps/web/node_modules/.prisma && rm -rf apps/api/node_modules/@prisma && rm -rf apps/web/node_modules/@prisma",
+    "prisma:studio": "npx prisma studio",
     "api:generate": "npm run generate -w api",
     "web:generate": "npm run generate -w web",
     "api:build": "npm run build -w api",
@@ -41,6 +42,7 @@
     "shared:watch": "npm run watch -w shared",
     "shared-server:build": "npm run build -w shared-server",
     "shared-server:watch": "npm run watch -w shared-server",
+    "stripe:login": "stripe login",
     "stripe:relay": "stripe listen --forward-to 127.0.0.1:3000/api/webhook",
     "cli": "ts-node apps/cli/src/index"
   },

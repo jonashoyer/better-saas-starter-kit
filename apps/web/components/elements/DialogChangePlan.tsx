@@ -4,7 +4,6 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { StripeProduct, StripePrice } from '@prisma/client';
 import { CurrentProjectSettingsQuery, PaymentMethodImportance, SubscriptionPlan, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, capitalize, Divider, FormControlLabel, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
@@ -15,14 +14,14 @@ import { LoadingButton } from '@mui/lab';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 import usePollPlan from 'hooks/usePollPlan';
+import { StripeProductWithPricing } from '../../types/types';
 
-type ProductNPricing = (StripeProduct & { prices: StripePrice[] });
 export type DialogChangePlanProps = {
   open: boolean;
   handleClose: () => any;
   project?: CurrentProjectSettingsQuery['currentProject'];
-  products: (StripeProduct & { prices: StripePrice[] })[];
-  targetProduct?: ProductNPricing;
+  products: StripeProductWithPricing[];
+  targetProduct?: StripeProductWithPricing;
 }
 
 export default function DialogChangePlan({ open,  handleClose, targetProduct, project }: DialogChangePlanProps) {
@@ -93,11 +92,11 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   React.useEffect(() => {
     if (!targetProduct) return;
     latestProductRef.current = targetProduct;
-    setPrice(targetProduct?.prices[0]);
+    setPrice(targetProduct.prices.find(e => e.interval == 'year') || targetProduct.prices[0]);
   }, [targetProduct]);
 
 
-  const product: ProductNPricing = targetProduct || latestProductRef.current;
+  const product: StripeProductWithPricing = targetProduct || latestProductRef.current;
 
   const isMonthOrYearlyBilling = React.useMemo(() => {
     if (!product) return true;
@@ -110,7 +109,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const yearlyDiscount = React.useMemo(() => {
     if (!product) return;
     if (!isMonthOrYearlyBilling) return null;
-    console.log(isMonthOrYearlyBilling);
+    
     const pm = product.prices.find(e => e.interval == 'month')
     const py = product.prices.find(e => e.interval == 'year');
     return ((1 - ((py.unitAmount / 12) / pm.unitAmount)) * 100).toFixed(1);
@@ -128,7 +127,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     if (!price) return null;
     if (!isMonthOrYearlyBilling || price.interval == 'month') return defaultFormat();
     const monthlyPrice = price.unitAmount / 100 / 12;
-    return `${t('pricing:planPricingSummary', { price: formatCurrency(lang, price.currency, monthlyPrice, { shortFraction: true }), interval: 'month' })} - ${t('pricing:billedYearly')}`;
+    return `${t('pricing:planPricingSummary', { price: formatCurrency(lang, price.currency, monthlyPrice, { shortFraction: true }), interval: 'month' })} · ${t('pricing:billedAnnually')}`;
   }, [interval, isMonthOrYearlyBilling, lang, price, t]);
 
   React.useEffect(() => {
@@ -219,7 +218,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
           <Box sx={{ flex: '1' }}>
             <Box sx={{ mb: 2 }}>
               <Typography variant='h6'>{project.subscriptionPlan == SubscriptionPlan.Free ? t('pricing:upgradeToPlan', { planName: product.type.toLowerCase() }) : t('pricing:changePlanTitle')}</Typography>
-              <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.type?.toLowerCase()}_description`)}</Typography>
+              <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.type?.toLowerCase()}Description`)}</Typography>
             </Box>
 
             {isMonthOrYearlyBilling &&
@@ -229,7 +228,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
                 control={
                   <Switch checked={price && price.interval == 'year'} onChange={(_, c) => setPrice(product.prices.find(e => e.interval == (c ? 'year' : 'month')))} />
                 }
-                label={`Yealy billing (-${yearlyDiscount}%)`}
+                label={<Typography variant='subtitle2'>{`${t('pricing:payAnnually')} (-${yearlyDiscount}%)`}</Typography>}
               />
             }
             <Box>
@@ -260,7 +259,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
               <Typography color='text' variant='body2'>{t('pricing:productNameMemberCount', { productName: product?.name, count: project.users.length })}</Typography>
               <Typography fontSize='0.875rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
             </Box>
-            <Typography fontSize='0.75rem' color='textSecondary' variant='body2'>{planPricingSummary}</Typography>
+            <Typography fontSize='0.725rem' color='textSecondary' variant='body2'>{planPricingSummary}</Typography>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography color='textSecondary' variant='body2'>{t('pricing:subtotal')}</Typography>

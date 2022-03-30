@@ -1,6 +1,6 @@
-free_description: "For individuals looking to get more done"
-basic_description: "All the basics"
-premium_description: "Advanced tools"
+freeDescription: "For individuals looking to get more done"
+basicDescription: "All the basics"
+premiumDescription: "Advanced tools"
 perMember: 'per member'
 
 current: 'Current'
@@ -45,9 +45,13 @@ tax: 'Tax'
 total: 'Total'
 
 planPricingSummary: '{{price}} / member / {{interval}}'
-billedYearly: 'Billed yearly'
+billedAnnually: 'Billed annually'
 recommended: 'Recommended'
 
 currentPlan: 'Current plan'
 upgrade: 'Upgrade'
 downgrade: 'Downgrade'
+
+free: 'Free'
+
+payAnnually: 'Pay Annually'

@@ -1,27 +1,33 @@
 import React from "react";
-import { StripeProduct, StripePrice, SubscriptionPlan } from "@prisma/client";
-import { Box,  Button,  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { SubscriptionPlan } from "@prisma/client";
+import { Box,  Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { formatCurrency } from "shared";
+import { StripeProductWithPricing } from "../../types/types";
+import { PricingDisplay } from "./ProjectPlanPaper";
 
 export interface ProductPricingsLayoutProps {
-  products: (StripeProduct & { prices: StripePrice[] })[];
-  currentProduct?: (StripeProduct & { prices: StripePrice[] });
+  products: StripeProductWithPricing[];
+  currentProduct?: StripeProductWithPricing;
   component?: any;
-  onPlanSwitch?: (product: StripeProduct & { prices: StripePrice[] }) => any;
+  onPlanSwitch?: (product: StripeProductWithPricing) => any;
 }
+
+const monthlyPriceFindFn = e => e.interval == 'month';
+const yearlyPriceFindFn = e => e.interval == 'year';
 
 const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduct }: ProductPricingsLayoutProps) => {
 
   const { t, lang } = useTranslation();
-
-  const priceFindFn = React.useCallback(e => e.interval == 'month', []);
+  
+  const productPricingFn = React.useMemo(() => {
+    return (product: StripeProductWithPricing) => (product.prices.find(yearlyPriceFindFn) || product.prices.find(monthlyPriceFindFn));  return (product: StripeProductWithPricing) => (product.prices.find(monthlyPriceFindFn) || product.prices.find(yearlyPriceFindFn));
+  }, []);
   
   const sortedProducts = React.useMemo(() => {
-    return products.sort((a, b) => (a.prices.find(priceFindFn).unitAmount ?? Infinity) - (b.prices.find(priceFindFn).unitAmount ?? Infinity) );
-  }, [products, priceFindFn]);
+    return products.sort((a, b) => (productPricingFn(a).unitAmount ?? Infinity) - (productPricingFn(b).unitAmount ?? Infinity) );
+  }, [productPricingFn, products]);
 
   const currentProductIndex = sortedProducts.findIndex(e => e.type == currentProduct?.type);
 
@@ -36,7 +42,7 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant='h6'>{e.name}</Typography>
-                      <Typography variant='body2'>{t(`pricing:${e.type.toLowerCase()}_description`)}</Typography>
+                      <Typography variant='body2'>{t(`pricing:${e.type.toLowerCase()}Description`)}</Typography>
                     </Box>
                   </TableCell>
                 ))}
@@ -46,13 +52,12 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
             <TableRow>
               <TableCell colSpan={2} component="th" scope="row" />
               {sortedProducts.map((e, i) => {
-                const price = e.prices.find(priceFindFn);
+                const price = productPricingFn(e);
                 const isCurrentProduct = i == currentProductIndex;
                 return (
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ textAlign: 'center' }}>
-                      <Typography sx={{ lineHeight: '1' }} variant='subtitle1'>{formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true })}</Typography>
-                      <Typography variant='caption' color='textSecondary'>{t('pricing:perMember')} / {price.intervalCount != 1 && price.intervalCount} {t(`pricing:${price.interval}`, { count: price.intervalCount })}</Typography>
+                      <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} />
                       {onPlanSwitch && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>}
                       {!onPlanSwitch && isCurrentProduct && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{t('pricing:currentPlan')}</Button>}
                     </Box>

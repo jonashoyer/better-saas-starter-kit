@@ -22,7 +22,7 @@ interface UsePollPaymentMethodsOption {
 }
 
 const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => void, boolean] => {
-  const { projectId, paymentMethods, onCompleted, onFailed, maxTries = 8, delay = 200, initialDelay = 800 } = option;
+  const { projectId, paymentMethods, onCompleted, onFailed, maxTries = 8, delay = 500, initialDelay = 800 } = option;
   
   const currentHashRef = React.useRef(null);
 
