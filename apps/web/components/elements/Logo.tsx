@@ -9,7 +9,7 @@ const Logo = (props: any) => {
       underline="none"
       color="inherit"
     >
-      APP
+      Better SaaS Starter Kit
     </Link>
   )
 }

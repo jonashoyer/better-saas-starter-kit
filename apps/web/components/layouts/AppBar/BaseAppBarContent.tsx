@@ -1,22 +1,22 @@
-import React from "react";
+import React from 'react';
+import { Box } from '@mui/material';
 import dynamic from 'next/dynamic';
-import { Box } from "@mui/system";
-import Logo from "../elements/Logo";
+import Logo from "../../elements/Logo";
 import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem, Link as MuiLink } from "@mui/material";
-import { signIn, useSession } from "next-auth/client";
+import { signIn, useSession, signOut } from "next-auth/react";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { signOut } from "next-auth/client"
 import useTranslation from "next-translate/useTranslation";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import Lazy from "../elements/Lazy";
+import Lazy from "../../elements/Lazy";
 import Link from "next/link";
 
-const LazyDialogAccountSettings = dynamic(() => import('../elements/DialogAccountSettings'));
+const LazyDialogAccountSettings = dynamic(() => import('../../elements/DialogAccountSettings'));
 
+const BaseAppBarContent = () => {
 
-const AppAppBar = (props: any) => {
+  const { data: session, status } = useSession();
 
-  const [session, loading] = useSession();
+  const loading = status === 'loading';
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = React.useState(null);
 
@@ -24,34 +24,19 @@ const AppAppBar = (props: any) => {
     setProfileMenuAnchorEl(e.currentTarget);
   }
 
+
   return (
-    <Box
-      sx={{
-        position: 'sticky',
-        left: 64,
-        right: 64,
-        top: 0,
-        background: '#ffffff44',
-        px: 2,
-        py: 1,
-        color: '#000',
-        justifyContent: 'center',
-        display: 'flex',
-        backdropFilter: 'saturate(180%) blur(5px)',
-        zIndex: (theme: any) => theme.zIndex.appBar,
-        borderBottom: '1px solid #00000044',
-        alignItems: 'center',
-      }}
-    >
-      <Box sx={{ flexBasis: '200px', px: 2 }} />
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+    <React.Fragment>
+      <Box sx={{ flexBasis: '300px', px: 2 }}>
         <Link href='/' passHref>
           <MuiLink color='inherit' underline='none'>
             <Logo />
           </MuiLink>
         </Link>
       </Box>
-      <Box sx={{ flexBasis: '200px', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+      </Box>
+      <Box sx={{ flexBasis: '300px', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
         {(!loading && session) &&
           <React.Fragment>
             <IconButton
@@ -76,9 +61,11 @@ const AppAppBar = (props: any) => {
           <Button onClick={() => signIn()} variant='contained' color='primary'>Login</Button>
         }
       </Box>
-    </Box>
+    </React.Fragment>
   )
 }
+
+export default BaseAppBarContent;
 
 export interface UserMenuProps {
   anchorEl: any;
@@ -148,5 +135,3 @@ const UserMenu = ({ anchorEl, handleClose }: UserMenuProps) => {
     </React.Fragment>
   )
 }
-
-export default AppAppBar;

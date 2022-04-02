@@ -4,7 +4,7 @@ import { onError } from "@apollo/client/link/error";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { getMainDefinition } from '@apollo/client/utilities';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { signOut } from 'next-auth/client';
+import { signOut } from 'next-auth/react';
 import { GRAPHQL_ENDPOINT, GRAPHQL_WEBSOCKET_ENDPOINT } from '../config';
 import { getURL } from '.';
 

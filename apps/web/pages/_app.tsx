@@ -5,8 +5,10 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { defaultTheme } from '../constants/theme';
 import { useApollo } from '../utils/GraphqlClient';
 import { ApolloProvider } from '@apollo/client';
-import { Provider as NextAuthProvider } from 'next-auth/client'
+import { SessionProvider } from 'next-auth/react'
 import { ProjectValueProvider } from '../hooks/useProject';
+import WithCookieSnackbar from '../components/layouts/WithCookieSnackbar';
+import { AuthGuard } from '../components/elements/AuthGuard';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -22,23 +24,21 @@ function MyApp({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps.initialApolloState);
 
   return (
-    <NextAuthProvider
-      options={{
-        clientMaxAge: 60 * 30,
-        keepAlive: 60 * 60,
-      }}
-      session={pageProps.session}
-    >
+    <SessionProvider session={pageProps.session}>
         <ApolloProvider client={apolloClient}>
           <ThemeProvider theme={defaultTheme}>
             <ProjectValueProvider initialValue={pageProps.projectId}>
               <CssBaseline />
-              <Component {...pageProps} />
+              <WithCookieSnackbar>
+                <AuthGuard Component={Component} pageProps={pageProps} />
+              </WithCookieSnackbar>
             </ProjectValueProvider>
           </ThemeProvider>
         </ApolloProvider>
-    </NextAuthProvider>
+    </SessionProvider>
   );
 }
 
-export default MyApp
+export default MyApp;
+
+

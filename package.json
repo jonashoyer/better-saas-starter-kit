@@ -26,7 +26,7 @@
     "web:dev": "npm run dev -w web",
     "api:dev": "npm run dev -w api",
     "worker:dev": "npm run dev -w worker",
-    "prisma:generate": "npx prisma generate",
+    "prisma:generate": "npx prisma generate && npm run prisma:fix",
     "prisma:dev": "npx prisma migrate dev",
     "prisma:reset": "npx prisma migrate reset",
     "prisma:deploy": "npx prisma migrate deploy",
@@ -44,7 +44,8 @@
     "shared-server:watch": "npm run watch -w shared-server",
     "stripe:login": "stripe login",
     "stripe:relay": "stripe listen --forward-to 127.0.0.1:3000/api/webhook",
-    "cli": "ts-node apps/cli/src/index"
+    "cli": "ts-node apps/cli/src/index",
+    "generate:secret": "openssl rand -base64 32"
   },
   "devDependencies": {
     "@types/ms": "^0.7.31",

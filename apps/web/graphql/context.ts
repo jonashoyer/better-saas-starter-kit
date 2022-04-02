@@ -2,7 +2,7 @@ import { PrismaClient, User } from '@prisma/client';
 import Redis from 'ioredis';
 import { createRedisClient, createStripe, createAppQueueManager, StripeHandler } from 'shared-server';
 import { ContextFunction } from 'apollo-server-core'
-import { getSession } from 'next-auth/client';
+import { getSession } from 'next-auth/react';
 import Stripe from 'stripe';
 import { IncomingMessage, OutgoingMessage } from 'http';
 import { Session } from '../pages/api/auth/[...nextauth]';

@@ -1,14 +1,14 @@
 import React from 'react';
 import Head from 'next/head';
-import { getSession } from "next-auth/client";
+import { getSession } from "next-auth/react";
 import { CurrentProjectSettingsDocument, SelfDocument, useCurrentProjectSettingsQuery, useSelfQuery } from 'types/gql';
-import prisma from 'utils/prisma';
+import { prisma } from 'utils/prisma';
 import { GetServerSideProps } from 'next';
 import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'shared';
 import { setCookie } from 'utils/cookies';
 import useProject from 'hooks/useProject';
-import PageLayout from 'components/layouts/PageLayout';
+import StaticPageLayout from 'components/layouts/PageLayout/StaticPageLayout';
 import ProjectDetailsPaper from 'components/layouts/ProjectDetailsPaper';
 import ProjectMembersPaper from 'components/layouts/ProjectMembersPaper';
 import ProjectDangerZonePaper from 'components/layouts/ProjectDangerZonePaper';
@@ -17,10 +17,11 @@ import ProjectPaymentMethodPaper from 'components/layouts/ProjectPaymentMethodPa
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import ProjectBillingPaper from 'components/layouts/ProjectBillingPaper';
+import { AppNextPage } from '../types/types';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-export default function Settings(props: any) {
+const Settings: AppNextPage = (props) => {
 
   const [projectId] = useProject();
 
@@ -41,7 +42,7 @@ export default function Settings(props: any) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <PageLayout padded>
+      <StaticPageLayout padded pageTitle='Project Settings'>
 
         <ProjectDetailsPaper project={currentProjectData.currentProject} />
         <ProjectMembersPaper project={currentProjectData.currentProject} self={selfData?.self} />
@@ -50,7 +51,7 @@ export default function Settings(props: any) {
         <ProjectBillingPaper project={currentProjectData.currentProject} />
         <ProjectDangerZonePaper project={currentProjectData.currentProject} />
 
-      </PageLayout>
+      </StaticPageLayout>
     </Elements>
   )
 }
@@ -95,3 +96,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     props: { products },
   };
 }
+
+Settings.authGuard = 'authenticated';
+export default Settings;
