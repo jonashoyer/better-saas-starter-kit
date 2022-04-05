@@ -28,6 +28,7 @@
     "@types/react-dom": "^17.0.9",
     "apollo-server-micro": "^3.0.2",
     "argon2": "^0.28.5",
+    "chroma-js": "^2.4.2",
     "cors": "^2.8.5",
     "cuid": "^2.1.8",
     "framer-motion": "^6.2.8",

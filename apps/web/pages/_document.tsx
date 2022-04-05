@@ -1,5 +1,5 @@
 import React from 'react';
-import { defaultTheme } from '../constants/theme';
+import { defaultTheme } from '../themes/default';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import Document, { Html, Head, Main, NextScript } from 'next/document';
