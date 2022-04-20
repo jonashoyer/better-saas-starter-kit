@@ -9,8 +9,9 @@ import { TypographyOptions } from "@mui/material/styles/createTypography";
 
 export default function themeTypography(theme): TypographyOptions {
   return {
-    ...defaultTheme.typography,
+    // ...defaultTheme.typography,
     fontFamily: theme?.customization?.fontFamily,
+    fontWeightBold: 'bold',
     h6: {
       fontWeight: 500,
       color: theme.heading,

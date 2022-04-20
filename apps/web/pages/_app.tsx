@@ -10,9 +10,9 @@ import { ProjectValueProvider } from '../hooks/useProject';
 import WithCookieSnackbar from '../components/layouts/WithCookieSnackbar';
 import { AuthGuard } from '../components/elements/AuthGuard';
 // import TdcTheme from '@tdcerhverv/mui-theme';
-import BerryTheme from '../themes/berry';
-// import MaterialKitTheme from '../themes/material-kit';
-import SoftUITheme from '../themes/soft-ui';
+// import BerryTheme from '../themes/berry';
+import MaterialKitTheme from '../themes/material-kit';
+// import SoftUITheme from '../themes/soft-ui';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -30,7 +30,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>
       <ApolloProvider client={apolloClient}>
-        <ThemeProvider theme={SoftUITheme}>
+        <ThemeProvider theme={MaterialKitTheme}>
           <ProjectValueProvider initialValue={pageProps.projectId}>
             <CssBaseline />
             <WithCookieSnackbar>
