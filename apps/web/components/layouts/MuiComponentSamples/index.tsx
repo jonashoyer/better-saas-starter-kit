@@ -5,7 +5,7 @@ import componentSamples from "./Samples";
 
 const MuiComponentSamples = () => {
   return (
-    <Box sx={{ maxWidth: 1000, padding: 1, margin: 'auto' }}>
+    <Box>
       <Typography variant="h4" gutterBottom>
         Material-UI Components
       </Typography>

@@ -77,6 +77,7 @@ import svgIcon from "./components/svgIcon";
 import link from "./components/link";
 
 export default createTheme({
+  name: 'softUI',
   breakpoints: { ...breakpoints },
   palette: { ...colors },
   typography: { ...typography },

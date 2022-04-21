@@ -85,6 +85,7 @@ import dialogContentText from "./components/dialog/dialogContentText";
 import dialogActions from "./components/dialog/dialogActions";
 
 export default createTheme({
+  name: 'materialKit',
   breakpoints: { ...breakpoints },
   palette: { ...colors },
   typography: { ...typography },
