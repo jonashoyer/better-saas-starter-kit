@@ -28,7 +28,7 @@ const BaseAppBarContent = () => {
   return (
     <React.Fragment>
       <Box sx={{ flexBasis: '300px', px: 2 }}>
-        <Link href='/' passHref>
+        <Link href='/dashboard' passHref>
           <MuiLink color='inherit' underline='none'>
             <Logo />
           </MuiLink>

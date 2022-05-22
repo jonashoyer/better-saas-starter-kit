@@ -133,13 +133,15 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   React.useEffect(() => {
     if (stripeClientSecret || currentPaymentMethod) return;
     if (!project) return;
-    createSetupIntent()
-    .then(({ data }) => {
-      setStripeClientSecret(data.createStripeSetupIntent.clientSecret);
-    }).catch(err => {
-      // TODO: Catch this
-      console.error(err);
-    })
+    (async () => {
+      try {
+        const { data } = await createSetupIntent();
+        setStripeClientSecret(data.createStripeSetupIntent.clientSecret);
+      } catch (err) {
+        // TODO: Catch this
+        console.error(err);
+      }
+    })();
 
   }, [createSetupIntent, currentPaymentMethod, project, stripeClientSecret]);
 
@@ -147,7 +149,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const handleChangePlan = async (data: any) => {
 
     const createPaymentMethod = async () => {
-      if (!stripe || !elements) {
+      if (!stripe || !elements || !stripeClientSecret) {
         return;
       }
   
@@ -159,6 +161,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       if (cardComplete) {
         setProcessing(true);
       }
+      console.log({ stripeClientSecret });
   
   
       const payload = await stripe.confirmCardSetup(

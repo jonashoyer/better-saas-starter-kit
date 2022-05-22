@@ -4,34 +4,39 @@ datasource db {
 }
 
 generator prisma_client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 model Account {
-  id                 String    @id @default(cuid())
-  userId             String
-  providerType       String
-  providerId         String
-  providerAccountId  String
-  refreshToken       String?
-  accessToken        String?
-  accessTokenExpires DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String?
+  accessToken       String?
+  expiresAt         DateTime?
+  tokenType         String?
+  scope             String?
+  idToken           String?
+  sessionState      String?
 
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  verificationEmail VerificationEmail? @relation
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@unique([providerId, providerAccountId])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
   id           String   @id @default(cuid())
+  sessionToken String   @unique
   userId       String
   expires      DateTime
-  sessionToken String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -48,6 +53,17 @@ model User {
   accounts Account[]
   sessions Session[]
   projects UserProject[]
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
 }
 
 enum ProjectRole {
@@ -68,12 +84,6 @@ model UserProject {
   @@unique([projectId, userId])
 }
 
-enum SubscriptionPlan {
-  FREE
-  BASIC
-  PREMIUM
-}
-
 model Project {
   id               String           @id @default(cuid())
   name             String
@@ -81,46 +91,12 @@ model Project {
   updatedAt        DateTime         @updatedAt
   stripeCustomerId String           @unique
   stripeTaxId      String?
-  subscriptionPlan SubscriptionPlan @default(FREE)
 
   users                UserProject[]
   userInvites          UserInvite[]
   stripeSubscriptions  StripeSubscription[]
   stripePaymentMethods StripePaymentMethod[]
   stripeInvoices       StripeInvoice[]
-}
-
-enum StripeSubscriptionStatus {
-  INCOMPLETE
-  INCOMPLETE_EXPIRED
-  TRIALING
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  UNPAID
-}
-
-model StripeSubscription {
-  id               String                   @id
-  subscriptionPlan SubscriptionPlan         @default(FREE)
-  metadata         Json
-  status           StripeSubscriptionStatus
-  stripePriceId    String
-
-  quantity          Int
-  cancelAtPeriodEnd Boolean
-
-  cancelAt           DateTime?
-  canceledAt         DateTime?
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  created            DateTime
-  startDate          DateTime
-  endedAt            DateTime?
-
-  projectId   String
-  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  stripePrice StripePrice @relation(fields: [stripePriceId], references: [id], onDelete: Cascade)
 }
 
 model UserInvite {
@@ -160,28 +136,37 @@ enum PaymentMethodImportance {
   OTHER
 }
 
-model VerificationRequest {
-  id         String   @id @default(cuid())
-  identifier String
-  token      String   @unique
-  expires    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([identifier, token])
+enum StripeSubscriptionStatus {
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
 }
 
-model VerificationEmail {
-  id        String   @id @default(cuid())
-  accountId String
-  email     String
-  token     String   @unique
-  expires   DateTime
-  createdAt DateTime @default(now())
+model StripeSubscription {
+  id               String                   @id
 
-  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  metadata         Json
+  status           StripeSubscriptionStatus
+  stripePriceId    String
 
-  @@unique([accountId, token])
+  quantity          Int
+  cancelAtPeriodEnd Boolean
+
+  cancelAt           DateTime?
+  canceledAt         DateTime?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  created            DateTime
+  startDate          DateTime
+  endedAt            DateTime?
+
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stripePrice StripePrice @relation(fields: [stripePriceId], references: [id], onDelete: Cascade)
 }
 
 model StripeProduct {

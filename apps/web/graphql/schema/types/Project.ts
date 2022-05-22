@@ -12,6 +12,7 @@ export const Project = objectType({
     t.model.users();
     t.model.subscriptionPlan();
     t.model.stripePaymentMethods();
+    t.model.stripeInvoices();
     t.model.userInvites();
   },
 });

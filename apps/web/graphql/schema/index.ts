@@ -13,7 +13,7 @@ export default NexusSchema.makeSchema({
     NexusSchema.declarativeWrappingPlugin(),
     NexusSchema.fieldAuthorizePlugin({
       formatError({ error, info }) {
-        console.error(info);
+        console.error(error, info);
         return error;
       }
     }),

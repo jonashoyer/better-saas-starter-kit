@@ -28,6 +28,18 @@ export type Context<E = any> = {
 export const createContext: ContextFunction<any> = async (ctx)  => {
   const session = await getSession({ req: ctx.req });
 
+  const user = await prisma.user.findUnique({ where: { id: (session.user as any).id }, include: { projects: { include: { project: true } } } });
+  console.log( user );
+
+  try {
+
+    const stripeInfo = await (new StripeHandler(stripe, prisma)).fetchCustomerInfo(user.projects[0].project.stripeCustomerId);
+    console.log(stripeInfo);
+    (await import('fs')).writeFileSync('./stripe-info.json', JSON.stringify(stripeInfo, null, 2));
+  } catch (err) {
+    console.error(err);
+  }
+
   return {
     req: ctx.req,
     res: ctx.res,

@@ -1,4 +1,4 @@
-import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice } from '@prisma/client';
+import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice, SubscriptionPlanType, SubscriptionProductType } from '@prisma/client';
 import dayjs from 'dayjs';
 import Stripe from 'stripe'
 
@@ -18,16 +18,16 @@ export class StripeHandler {
   stripe: Stripe;
   prisma: PrismaClient;
 
-  constructor(stripe: Stripe, prisma: PrismaClient){
+  constructor(stripe: Stripe, prisma: PrismaClient) {
     this.stripe = stripe;
     this.prisma = prisma;
   }
 
   async upsertCustomer(projectId: string, params?: Stripe.CustomerCreateParams, options?: Stripe.RequestOptions) {
-    const project = await this.prisma.project.findUnique({ where: { id: projectId }, select: { stripeCustomerId: true }});
+    const project = await this.prisma.project.findUnique({ where: { id: projectId }, select: { stripeCustomerId: true } });
     if (!project) throw new Error(`Project not found by id (${projectId})!`)
     if (project.stripeCustomerId) return project.stripeCustomerId;
-    const customer = await this.createCustomer({...params, metadata: { ...params?.metadata, projectId }}, options);
+    const customer = await this.createCustomer({ ...params, metadata: { ...params?.metadata, projectId } }, options);
     return customer.id;
   }
 
@@ -58,7 +58,7 @@ export class StripeHandler {
     })
   }
 
-  upsertProductRecord (product: Stripe.Product) {
+  upsertProductRecord(product: Stripe.Product) {
     if (!product.metadata?.type) {
       console.error(`Stripe product is missing field 'type' in metadata!`);
       return;
@@ -81,7 +81,7 @@ export class StripeHandler {
     })
   };
 
-  upsertPriceRecord (price: Stripe.Price) {
+  upsertPriceRecord(price: Stripe.Price) {
     const priceData = {
       id: price.id,
       productId: typeof price.product == 'string' ? price.product : price.product.id,
@@ -134,10 +134,14 @@ export class StripeHandler {
   static formatStripeSubscription(s: Stripe.Subscription): StripeSubscription {
     return {
       id: s.id,
+      
+      
+      // planType: s.items.data[0].plan.metadata?.planType,
+      // productType: s.items.data[0].plan.metadata?.productType,
       metadata: s.metadata,
-      status: s.status.toUpperCase() as any,
+      status: s.status.toUpperCase(),
       stripePriceId: s.items.data[0].price.id,
-      subscriptionPlan: s.items.data[0].plan.metadata?.type as any, //FIXME: ??
+
       quantity: s.items.data[0].quantity ?? 1,
       cancelAtPeriodEnd: s.cancel_at_period_end,
       cancelAt: s.cancel_at ? secondsToDate(s.cancel_at) : null,
@@ -160,17 +164,19 @@ export class StripeHandler {
       expand: ['latest_invoice.payment_intent', 'plan.product'],
     });
 
-    return  StripeHandler.formatStripeSubscription(subscription);
+    return StripeHandler.formatStripeSubscription(subscription);
   }
 
   async updateSubscription(stripeSubscriptionId: string, priceId: string, quantity: number, beginAtNextPeriod?: boolean) {
 
+    
     const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
+
     const currentPriceId = subscription.items.data[0].price.id;
 
-    
+
     const getScheduleId = async () => {
-      
+
       const scheduleId = subscription.schedule;
       if (scheduleId) return typeof scheduleId == 'string' ? scheduleId : scheduleId.id;
 
@@ -192,45 +198,45 @@ export class StripeHandler {
           },
         ],
       });
-    return StripeHandler.formatStripeSubscription(updatedSubscription);
-  } else {
+      return StripeHandler.formatStripeSubscription(updatedSubscription);
+    } else {
 
-    if (!beginAtNextPeriod) {
-      const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
-        items: [
-          {
-            id: subscription.items.data[0].price.id,
-            deleted: true,
-          },
-          {
-            price: priceId,
-            quantity,
-          },
-        ],
+      if (!beginAtNextPeriod) {
+        const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
+          items: [
+            {
+              id: subscription.items.data[0].price.id,
+              deleted: true,
+            },
+            {
+              price: priceId,
+              quantity,
+            },
+          ],
+        });
+        return StripeHandler.formatStripeSubscription(updatedSubscription);
+      }
+
+      const scheduleId = await getScheduleId();
+
+      // const nowUnix = dayjs().unix();
+
+      const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
+        phases: [{
+          items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
+          start_date: subscription.current_period_start,
+          end_date: 'now',
+          proration_behavior: 'none',
+        }, {
+          items: [{ price: priceId, quantity }],
+          start_date: 'now',
+          proration_behavior: 'none',
+        }],
       });
+
+      const updatedSubscription = typeof updatedSubscriptionSchedule.subscription == 'string' ? (await this.stripe.subscriptions.retrieve(updatedSubscriptionSchedule.subscription)) : updatedSubscriptionSchedule.subscription!;
       return StripeHandler.formatStripeSubscription(updatedSubscription);
     }
-      
-    const scheduleId = await getScheduleId();
-
-    const nowUnix = dayjs().unix();
-
-    const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
-      phases: [{
-        items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
-        start_date: subscription.current_period_start,
-        end_date: nowUnix,
-        proration_behavior: 'none',
-      }, {
-        items: [{ price: priceId, quantity }],
-        start_date: nowUnix,
-        proration_behavior: 'none',
-      }],
-    });
-
-    const updatedSubscription = typeof updatedSubscriptionSchedule.subscription == 'string' ? (await this.stripe.subscriptions.retrieve(updatedSubscriptionSchedule.subscription)) : updatedSubscriptionSchedule.subscription!;
-    return StripeHandler.formatStripeSubscription(updatedSubscription);
-  }
 
     // try {
     //   const invoice = await this.stripe.invoices.create({
@@ -249,7 +255,7 @@ export class StripeHandler {
 
   }
 
-  async manageSubscriptionStatusChange(
+  async upsertSubscription(
     subscription: any,
   ) {
 
@@ -265,23 +271,9 @@ export class StripeHandler {
       console.warn('Subscription containes more then one item!');
     }
 
-    const product = await this.stripe.products.retrieve(subscription.items.data[0].plan.product);
-
-    const subscriptionData = {
-      id: subscription.id,
+    const subscriptionData: any = {
+      ...StripeHandler.formatStripeSubscription(subscription),
       projectId: project.id,
-      metadata: subscription.metadata,
-      status: subscription.status.toUpperCase() as any,
-      stripePriceId: subscription.items.data[0].price.id,
-      quantity: subscription.items.data[0].quantity ?? 1,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      cancelAt: subscription.cancel_at ? secondsToDate(subscription.cancel_at) : null,
-      canceledAt: subscription.canceled_at ? secondsToDate(subscription.canceled_at) : null,
-      currentPeriodStart: secondsToDate(subscription.current_period_start),
-      currentPeriodEnd: secondsToDate(subscription.current_period_end),
-      created: secondsToDate(subscription.created),
-      startDate: secondsToDate(subscription.start_date),
-      endedAt: subscription.ended_at ? secondsToDate(subscription.ended_at) : null,
     };
 
     await this.prisma.stripeSubscription.upsert({
@@ -290,14 +282,14 @@ export class StripeHandler {
       where: { id: subscriptionData.id },
     });
 
-    const unix = new Date().getTime() / 1000;
+    // const unix = new Date().getTime() / 1000;
 
-    if (product && product.metadata?.type && (!subscription.ended_at || unix < subscription.ended_at) && unix >= subscription.start_date) {
-      await this.prisma.project.update({
-        where: { stripeCustomerId: subscription.customer },
-        data: { subscriptionPlan: product.metadata.type as any },
-      })
-    }
+    // if (product && product.metadata?.type && (!subscription.ended_at || unix < subscription.ended_at) && unix >= subscription.start_date) {
+    //   await this.prisma.project.update({
+    //     where: { stripeCustomerId: subscription.customer },
+    //     data: { subscriptionPlan: product.metadata.type as any },
+    //   })
+    // }
 
     // // For a new subscription copy the billing details to the customer object.
     // // NOTE: This is a costly operation and should happen at the very end.
@@ -308,7 +300,7 @@ export class StripeHandler {
     //   );
   };
 
-  createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam ) {
+  createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam) {
     return this.stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -342,7 +334,7 @@ export class StripeHandler {
       if (paymentMethod.metadata?.importance) {
         const importance = paymentMethod.metadata.importance as PaymentMethodImportance;
         if (importance == PaymentMethodImportance.PRIMARY && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
-        if ((importance == PaymentMethodImportance.PRIMARY || importance == PaymentMethodImportance.BACKUP) && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
+        if ((importance == PaymentMethodImportance.PRIMARY || importance == PaymentMethodImportance.BACKUP) && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
         return PaymentMethodImportance.OTHER;
       }
 
@@ -393,7 +385,7 @@ export class StripeHandler {
   }
 
   manageChargeSucceeded(charge: Stripe.Charge) {
-    
+
   }
 
 
@@ -423,9 +415,9 @@ export class StripeHandler {
     const project = await this.prisma.project.findUnique({ where: { stripeCustomerId: customerId }, select: { id: true } });
     if (!project) return;
 
-    const i = StripeHandler.formatStripeInvoice(invoice);
+    const e = StripeHandler.formatStripeInvoice(invoice);
     const data: any = {
-      ...i,
+      ...e,
       project: {
         connect: { id: project.id }
       }
@@ -436,5 +428,54 @@ export class StripeHandler {
       update: data,
       where: { id: invoice.id },
     })
+  }
+
+
+  async fetchCustomerInfo(stripeCustomerId: string) {
+
+    const [
+      customer,
+      paymentMethodData,
+      subscriptionData,
+      invoiceData,
+      orderData,
+      chargeData,
+    ] = await Promise.all([
+      this.stripe.customers.retrieve(stripeCustomerId, { expand: ['invoice_settings.default_payment_method'] }),
+      this.stripe.paymentMethods.list({ customer: stripeCustomerId, type: 'card' }),
+      this.stripe.subscriptions.list({ customer: stripeCustomerId, expand: ['data.latest_invoice'] }),
+      this.stripe.invoices.list({ customer: stripeCustomerId, expand: ['data.payment_intent'] }),
+      this.stripe.orders.list({ customer: stripeCustomerId }),
+      this.stripe.charges.list({ customer: stripeCustomerId }),
+    ]);
+
+
+    return {
+      customer,
+      paymentMethods: paymentMethodData.data,
+      subscriptions: subscriptionData.data,
+      invoices: invoiceData.data,
+      orders: orderData.data,
+      charges: chargeData.data,
+    }
+  }
+
+  async refreshCustomerInfo(stripeCustomerId: string) {
+    const info = await this.fetchCustomerInfo(stripeCustomerId);
+
+    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId }});
+
+    if (!project) throw new Error('Project not found from stripe customer!');
+
+    await Promise.all(info.paymentMethods.map(this.upsertPaymentMethodRecord));
+    await this.prisma.stripePaymentMethod.deleteMany({ where: { projectId: project.id, id: { notIn: info.paymentMethods.map(e => e.id) } } });
+    
+    await Promise.all(info.subscriptions.map(this.upsertSubscription));
+    await this.prisma.stripeSubscription.deleteMany({ where: { projectId: project.id, id: { notIn: info.subscriptions.map(e => e.id) } } });
+
+    await Promise.all(info.invoices.map(this.upsertInvoice));
+    await this.prisma.stripeInvoice.deleteMany({ where: { projectId: project.id, id: { notIn: info.invoices.map(e => e.id) } } });
+
+    return info;
   }
 }

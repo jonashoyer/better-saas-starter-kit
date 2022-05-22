@@ -1,6 +1,9 @@
 freeDescription: "For individuals looking to get more done"
 basicDescription: "All the basics"
 premiumDescription: "Advanced tools"
+
+addOnDescription: "Add-on is optional and can be purchased separately"
+
 perMember: 'per member'
 
 current: 'Current'
@@ -55,3 +58,5 @@ downgrade: 'Downgrade'
 free: 'Free'
 
 payAnnually: 'Pay Annually'
+
+addOns: 'Add-ons'

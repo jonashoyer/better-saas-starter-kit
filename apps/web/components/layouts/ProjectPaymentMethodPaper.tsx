@@ -30,7 +30,7 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
   const [addPaymenthMethodDialog, setAddPaymenthMethodDialog] = React.useState(false);
   const [deletePaymentMethodConfirm, setDeletePaymentMethodConfirm] = React.useState(null);
 
-  const [pollPaymentMethods, pollPaymentMethodsLoading] = usePollPaymentMethods({
+  const [pollPaymentMethods, pollingPaymentMethods] = usePollPaymentMethods({
     projectId: project.id,
     paymentMethods: project.stripePaymentMethods,
     onCompleted() {
@@ -115,7 +115,7 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
         open={addPaymenthMethodDialog}
         onCreated={pollPaymentMethods}
         handleClose={() => setAddPaymenthMethodDialog(false)}
-        loading={pollPaymentMethodsLoading}
+        loading={pollingPaymentMethods}
       />
       <Lazy
         Component={LazyDialogYN}
@@ -158,7 +158,13 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
               project={project}
               setAddPaymenthMethodDialog={setAddPaymenthMethodDialog}
               handleUserMenuClick={handleUserMenuClick}
-            />
+            />,
+            <PaymentMethodSingle
+              key={2}
+              t={t}
+              project={project}
+              setAddPaymenthMethodDialog={setAddPaymenthMethodDialog}
+            />,
           ]}
         />
 
@@ -257,3 +263,40 @@ const importanceToColor = {
   'BACKUP': 'secondary',
   'OTHER': 'disabled'
 }
+
+interface PaymentMethodSingleProps {
+  t: any;
+  project?: CurrentProjectSettingsQuery['currentProject'];
+  setAddPaymenthMethodDialog: (b: boolean) => any;
+}
+
+
+const PaymentMethodSingle = ({ t, project, setAddPaymenthMethodDialog }: PaymentMethodSingleProps) => {
+
+  return (
+    <List>
+      {project.stripePaymentMethods.length == 0 &&
+        <Box sx={{ textAlign: 'center', py: 2 }}>
+          <Typography gutterBottom>No payment method on file</Typography>
+          <Button variant='contained' onClick={() => setAddPaymenthMethodDialog(true)}>Add payment method</Button>
+        </Box>
+      }
+      {project.stripePaymentMethods.map(e => {
+        return <PaymentMethodSingleItem key={e.id} t={t} paymentMethod={e} setAddPaymenthMethodDialog={setAddPaymenthMethodDialog} />
+      })}
+    </List>
+  )
+}
+
+const PaymentMethodSingleItem = ({ t, paymentMethod: e, setAddPaymenthMethodDialog }: { t: any, paymentMethod: CurrentProjectSettingsQuery['currentProject']['stripePaymentMethods'][0], setAddPaymenthMethodDialog: (b: boolean) => any, }) => (
+  <ListItem
+    secondaryAction={
+      <Button variant='outlined' onClick={() => setAddPaymenthMethodDialog(true)}>Change</Button>
+    }
+  >
+    <ListItemIcon>
+      <PaymentIcon color={importanceToColor[e.importance] as any} />
+    </ListItemIcon>
+    <ListItemText primary={`${capitalize(e.brand)} •••• ${e.last4}`} secondary={`${t('pricing:expires')} ${e.expMonth}/${e.expYear}`} />
+  </ListItem>
+)

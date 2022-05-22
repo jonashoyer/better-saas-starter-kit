@@ -7,3 +7,4 @@ export * from './redisClient';
 export * from './pubsub';
 export * from './PubSubTriggers';
 export * from './email';
+export * as config from './config';

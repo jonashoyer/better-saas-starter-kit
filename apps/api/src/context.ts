@@ -10,8 +10,10 @@ import { ContextFunction } from 'apollo-server-core'
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { authorize } from './nextAuthUtils';
 import { Request } from 'express';
+import { REDIS_HOST, REDIS_PORT } from './config';
+import { REDIS_DB } from 'shared-server/dist/config';
 
-export const pubsub = createPubsub();
+export const pubsub = createPubsub({ host: REDIS_HOST, port: REDIS_PORT, db: REDIS_DB });
 export const prisma = new PrismaClient();
 export const redis = createRedisClient('client');
 export const queueManager = createAppQueueManager(); // :MODULE worker

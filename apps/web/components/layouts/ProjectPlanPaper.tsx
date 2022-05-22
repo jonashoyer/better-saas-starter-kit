@@ -173,6 +173,9 @@ const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChan
         </Box>
       </Box>
       <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setShowDialogPlanCompare(true)}>{currentProduct?.type == 'FREE' ? t('pricing:upgrade') : t('pricing:switch')}</Button>
+      <Box>
+        <Typography variant='subtitle1'>{t('pricing:addOns')}</Typography>
+      </Box>
     </Box>
   )
 }

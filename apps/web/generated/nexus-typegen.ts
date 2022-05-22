@@ -39,6 +39,9 @@ export interface NexusGenInputs {
     projectId: string; // String!
     role: NexusGenEnums['ProjectRole']; // ProjectRole!
   }
+  StripeInvoiceWhereUniqueInput: { // input type
+    id?: string | null; // String
+  }
   StripePaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
   }
@@ -92,7 +95,8 @@ export interface NexusGenEnums {
   PaymentMethodImportance: prisma.PaymentMethodImportance
   ProjectRole: prisma.ProjectRole
   StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
-  SubscriptionPlan: prisma.SubscriptionPlan
+  SubscriptionPlan: "BASIC" | "FREE" | "PREMIUM"
+  SubscriptionPlanType: prisma.SubscriptionPlanType
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
 }
 
@@ -132,7 +136,7 @@ export interface NexusGenObjects {
   User: prisma.User;
   UserInvite: prisma.UserInvite;
   UserProject: prisma.UserProject;
-  VerificationEmail: prisma.VerificationEmail;
+  VerificationToken: prisma.VerificationToken;
 }
 
 export interface NexusGenInterfaces {
@@ -175,8 +179,9 @@ export interface NexusGenFieldTypes {
   Project: { // field return type
     id: string; // String!
     name: string; // String!
+    stripeInvoices: NexusGenRootTypes['StripeInvoice'][]; // [StripeInvoice!]!
     stripePaymentMethods: NexusGenRootTypes['StripePaymentMethod'][]; // [StripePaymentMethod!]!
-    subscriptionPlan: NexusGenEnums['SubscriptionPlan']; // SubscriptionPlan!
+    subscriptionPlan: NexusGenEnums['SubscriptionPlanType']; // SubscriptionPlanType!
     userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
   }
@@ -259,7 +264,7 @@ export interface NexusGenFieldTypes {
     role: NexusGenEnums['ProjectRole']; // ProjectRole!
     user: NexusGenRootTypes['User']; // User!
   }
-  VerificationEmail: { // field return type
+  VerificationToken: { // field return type
     id: string; // String!
   }
 }
@@ -294,8 +299,9 @@ export interface NexusGenFieldTypeNames {
   Project: { // field return type name
     id: 'String'
     name: 'String'
+    stripeInvoices: 'StripeInvoice'
     stripePaymentMethods: 'StripePaymentMethod'
-    subscriptionPlan: 'SubscriptionPlan'
+    subscriptionPlan: 'SubscriptionPlanType'
     userInvites: 'UserInvite'
     users: 'UserProject'
   }
@@ -378,7 +384,7 @@ export interface NexusGenFieldTypeNames {
     role: 'ProjectRole'
     user: 'User'
   }
-  VerificationEmail: { // field return type name
+  VerificationToken: { // field return type name
     id: 'String'
   }
 }
@@ -441,6 +447,11 @@ export interface NexusGenArgTypes {
     }
   }
   Project: {
+    stripeInvoices: { // args
+      cursor?: NexusGenInputs['StripeInvoiceWhereUniqueInput'] | null; // StripeInvoiceWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
     stripePaymentMethods: { // args
       cursor?: NexusGenInputs['StripePaymentMethodWhereUniqueInput'] | null; // StripePaymentMethodWhereUniqueInput
       skip?: number | null; // Int

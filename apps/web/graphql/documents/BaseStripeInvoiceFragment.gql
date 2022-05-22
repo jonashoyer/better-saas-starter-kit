@@ -1,0 +1,17 @@
+fragment BaseStripeInvoice on StripeInvoice {
+  id
+  created
+  dueDate
+  status
+  amountDue
+  amountPaid
+  amountRemaining
+  billingReason
+  invoicePdf
+  periodStart
+  periodEnd
+  receiptNumber
+  subtotal
+  tax
+  total
+}

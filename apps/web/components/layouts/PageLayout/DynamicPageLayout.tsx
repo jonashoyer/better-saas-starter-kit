@@ -2,7 +2,7 @@ import React from "react";
 import { Box } from "@mui/system";
 import AppFooter from "../AppFooter";
 import DynamicAppBar from "../AppBar/DynamicAppBar";
-import BaseAppBarContent from "../AppBar/BaseAppBarContent";
+import PublicAppBarContent from "../AppBar/PublicAppBarContent";
 import Banner from "../Banner";
 import Head from "next/head";
 
@@ -28,7 +28,7 @@ const DynamicPageLayout = ({ padded, children, pageTitle, pageDescription }: Dyn
 
         <Banner />
         <Box sx={{ height: 32 }} />
-        <DynamicAppBar content={<BaseAppBarContent />} />
+        <DynamicAppBar content={<PublicAppBarContent />} />
         <Box sx={{ mt: '-72px' }}>
           {inner}
         </Box>

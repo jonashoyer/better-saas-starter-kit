@@ -23,5 +23,8 @@ query CurrentProjectSettings($projectId: String) {
     stripePaymentMethods {
       ...BasePaymenthMethod
     }
+    stripeInvoices {
+      ...BaseStripeInvoice
+    }
   }
 }

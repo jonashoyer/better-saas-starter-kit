@@ -2,7 +2,7 @@ import React from "react";
 import { Box } from "@mui/system";
 import AppFooter from "../AppFooter";
 import StaticAppBar from "../AppBar/StaticAppBar";
-import BaseAppBarContent from "../AppBar/BaseAppBarContent";
+import PrivateAppBarContent from "../AppBar/PrivateAppBarContent";
 import Banner from "../Banner";
 import Head from "next/head";
 
@@ -27,7 +27,7 @@ const StaticPageLayout = ({ padded, children, pageTitle, pageDescription }: Stat
       <Box>
 
         <Banner />
-        <StaticAppBar content={<BaseAppBarContent />} />
+        <StaticAppBar content={<PrivateAppBarContent />} />
         {inner}
         <AppFooter />
       </Box>

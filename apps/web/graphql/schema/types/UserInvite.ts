@@ -59,7 +59,7 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
       data,
     });
     
-    await ctx.queueManager.queues.email.add(
+    await ctx.queueManager.email.queue.add(
       'send',
       data.map(e => ({
         email: {

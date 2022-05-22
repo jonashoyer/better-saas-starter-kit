@@ -12,7 +12,9 @@ export function AuthGuard({ Component, pageProps }: AuthGuardProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  if (Component.authGuard != 'public') {
+  const { authGuard = 'public' } = Component;
+
+  if (authGuard != 'public') {
 
     if (status === 'loading') {
       return (
@@ -24,8 +26,8 @@ export function AuthGuard({ Component, pageProps }: AuthGuardProps) {
       )
     }
 
-    if (!!session != (Component.authGuard == 'authenticated')) {
-      router.push(Component.authGuard == 'authenticated' ? '/login' : '/');
+    if (!!session != (authGuard == 'authenticated')) {
+      router.push(authGuard == 'authenticated' ? '/login' : '/');
       return null;
     }
   }

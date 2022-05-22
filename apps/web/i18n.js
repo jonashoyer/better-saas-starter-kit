@@ -4,6 +4,7 @@ module.exports = {
   pages: {
     '*': ['common', 'dialog'],
     '/': ['home', 'pricing'],
+    '/dashboard': ['home', 'pricing'],
     '/settings': ['settings', 'pricing'],
   },
   async loadLocaleFrom(lang, ns) {

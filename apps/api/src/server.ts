@@ -1,4 +1,5 @@
 import schema from './schema';
+import { NODE_ENV, PORT } from './config';
 import { execute, subscribe } from "graphql";
 import { Context, createContext, createSubscriptionContext } from './context';
 import { ApolloServer, ExpressContext } from 'apollo-server-express';
@@ -11,9 +12,9 @@ import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import { NodeEnv } from 'shared';
 import { createRedisClient } from 'shared-server';
-import { NODE_ENV, PORT } from './config';
 import cookieParser from 'cookie-parser';
 import bullboardRoute from './routes/bullboard';
+
 
 (async function () {
   
@@ -22,7 +23,7 @@ import bullboardRoute from './routes/bullboard';
   
   app.use(cors({
     credentials: true,
-    origin: process.env.NODE_ENV === 'production' ? process.env.CORS_ORIGIN : /.*/,
+    origin: NODE_ENV === 'production' ? process.env.CORS_ORIGIN : /.*/,
   }));
   
   app.use(rateLimit({
@@ -32,7 +33,7 @@ import bullboardRoute from './routes/bullboard';
     max: 60,
     windowMs: 60000,
   }))
-  if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+  if (NODE_ENV === 'production') app.set('trust proxy', 1);
 
   app.use(cookieParser());
 

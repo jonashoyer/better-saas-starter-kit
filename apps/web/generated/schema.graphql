@@ -85,8 +85,9 @@ enum PaymentMethodImportance {
 type Project {
   id: String!
   name: String!
+  stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, skip: Int, take: Int): [StripeInvoice!]!
   stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
-  subscriptionPlan: SubscriptionPlan!
+  subscriptionPlan: SubscriptionPlanType!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
   users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }
@@ -125,6 +126,10 @@ type StripeInvoice {
   subtotal: Int!
   tax: Int
   total: Int!
+}
+
+input StripeInvoiceWhereUniqueInput {
+  id: String
 }
 
 type StripePaymentMethod {
@@ -174,6 +179,12 @@ enum StripeSubscriptionStatus {
 }
 
 enum SubscriptionPlan {
+  BASIC
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionPlanType {
   BASIC
   FREE
   PREMIUM
@@ -298,6 +309,6 @@ input UserProjectWhereUniqueInput {
   projectId_userId: UserProjectProjectIdUserIdCompoundUniqueInput
 }
 
-type VerificationEmail {
+type VerificationToken {
   id: String!
 }

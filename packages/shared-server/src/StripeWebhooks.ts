@@ -5,13 +5,6 @@ import { StripeHandler } from './StripeHandler';
 
 // https://github.com/vercel/nextjs-subscription-payments/blob/main/pages/api/webhooks.js
 
-// Stripe requires the raw body to construct the event.
-export const config = {
-  api: {
-    bodyParser: false
-  }
-};
-
 async function reqToBuffer(req: NextApiRequest): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: any = [];
@@ -94,7 +87,7 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted':
-          await handler.manageSubscriptionStatusChange(obj);
+          await handler.upsertSubscription(obj);
           break;
         case 'subscription_schedule.updated':
           console.dir(obj, { depth: null });
@@ -105,7 +98,7 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
         case 'checkout.session.completed':
           if (obj.mode === 'subscription') {
             const subscription = await stripe.subscriptions.retrieve(obj.subscription);
-            await handler.manageSubscriptionStatusChange(subscription);
+            await handler.upsertSubscription(subscription);
           }
           break;
         case 'invoice.paid':

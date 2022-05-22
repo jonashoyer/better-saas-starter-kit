@@ -63,8 +63,8 @@ export const UpdateUser = mutationField('updateUser', {
 })
 
 
-export const VerificationEmail = objectType({
-  name: 'VerificationEmail',
+export const VerificationToken = objectType({
+  name: 'VerificationToken',
   definition(t) {
     t.model.id();
   }
@@ -89,16 +89,15 @@ export const SendVerifyEmail = mutationField('sendVerifyEmail', {
     if (accounts.length == 0) throw new ForbiddenError('User has no account linked!');
     if (accounts.length > 1) throw new ForbiddenError('User has multiple account linked already!');
 
-    const verificationEmail = await ctx.prisma.verificationEmail.create({
+    const verificationToken = await ctx.prisma.verificationToken.create({
       data: {
         expires: new Date(Date.now() + ms('1h')),
         token: crypto.randomBytes(32).toString('hex'),
-        accountId: accounts[0].id,
-        email,
+        identifier: accounts[0].id,
       }
     });
 
-    await ctx.queueManager.queues.email.add(
+    await ctx.queueManager.email.queue.add(
       'send',
       [{
         email: {
@@ -109,7 +108,7 @@ export const SendVerifyEmail = mutationField('sendVerifyEmail', {
         template: {
           name: 'verificationEmail',
           context: {
-            url: `${getURL()}?verify=${verificationEmail.token}`,
+            url: `${getURL()}?verify=${verificationToken.token}`,
           }
         }
       }]
@@ -129,11 +128,11 @@ export const VerifiyEmail = mutationField('verifyEmail', {
   authorize: requireAuth,
   async resolve(root, { token }, ctx) {
 
-    const verificationEmail = await ctx.prisma.verificationEmail.findUnique({
+    const verificationToken = await ctx.prisma.verificationToken.findUnique({
       where: { token },
     });
 
-    if (!verificationEmail) throw new ForbiddenError('Bad token!');
+    if (!verificationToken) throw new ForbiddenError('Bad token!');
 
     const accounts = await ctx.prisma.account.findMany({
       where: {
@@ -144,11 +143,11 @@ export const VerifiyEmail = mutationField('verifyEmail', {
     if (accounts.length == 0) throw new ForbiddenError('User has no account linked!');
     if (accounts.length > 1) throw new ForbiddenError('User has multiple account linked already!');
 
-    if (!accounts.some(e => e.id == verificationEmail.accountId)) throw new ForbiddenError('Verification not intended for this user!');
+    if (!accounts.some(e => e.id == verificationToken.identifier)) throw new ForbiddenError('Verification not intended for this user!');
     
     const user = await ctx.prisma.user.update({
       where: { id: accounts[0].id },
-      data: { email: verificationEmail.email, emailVerified: new Date() },
+      data: { id: verificationToken.identifier, emailVerified: new Date() },
     })
 
     return user;

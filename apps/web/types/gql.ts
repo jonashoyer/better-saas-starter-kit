@@ -11,6 +11,25 @@ export const BaseProjcetFragmentDoc = gql`
   name
 }
     `;
+export const BaseStripeInvoiceFragmentDoc = gql`
+    fragment BaseStripeInvoice on StripeInvoice {
+  id
+  created
+  dueDate
+  status
+  amountDue
+  amountPaid
+  amountRemaining
+  billingReason
+  invoicePdf
+  periodStart
+  periodEnd
+  receiptNumber
+  subtotal
+  tax
+  total
+}
+    `;
 export const BasePaymenthMethodFragmentDoc = gql`
     fragment BasePaymenthMethod on StripePaymentMethod {
   id
@@ -188,10 +207,14 @@ export const CurrentProjectSettingsDocument = gql`
     stripePaymentMethods {
       ...BasePaymenthMethod
     }
+    stripeInvoices {
+      ...BaseStripeInvoice
+    }
   }
 }
     ${BaseProjcetFragmentDoc}
-${BasePaymenthMethodFragmentDoc}`;
+${BasePaymenthMethodFragmentDoc}
+${BaseStripeInvoiceFragmentDoc}`;
 
 /**
  * __useCurrentProjectSettingsQuery__
@@ -767,81 +790,31 @@ export enum InvoiceStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  updateUser?: Maybe<User>;
-  sendVerifyEmail?: Maybe<StatusResponse>;
-  verifyEmail?: Maybe<User>;
   createCheckoutSession?: Maybe<CheckoutSession>;
-  createProject?: Maybe<Project>;
-  updateProject?: Maybe<Project>;
-  deleteProject?: Maybe<Project>;
-  updateTaxId?: Maybe<Ok>;
-  deleteTaxId?: Maybe<Ok>;
-  updateUserProject?: Maybe<UserProject>;
-  deleteUserProject?: Maybe<UserProject>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
-  deleteUserInvite?: Maybe<UserInvite>;
+  createProject?: Maybe<Project>;
   createStripeSetupIntent?: Maybe<StripeSetupIntent>;
-  updateStripePaymentMethod?: Maybe<StripePaymentMethod>;
+  deleteProject?: Maybe<Project>;
   deleteStripePaymentMethod?: Maybe<StripePaymentMethod>;
+  deleteTaxId?: Maybe<Ok>;
+  deleteUserInvite?: Maybe<UserInvite>;
+  deleteUserProject?: Maybe<UserProject>;
+  sendVerifyEmail?: Maybe<StatusResponse>;
+  updateProject?: Maybe<Project>;
+  updateStripePaymentMethod?: Maybe<StripePaymentMethod>;
+  updateTaxId?: Maybe<Ok>;
+  updateUser?: Maybe<User>;
+  updateUserProject?: Maybe<UserProject>;
   upsertStripeSubscription?: Maybe<StripeSubscription>;
-};
-
-
-export type MutationUpdateUserArgs = {
-  input: UpdateUserInput;
-};
-
-
-export type MutationSendVerifyEmailArgs = {
-  email: Scalars['String'];
-};
-
-
-export type MutationVerifyEmailArgs = {
-  token: Scalars['String'];
+  verifyEmail?: Maybe<User>;
 };
 
 
 export type MutationCreateCheckoutSessionArgs = {
-  price: Scalars['String'];
-  quantity?: Maybe<Scalars['Int']>;
   metadata?: Maybe<Scalars['Json']>;
+  price: Scalars['String'];
   projectId: Scalars['String'];
-};
-
-
-export type MutationCreateProjectArgs = {
-  input: CreateProjectInput;
-};
-
-
-export type MutationUpdateProjectArgs = {
-  input: UpdateProjectInput;
-};
-
-
-export type MutationDeleteProjectArgs = {
-  id: Scalars['String'];
-};
-
-
-export type MutationUpdateTaxIdArgs = {
-  input: UpdateTaxIdInput;
-};
-
-
-export type MutationDeleteTaxIdArgs = {
-  projectId: Scalars['String'];
-};
-
-
-export type MutationUpdateUserProjectArgs = {
-  input: UpdateUserProjectInput;
-};
-
-
-export type MutationDeleteUserProjectArgs = {
-  id: Scalars['String'];
+  quantity?: Maybe<Scalars['Int']>;
 };
 
 
@@ -850,8 +823,8 @@ export type MutationCreateManyUserInviteArgs = {
 };
 
 
-export type MutationDeleteUserInviteArgs = {
-  id: Scalars['String'];
+export type MutationCreateProjectArgs = {
+  input: CreateProjectInput;
 };
 
 
@@ -860,8 +833,8 @@ export type MutationCreateStripeSetupIntentArgs = {
 };
 
 
-export type MutationUpdateStripePaymentMethodArgs = {
-  input: UpdateStripePaymentMethodInput;
+export type MutationDeleteProjectArgs = {
+  id: Scalars['String'];
 };
 
 
@@ -870,51 +843,109 @@ export type MutationDeleteStripePaymentMethodArgs = {
 };
 
 
+export type MutationDeleteTaxIdArgs = {
+  projectId: Scalars['String'];
+};
+
+
+export type MutationDeleteUserInviteArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationDeleteUserProjectArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationSendVerifyEmailArgs = {
+  email: Scalars['String'];
+};
+
+
+export type MutationUpdateProjectArgs = {
+  input: UpdateProjectInput;
+};
+
+
+export type MutationUpdateStripePaymentMethodArgs = {
+  input: UpdateStripePaymentMethodInput;
+};
+
+
+export type MutationUpdateTaxIdArgs = {
+  input: UpdateTaxIdInput;
+};
+
+
+export type MutationUpdateUserArgs = {
+  input: UpdateUserInput;
+};
+
+
+export type MutationUpdateUserProjectArgs = {
+  input: UpdateUserProjectInput;
+};
+
+
 export type MutationUpsertStripeSubscriptionArgs = {
   input: UpsertStripeSubscriptionInput;
 };
 
+
+export type MutationVerifyEmailArgs = {
+  token: Scalars['String'];
+};
+
 export type Ok = {
   __typename?: 'Ok';
-  ok: Scalars['Boolean'];
   message?: Maybe<Scalars['String']>;
+  ok: Scalars['Boolean'];
 };
 
 export enum PaymentMethodImportance {
-  Primary = 'PRIMARY',
   Backup = 'BACKUP',
-  Other = 'OTHER'
+  Other = 'OTHER',
+  Primary = 'PRIMARY'
 }
 
 export type Project = {
   __typename?: 'Project';
   id: Scalars['String'];
   name: Scalars['String'];
-  users: Array<UserProject>;
-  subscriptionPlan: SubscriptionPlan;
+  stripeInvoices: Array<StripeInvoice>;
   stripePaymentMethods: Array<StripePaymentMethod>;
+  subscriptionPlan: SubscriptionPlan;
   userInvites: Array<UserInvite>;
+  users: Array<UserProject>;
 };
 
 
-export type ProjectUsersArgs = {
-  take?: Maybe<Scalars['Int']>;
+export type ProjectStripeInvoicesArgs = {
+  cursor?: Maybe<StripeInvoiceWhereUniqueInput>;
   skip?: Maybe<Scalars['Int']>;
-  cursor?: Maybe<UserProjectWhereUniqueInput>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 
 export type ProjectStripePaymentMethodsArgs = {
-  take?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
   cursor?: Maybe<StripePaymentMethodWhereUniqueInput>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 
 export type ProjectUserInvitesArgs = {
-  take?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
   cursor?: Maybe<UserInviteWhereUniqueInput>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
+};
+
+
+export type ProjectUsersArgs = {
+  cursor?: Maybe<UserProjectWhereUniqueInput>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 export enum ProjectRole {
@@ -943,41 +974,45 @@ export type QueryGetUserInvitesArgs = {
 
 export type StatusResponse = {
   __typename?: 'StatusResponse';
-  ok?: Maybe<Scalars['Boolean']>;
   message?: Maybe<Scalars['String']>;
+  ok?: Maybe<Scalars['Boolean']>;
 };
 
 export type StripeInvoice = {
   __typename?: 'StripeInvoice';
-  id: Scalars['String'];
-  created: Scalars['DateTime'];
-  dueDate?: Maybe<Scalars['DateTime']>;
-  status?: Maybe<InvoiceStatus>;
   amountDue: Scalars['Int'];
   amountPaid: Scalars['Int'];
   amountRemaining: Scalars['Int'];
   billingReason?: Maybe<InvoiceBillingReason>;
+  created: Scalars['DateTime'];
+  dueDate?: Maybe<Scalars['DateTime']>;
+  id: Scalars['String'];
   invoicePdf?: Maybe<Scalars['String']>;
-  periodStart: Scalars['DateTime'];
   periodEnd: Scalars['DateTime'];
+  periodStart: Scalars['DateTime'];
   receiptNumber?: Maybe<Scalars['String']>;
+  status?: Maybe<InvoiceStatus>;
   subtotal: Scalars['Int'];
   tax?: Maybe<Scalars['Int']>;
   total: Scalars['Int'];
 };
 
+export type StripeInvoiceWhereUniqueInput = {
+  id?: Maybe<Scalars['String']>;
+};
+
 export type StripePaymentMethod = {
   __typename?: 'StripePaymentMethod';
-  id: Scalars['String'];
-  createdAt: Scalars['DateTime'];
-  updatedAt: Scalars['DateTime'];
   brand: Scalars['String'];
-  last4: Scalars['String'];
+  createdAt: Scalars['DateTime'];
   expMonth: Scalars['Int'];
   expYear: Scalars['Int'];
-  type: Scalars['String'];
+  id: Scalars['String'];
   importance: PaymentMethodImportance;
+  last4: Scalars['String'];
   project: Project;
+  type: Scalars['String'];
+  updatedAt: Scalars['DateTime'];
 };
 
 export type StripePaymentMethodWhereUniqueInput = {
@@ -991,27 +1026,27 @@ export type StripeSetupIntent = {
 
 export type StripeSubscription = {
   __typename?: 'StripeSubscription';
+  cancelAt?: Maybe<Scalars['DateTime']>;
+  cancelAtPeriodEnd: Scalars['Boolean'];
+  canceledAt?: Maybe<Scalars['DateTime']>;
+  created: Scalars['DateTime'];
+  currentPeriodEnd: Scalars['DateTime'];
+  currentPeriodStart: Scalars['DateTime'];
+  endedAt?: Maybe<Scalars['DateTime']>;
   id: Scalars['String'];
   metadata: Scalars['Json'];
+  quantity: Scalars['Int'];
   status: StripeSubscriptionStatus;
   stripePriceId: Scalars['String'];
-  quantity: Scalars['Int'];
-  cancelAtPeriodEnd: Scalars['Boolean'];
-  cancelAt?: Maybe<Scalars['DateTime']>;
-  canceledAt?: Maybe<Scalars['DateTime']>;
-  currentPeriodStart: Scalars['DateTime'];
-  currentPeriodEnd: Scalars['DateTime'];
-  created: Scalars['DateTime'];
-  endedAt?: Maybe<Scalars['DateTime']>;
 };
 
 export enum StripeSubscriptionStatus {
+  Active = 'ACTIVE',
+  Canceled = 'CANCELED',
   Incomplete = 'INCOMPLETE',
   IncompleteExpired = 'INCOMPLETE_EXPIRED',
-  Trialing = 'TRIALING',
-  Active = 'ACTIVE',
   PastDue = 'PAST_DUE',
-  Canceled = 'CANCELED',
+  Trialing = 'TRIALING',
   Unpaid = 'UNPAID'
 }
 
@@ -1021,8 +1056,8 @@ export type Subscription = {
 };
 
 export enum SubscriptionPlan {
-  Free = 'FREE',
   Basic = 'BASIC',
+  Free = 'FREE',
   Premium = 'PREMIUM'
 }
 
@@ -1080,8 +1115,8 @@ export type UpdateStripePaymentMethodInput = {
 
 export type UpdateTaxIdInput = {
   projectId: Scalars['String'];
-  taxType: TaxType;
   taxId: Scalars['String'];
+  taxType: TaxType;
 };
 
 export type UpdateUserInput = {
@@ -1095,8 +1130,8 @@ export type UpdateUserProjectInput = {
 };
 
 export type UpsertStripeSubscriptionInput = {
-  projectId: Scalars['String'];
   priceId: Scalars['String'];
+  projectId: Scalars['String'];
 };
 
 export type User = {
@@ -1112,37 +1147,37 @@ export type User = {
 
 
 export type UserProjectsArgs = {
-  take?: Maybe<Scalars['Int']>;
-  skip?: Maybe<Scalars['Int']>;
   cursor?: Maybe<UserProjectWhereUniqueInput>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 export type UserInvite = {
   __typename?: 'UserInvite';
-  id: Scalars['String'];
   createdAt: Scalars['DateTime'];
-  role: ProjectRole;
   email: Scalars['String'];
+  id: Scalars['String'];
+  role: ProjectRole;
 };
 
 export type UserInviteProjectIdEmailCompoundUniqueInput = {
-  projectId: Scalars['String'];
   email: Scalars['String'];
+  projectId: Scalars['String'];
 };
 
 export type UserInviteWhereUniqueInput = {
   id?: Maybe<Scalars['String']>;
-  token?: Maybe<Scalars['String']>;
   projectId_email?: Maybe<UserInviteProjectIdEmailCompoundUniqueInput>;
+  token?: Maybe<Scalars['String']>;
 };
 
 export type UserProject = {
   __typename?: 'UserProject';
-  id: Scalars['String'];
   createdAt: Scalars['DateTime'];
+  id: Scalars['String'];
+  project: Project;
   role: ProjectRole;
   user: User;
-  project: Project;
 };
 
 export type UserProjectProjectIdUserIdCompoundUniqueInput = {
@@ -1155,14 +1190,19 @@ export type UserProjectWhereUniqueInput = {
   projectId_userId?: Maybe<UserProjectProjectIdUserIdCompoundUniqueInput>;
 };
 
-export type VerificationEmail = {
-  __typename?: 'VerificationEmail';
+export type VerificationToken = {
+  __typename?: 'VerificationToken';
   id: Scalars['String'];
 };
 
 export type BaseProjcetFragment = (
   { __typename?: 'Project' }
   & Pick<Project, 'id' | 'name'>
+);
+
+export type BaseStripeInvoiceFragment = (
+  { __typename?: 'StripeInvoice' }
+  & Pick<StripeInvoice, 'id' | 'created' | 'dueDate' | 'status' | 'amountDue' | 'amountPaid' | 'amountRemaining' | 'billingReason' | 'invoicePdf' | 'periodStart' | 'periodEnd' | 'receiptNumber' | 'subtotal' | 'tax' | 'total'>
 );
 
 export type CreateManyUserInviteMutationVariables = Exact<{
@@ -1241,6 +1281,9 @@ export type CurrentProjectSettingsQuery = (
     )>, stripePaymentMethods: Array<(
       { __typename?: 'StripePaymentMethod' }
       & BasePaymenthMethodFragment
+    )>, stripeInvoices: Array<(
+      { __typename?: 'StripeInvoice' }
+      & BaseStripeInvoiceFragment
     )> }
     & BaseProjcetFragment
   )> }

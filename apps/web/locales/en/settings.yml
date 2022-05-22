@@ -14,6 +14,9 @@ paymentMethod:
   one: 'Payment method'
   other: 'Payment methods'
 
-billing: 'Billing'
+invoices: 'Invoices'
+overdueInvoices: 'Overdue invoices'
+paidInvoiceReceipts: 'Paid invoice receipts'
+invoiceAmount: 'Invoice amount ${{amount}}'
 
 inviteNewMember: 'Invite new member'

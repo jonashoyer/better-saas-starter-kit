@@ -43,6 +43,7 @@ const DynamicAppBar = ({ content }: DynamicAppBarProps) => {
         borderBottomStyle: 'solid',
         borderBottomWidth: 1,
         top: 0,
+        px: 1,
       }}
       style={{background, borderColor }}
     >

@@ -56,7 +56,7 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
                 const isCurrentProduct = i == currentProductIndex;
                 return (
                   <TableCell key={e.id} sx={{ width: 192 }}>
-                    <Box sx={{ textAlign: 'center' }}>
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'column' }}>
                       <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} />
                       {onPlanSwitch && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>}
                       {!onPlanSwitch && isCurrentProduct && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{t('pricing:currentPlan')}</Button>}

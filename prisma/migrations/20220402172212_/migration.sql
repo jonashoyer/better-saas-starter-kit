@@ -20,12 +20,16 @@ CREATE TYPE "InvoiceBillingReason" AS ENUM ('AUTOMATIC_PENDING_INVOICE_ITEM_INVO
 CREATE TABLE "Account" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "providerType" TEXT NOT NULL,
-    "providerId" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
     "providerAccountId" TEXT NOT NULL,
     "refreshToken" TEXT,
     "accessToken" TEXT,
-    "accessTokenExpires" TIMESTAMP(3),
+    "expiresAt" TIMESTAMP(3),
+    "tokenType" TEXT,
+    "scope" TEXT,
+    "idToken" TEXT,
+    "sessionState" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -35,9 +39,9 @@ CREATE TABLE "Account" (
 -- CreateTable
 CREATE TABLE "Session" (
     "id" TEXT NOT NULL,
+    "sessionToken" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "expires" TIMESTAMP(3) NOT NULL,
-    "sessionToken" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -55,6 +59,18 @@ CREATE TABLE "User" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "VerificationToken" (
+    "id" TEXT NOT NULL,
+    "identifier" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "VerificationToken_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -131,30 +147,6 @@ CREATE TABLE "StripePaymentMethod" (
 );
 
 -- CreateTable
-CREATE TABLE "VerificationRequest" (
-    "id" TEXT NOT NULL,
-    "identifier" TEXT NOT NULL,
-    "token" TEXT NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "VerificationRequest_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "VerificationEmail" (
-    "id" TEXT NOT NULL,
-    "accountId" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "token" TEXT NOT NULL,
-    "expires" TIMESTAMP(3) NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "VerificationEmail_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "StripeProduct" (
     "id" TEXT NOT NULL,
     "type" TEXT NOT NULL,
@@ -205,13 +197,19 @@ CREATE TABLE "StripeInvoice" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Account_providerId_providerAccountId_key" ON "Account"("providerId", "providerAccountId");
+CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VerificationToken_token_key" ON "VerificationToken"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "VerificationToken"("identifier", "token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserProject_projectId_userId_key" ON "UserProject"("projectId", "userId");
@@ -224,21 +222,6 @@ CREATE UNIQUE INDEX "UserInvite_token_key" ON "UserInvite"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserInvite_projectId_email_key" ON "UserInvite"("projectId", "email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VerificationRequest_token_key" ON "VerificationRequest"("token");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VerificationRequest_identifier_token_key" ON "VerificationRequest"("identifier", "token");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VerificationEmail_token_key" ON "VerificationEmail"("token");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VerificationEmail_accountId_token_key" ON "VerificationEmail"("accountId", "token");
-
--- CreateIndex
-CREATE UNIQUE INDEX "VerificationEmail_accountId_unique" ON "VerificationEmail"("accountId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "StripeProduct_type_key" ON "StripeProduct"("type");
@@ -266,9 +249,6 @@ ALTER TABLE "UserInvite" ADD CONSTRAINT "UserInvite_projectId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "StripePaymentMethod" ADD CONSTRAINT "StripePaymentMethod_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "VerificationEmail" ADD CONSTRAINT "VerificationEmail_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "StripePrice" ADD CONSTRAINT "StripePrice_productId_fkey" FOREIGN KEY ("productId") REFERENCES "StripeProduct"("id") ON DELETE CASCADE ON UPDATE CASCADE;

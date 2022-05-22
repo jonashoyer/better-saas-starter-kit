@@ -21,7 +21,7 @@ export default function Home(props: any) {
 
       <DynamicPageLayout pageTitle='Better SaaS Starter Kit'>
 
-        <Box sx={{ textAlign: 'center', minHeight: '100vh', maxWidth: 1532, mx: 'auto', pt: 1.5 }}>
+        <Box sx={{ textAlign: 'center', minHeight: '100vh', maxWidth: 1532, mx: 'auto', pt: 1.5, px: 2 }}>
           <Box sx={{ bgcolor: '#f3f3f3', pt: 12, borderRadius: 5, mb: 2, pb: 64 }}>
             <motion.div
               initial={{ y: 15, opacity: 0 }}
@@ -49,7 +49,7 @@ export default function Home(props: any) {
               animate={{ y: 0, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 20, delay: .45 }}
             >
-              <Button variant='contained' onClick={() => router.push('/')}>{t('home:heroGetStarted')}</Button>
+              <Button variant='contained' onClick={() => router.push('/signup')}>{t('home:heroGetStarted')}</Button>
             </motion.div>
           </Box>
 
@@ -65,7 +65,7 @@ export default function Home(props: any) {
             </Box>
           </Box>
           <Box
-          component={motion.div}
+            component={motion.div}
             sx={{ height: 256, borderRadius: 5, background: 'linear-gradient(150deg, #48e5fa 0%, #6b63ff 50%, #ff6584 100%)' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
