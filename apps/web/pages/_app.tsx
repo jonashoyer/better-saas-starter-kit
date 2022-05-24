@@ -9,6 +9,7 @@ import { SessionProvider } from 'next-auth/react'
 import { ProjectValueProvider } from '../hooks/useProject';
 import WithCookieSnackbar from '../components/layouts/WithCookieSnackbar';
 import { AuthGuard } from '../components/elements/AuthGuard';
+import { UserContextProvider } from '../contexts/UserContext';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -25,16 +26,18 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <SessionProvider session={pageProps.session}>
-        <ApolloProvider client={apolloClient}>
-          <ThemeProvider theme={defaultTheme}>
-            <ProjectValueProvider initialValue={pageProps.projectId}>
+      <ApolloProvider client={apolloClient}>
+        <ProjectValueProvider initialValue={pageProps.projectId}>
+          <UserContextProvider>
+            <ThemeProvider theme={defaultTheme}>
               <CssBaseline />
               <WithCookieSnackbar>
                 <AuthGuard Component={Component} pageProps={pageProps} />
               </WithCookieSnackbar>
-            </ProjectValueProvider>
-          </ThemeProvider>
-        </ApolloProvider>
+            </ThemeProvider>
+          </UserContextProvider>
+        </ProjectValueProvider>
+      </ApolloProvider>
     </SessionProvider>
   );
 }

@@ -11,27 +11,14 @@ import ProjectSelector from 'components/layouts/ProjectSelector';
 import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'shared';
 import { setCookie } from 'utils/cookies';
-import useProject from 'hooks/useProject';
-import dayjs from 'dayjs';
 import { AppNextPage } from '../types/types';
+import { useUserContext } from '../contexts/UserContext';
 
 // FIXME: Cookie project is deleted it should fallback
 
 const Dashboard: AppNextPage = (props: any) => {
 
-  const [projectId] = useProject();
-
-  const { data: session, status } = useSession();
-
-  const loading = status === 'loading';
-
-  const { data: currentProjectData } = useCurrentProjectQuery({
-    variables: {
-      projectId,
-    },
-  });
-  const { data: selfProjectsData } = useSelfProjectsQuery({ context: { serverless: true } });
-
+  const { session, project, projects, loading } = useUserContext();
 
   return (
     <React.Fragment>
@@ -47,7 +34,12 @@ const Dashboard: AppNextPage = (props: any) => {
         {session && <Button onClick={() => signOut() } variant='contained'>Logout</Button>}
         <Paper sx={{ p: 2 , my: 2}}>
           <Typography variant='subtitle1' color='textSecondary'>Project</Typography>
-          {currentProjectData && <Typography sx={{ mb: 1 }}>{currentProjectData.currentProject?.id} {currentProjectData.currentProject?.name}</Typography>}
+          {project && 
+            <Box sx={{ mb: 1, display: 'flex', gap: 1 }}>
+              <Typography>{project?.name}</Typography>
+              <Typography color='textSecondary'>{project?.id}</Typography>
+            </Box>
+          }
           <Typography variant='subtitle1' color='textSecondary'>Session data</Typography>
           <Typography variant='body2'>{loading ? 'Loading...' : (session ? JSON.stringify(session, null, 2) : 'No session')}</Typography>
         </Paper>
@@ -57,11 +49,7 @@ const Dashboard: AppNextPage = (props: any) => {
         </Box>
 
         <Box sx={{ py: 1 }}>
-          {selfProjectsData?.selfProjects &&
-            <ProjectSelector
-              projects={selfProjectsData.selfProjects}
-            />
-          }
+          <ProjectSelector projects={projects} />
         </Box>
         <Typography>Text</Typography>
 

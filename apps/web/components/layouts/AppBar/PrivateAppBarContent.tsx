@@ -9,14 +9,14 @@ import useTranslation from "next-translate/useTranslation";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Lazy from "../../elements/Lazy";
 import Link from "next/link";
+import ProjectSelector from '../ProjectSelector';
+import { useUserContext } from '../../../contexts/UserContext';
 
 const LazyDialogAccountSettings = dynamic(() => import('../../elements/DialogAccountSettings'));
 
 const BaseAppBarContent = () => {
 
-  const { data: session, status } = useSession();
-
-  const loading = status === 'loading';
+  const { session, loading, projects } = useUserContext();
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = React.useState(null);
 
@@ -27,16 +27,16 @@ const BaseAppBarContent = () => {
 
   return (
     <React.Fragment>
-      <Box sx={{ flexBasis: '300px', px: 2 }}>
+      <Box sx={{ flex: '1', px: 2, display: 'flex', gap: 4, alignItems: 'center' }}>
         <Link href='/dashboard' passHref>
           <MuiLink color='inherit' underline='none'>
             <Logo />
           </MuiLink>
         </Link>
+        <ProjectSelector variant='text' size='small' projects={projects} />
       </Box>
-      <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-      </Box>
-      <Box sx={{ flexBasis: '300px', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
+
+      <Box sx={{ flex: '1', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
         {(!loading && session) &&
           <React.Fragment>
             <IconButton
