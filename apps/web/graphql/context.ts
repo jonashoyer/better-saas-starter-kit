@@ -35,7 +35,7 @@ export const createContext: ContextFunction<any> = async (ctx)  => {
 
     const stripeInfo = await (new StripeHandler(stripe, prisma)).fetchCustomerInfo(user.projects[0].project.stripeCustomerId);
     console.log(stripeInfo);
-    (await import('fs')).writeFileSync('./stripe-info.json', JSON.stringify(stripeInfo, null, 2));
+    (await import('fs')).writeFileSync('./debug.stripe-info.json', JSON.stringify(stripeInfo, null, 2));
   } catch (err) {
     console.error(err);
   }
