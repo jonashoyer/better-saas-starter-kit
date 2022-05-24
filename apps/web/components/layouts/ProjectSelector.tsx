@@ -10,10 +10,12 @@ import { useRouter } from "next/router";
 import DialogCreateProject from "../elements/DialogCreateProject";
 
 interface ProjectSelectorProps {
-  projects: ({ id: string, name: string })[];
+  projects: ({ id: string, name: string })[] | null;
+  variant?: 'text' | 'contained';
+  size?: 'small' | 'medium';
 }
 
-const ProjectSelector = ({ projects }: ProjectSelectorProps) => {
+const ProjectSelector = ({ projects, variant, size }: ProjectSelectorProps) => {
 
   const router = useRouter();
 
@@ -28,6 +30,7 @@ const ProjectSelector = ({ projects }: ProjectSelectorProps) => {
   }
 
   const currentProject = React.useMemo(() => {
+    if (!projects) return null;
     return projects.find(e => e.id == projectId) ?? projects[0] ?? { id: 'unknown', name: 'Unknown' };
   }, [projects, projectId]);
 
@@ -45,7 +48,7 @@ const ProjectSelector = ({ projects }: ProjectSelectorProps) => {
       />
       <Selector
         items={[
-          ...projects.map(e =>
+          ...(projects ?? []).map(e =>
             <ProjectButton
               key={e.id}
               dense
@@ -75,6 +78,9 @@ const ProjectSelector = ({ projects }: ProjectSelectorProps) => {
           endAdornment={
             <KeyboardArrowDownIcon />
           }
+          elevation={variant == 'text' ? 0 : 2}
+          sx={{ ...(size == 'small' && { bgcolor: '#0000', '&:hover': { bgcolor: '#00000018' } }) }}
+          avatarSx={{ ...(size == 'small' && { height: 26, width: 26, mr: 1, fontSize: '.85rem' }) }}
         />
       </Selector>
     </React.Fragment>
