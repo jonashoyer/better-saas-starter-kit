@@ -1,18 +1,17 @@
 import React from 'react';
 import Head from 'next/head';
 import StaticPageLayout from 'components/layouts/PageLayout/StaticPageLayout';
-import { useSession, signIn, signOut, getSession  } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { Box, Button, Paper, Typography } from '@mui/material';
-import { CurrentProjectDocument, SelfProjectsDocument, useCurrentProjectQuery, useSelfProjectsQuery } from 'types/gql';
 import ProductPricingsTable from 'components/layouts/ProductPricingsTable';
 import { prisma } from 'utils/prisma';
 import { GetServerSideProps } from 'next';
 import ProjectSelector from 'components/layouts/ProjectSelector';
-import { initializeApollo } from 'utils/GraphqlClient';
 import { Constants } from 'shared';
 import { setCookie } from 'utils/cookies';
 import { AppNextPage } from '../types/types';
 import { useUserContext } from '../contexts/UserContext';
+import { fetchUserContext } from '../utils/serverSideUtils';
 
 // FIXME: Cookie project is deleted it should fallback
 
@@ -31,10 +30,10 @@ const Dashboard: AppNextPage = (props: any) => {
 
       <StaticPageLayout padded pageTitle='SaaS Dashboard'>
         {!session && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
-        {session && <Button onClick={() => signOut() } variant='contained'>Logout</Button>}
-        <Paper sx={{ p: 2 , my: 2}}>
+        {session && <Button onClick={() => signOut()} variant='contained'>Logout</Button>}
+        <Paper sx={{ p: 2, my: 2 }}>
           <Typography variant='subtitle1' color='textSecondary'>Project</Typography>
-          {project && 
+          {project &&
             <Box sx={{ mb: 1, display: 'flex', gap: 1 }}>
               <Typography>{project?.name}</Typography>
               <Typography color='textSecondary'>{project?.id}</Typography>
@@ -59,9 +58,7 @@ const Dashboard: AppNextPage = (props: any) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getSession(ctx) as any;
-
-  const client = initializeApollo({}, ctx.req.headers);
+  const { session, project, client, projectId } = await fetchUserContext(ctx);
 
   const products = await prisma.stripeProduct.findMany({
     where: { active: true },
@@ -74,23 +71,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   if (session?.user) {
 
-    const projectId = ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY];
-
-    const { data: { currentProject } } = await client.query({
-      query: CurrentProjectDocument,
-      variables: {
-        projectId,
-      },
-    })
-
-    if (!projectId && currentProject?.id) setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, currentProject.id, { maxAge: 31540000000 });
-
-    await client.query({
-      query: SelfProjectsDocument,
-    });
+    if (!projectId && project?.id) setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, project.id, { maxAge: 31540000000 });
 
     return {
-      props: { products, projectId: currentProject?.id, initialApolloState: client.extract() },
+      props: { products, projectId: project?.id ?? null, initialApolloState: client.extract() },
     };
   }
 

@@ -28,16 +28,16 @@ export type Context<E = any> = {
 export const createContext: ContextFunction<any> = async (ctx)  => {
   const session = await getSession({ req: ctx.req });
 
-  const user = await prisma.user.findUnique({ where: { id: (session.user as any).id }, include: { projects: { include: { project: true } } } });
+  const user = session?.user ? (await prisma.user.findUnique({ where: { id: (session.user as any).id }, include: { projects: { include: { project: true } } } })) : null;
 
-  try {
-
-    const stripeInfo = await (new StripeHandler(stripe, prisma)).fetchCustomerInfo(user.projects[0].project.stripeCustomerId);
-    console.log(stripeInfo);
-    (await import('fs')).writeFileSync('./debug.stripe-info.json', JSON.stringify(stripeInfo, null, 2));
-  } catch (err) {
-    console.error(err);
-  }
+  // if (user) {
+  //   try {
+  //     const stripeInfo = await (new StripeHandler(stripe, prisma)).fetchCustomerInfo(user.projects[0].project.stripeCustomerId);
+  //     (await import('fs')).writeFileSync('./debug.stripe-info.json', JSON.stringify(stripeInfo, null, 2));
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 
   return {
     req: ctx.req,
@@ -47,7 +47,7 @@ export const createContext: ContextFunction<any> = async (ctx)  => {
     queueManager,
     stripe,
     getStripeHandler: () => new StripeHandler(stripe, prisma),
-    user: session?.user,
+    user,
     session,
   }
 }
