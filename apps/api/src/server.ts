@@ -1,9 +1,7 @@
 import schema from './schema';
 import { NODE_ENV, PORT } from './config';
-import { execute, subscribe } from "graphql";
-import { Context, createContext, createSubscriptionContext } from './context';
-import { ApolloServer, ExpressContext } from 'apollo-server-express';
-import { SubscriptionServer } from "subscriptions-transport-ws";
+import { createContext, createSubscriptionContext } from './context';
+import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 import http from 'http';
 import depthLimit from 'graphql-depth-limit';
@@ -14,6 +12,9 @@ import { NodeEnv } from 'shared';
 import { createRedisClient } from 'shared-server';
 import cookieParser from 'cookie-parser';
 import bullboardRoute from './routes/bullboard';
+import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 
 
 (async function () {
@@ -39,35 +40,56 @@ import bullboardRoute from './routes/bullboard';
 
   app.use('/admin', bullboardRoute);
 
+
+
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/graphql',
+
+  });
+
+  const serverCleanup = useServer({
+    schema,
+    context: createSubscriptionContext,
+  }, wsServer);
+
   const apollo = new ApolloServer({
     schema,
+    csrfPrevention: true,
     context: createContext,
     validationRules: [depthLimit(4)],
-    debug: NODE_ENV === NodeEnv.Development
+    debug: NODE_ENV === NodeEnv.Development,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose();
+            }
+          }   
+        }
+      }
+    ]
   });
 
   await apollo.start();  
   
   apollo.applyMiddleware({ app, cors: false });
 
-  const subscriptionServer = SubscriptionServer.create(
-    {
-      schema, execute, subscribe,
-      async onConnect(connectionParams: any, websocket: any, ctx: ExpressContext): Promise<Context> {
-        return createSubscriptionContext(connectionParams, websocket, ctx);
-      }
-    },
-    { server: httpServer, path: apollo.graphqlPath }
-  );
+
+  // const subscriptionServer = SubscriptionServer.create(
+  //   {
+  //     schema, execute, subscribe,
+  //     async onConnect(connectionParams: any, websocket: any, ctx: ExpressContext): Promise<Context> {
+  //       return createSubscriptionContext(connectionParams, websocket, ctx);
+  //     }
+  //   },
+  //   { server: httpServer, path: apollo.graphqlPath }
+  // );
   
   httpServer.listen(PORT, () => {
     console.log(`🚀 GraphQL service ready at http://localhost:${PORT}/graphql`);
   });
   
-  ['SIGINT', 'SIGTERM'].forEach(signal => {
-    process.on(signal, async () => {
-      subscriptionServer.close();
-    });
-  });
-
 })();

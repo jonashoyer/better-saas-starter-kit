@@ -5,7 +5,6 @@ import cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import { AUTH_SECRET } from "./config";
 import http from 'http';
-import type { ExecutionParams } from 'subscriptions-transport-ws';
 
 const SESSION_TOKEN_NAME = 'next-auth.session-token';
 
@@ -22,7 +21,7 @@ export async function findSession(sessionToken: string ): Promise<(Session & { u
 }
 
 
-export async function verifyAccessToken(accessToken: string) {
+export async function authorizeAccessToken(accessToken: string) {
   const decoded = jwt.verify(accessToken, AUTH_SECRET);
   if (typeof decoded != 'object') return null;
   const user = await prisma.user.findUnique({
@@ -46,27 +45,18 @@ export async function getSession({ req, sessionToken }: { req?: {  headers: http
   return null;
 };
 
-export async function authorize({ req, connection, sessionToken, accessToken }: {
+export async function authorize({ req, sessionToken, accessToken }: {
   req?: { headers: http.IncomingHttpHeaders },
-  connection?: ExecutionParams<any>,
   sessionToken?: string,
   accessToken?: string,
 }): Promise<(User & { session?: Session }) | null> {
 
-  
   if (accessToken) {
-    return verifyAccessToken(accessToken);
-  }
-
-  if (connection) {
-    const { accessToken } = connection.context;
-    if (accessToken) {
-      return verifyAccessToken(accessToken);
-    }
+    return authorizeAccessToken(accessToken);
   }
   
   if (req || sessionToken) {
-    const session = await getSession({ req, sessionToken, connection } as any);
+    const session = await getSession({ req, sessionToken } as any);
     if (!session) return null;
     return { ...session.user, session };
   }
