@@ -29,7 +29,6 @@ export const createContext: ContextFunction<any> = async (ctx)  => {
   const session = await getSession({ req: ctx.req });
 
   const user = await prisma.user.findUnique({ where: { id: (session.user as any).id }, include: { projects: { include: { project: true } } } });
-  console.log( user );
 
   try {
 

@@ -50,7 +50,7 @@ const createUserWithProject = async (profile: Profile & { emailVerified?: Date; 
         id: projectId,
         name: `${firstName}'s Project`,
         stripeCustomerId: stripeCustomer.id,
-        subscriptionPlan: isJSONValueObject(stripeSubscription.metadata) ? stripeSubscription.metadata.type as any : undefined,
+        // subscriptionPlan: isJSONValueObject(stripeSubscription.metadata) ? stripeSubscription.metadata.type as any : undefined,
         users: {
           create: {
             role: 'ADMIN',

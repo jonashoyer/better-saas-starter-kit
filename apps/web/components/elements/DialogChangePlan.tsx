@@ -161,7 +161,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       if (cardComplete) {
         setProcessing(true);
       }
-      console.log({ stripeClientSecret });
   
   
       const payload = await stripe.confirmCardSetup(

@@ -17,8 +17,6 @@ const LoginPage: AppNextPage = (props) => {
 
   const { data: session, status } = useSession();
 
-  console.log({ session, status });
-
   React.useEffect(() => {
     getProviders().then(providers => console.log(providers));
   },[]);

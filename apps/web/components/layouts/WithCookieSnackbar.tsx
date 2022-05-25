@@ -11,7 +11,7 @@ export interface CookieProvider {
 const WithCookieSnackbar = ({ children }) => {
   
   const [value, setValue, remove] = useLocalStorage('allow-tracking');
-  console.log(value);
+
   return (
     <React.Fragment>
       <NoSsr>

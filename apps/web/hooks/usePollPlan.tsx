@@ -36,7 +36,6 @@ const usePollPlan = (option: UsePollPaymentMethodsOption): [() => void, boolean]
   const startPollProxy = async () => {
     const { data } = await apolloClient.query({ query: GetCurrentProjectSubscriptionPlanDocument, variables: { projectId }, fetchPolicy: 'cache-first' });
     planRef.current = data?.currentProject?.subscriptionPlan;
-    console.log(planRef.current, data?.currentProject);
     startPoll();
   }
 
