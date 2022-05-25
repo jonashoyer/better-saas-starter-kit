@@ -16,7 +16,7 @@
     "sync:stripe": "ts-node tools/syncStripe"
   },
   "dependencies": {
-    "@apollo/client": "^3.3.21",
+    "@apollo/client": "^3.6.5",
     "@emotion/react": "^11.4.0",
     "@emotion/server": "^11.4.0",
     "@emotion/styled": "^11.3.0",
@@ -33,6 +33,7 @@
     "framer-motion": "^6.2.8",
     "graphql-depth-limit": "^1.1.0",
     "graphql-scalars": "^1.10.0",
+    "graphql-ws": "^5.8.2",
     "ioredis": "^4.27.6",
     "jsonwebtoken": "^8.5.1",
     "micro": "^9.3.4",
@@ -47,7 +48,6 @@
     "react-use": "^17.3.2",
     "shared": "*",
     "stripe": "^8.163.0",
-    "subscriptions-transport-ws": "^0.9.19",
     "tsconfig": "*",
     "zxcvbn": "^4.4.2"
   },

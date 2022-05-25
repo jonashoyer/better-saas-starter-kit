@@ -7,6 +7,8 @@ import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { signOut } from 'next-auth/react';
 import { GRAPHQL_ENDPOINT, GRAPHQL_WEBSOCKET_ENDPOINT } from '../config';
 import { getURL } from '.';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
 
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -33,15 +35,10 @@ const createHttpLink = (uri: string, headers = {}) => {
 
 const createWebSocketLink = () => {
   if (process.browser) {
-    return new WebSocketLink(
-      new SubscriptionClient(
-        GRAPHQL_WEBSOCKET_ENDPOINT,
-        {
-          timeout: 10e3,
-          lazy: true,
-          reconnect: true,
-        })
-    );
+    return new GraphQLWsLink(createClient({
+      url: GRAPHQL_WEBSOCKET_ENDPOINT,
+      connectionParams: {},
+    }));
   }
   return null;
 }
@@ -57,18 +54,20 @@ const createLink = (headers = {}) => {
     createHttpLink(GRAPHQL_ENDPOINT, headers),
   );
 
-  if(process.browser) {
-    return split(
-      ({ query }) => {
-        const definition = getMainDefinition(query);
-        return (
-          definition.kind === 'OperationDefinition' &&
-          definition.operation === 'subscription'
-        );
-      },
-      graphqlOnError.concat(createWebSocketLink() as WebSocketLink),
-      httpLinkSplit,
-    )
+  if (process.browser) {
+    return graphqlOnError.concat(
+      split(
+        ({ query }) => {
+          const definition = getMainDefinition(query);
+          return (
+            definition.kind === 'OperationDefinition' &&
+            definition.operation === 'subscription'
+          );
+        },
+        createWebSocketLink(),
+        httpLinkSplit,
+      )
+    );
   }
 
   return httpLinkSplit;
