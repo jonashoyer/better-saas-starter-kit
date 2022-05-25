@@ -5,10 +5,12 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "ts-node src/index"
+    "start": "ts-node src/index",
+    "stripe:sync": "ts-node src/tools/stripeSync"
   },
   "dependencies": {
     "shared": "*",
+    "shared-server": "*",
     "tsconfig": "*"
   },
   "author": "",
