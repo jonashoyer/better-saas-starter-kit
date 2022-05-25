@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import { NodeEnv } from 'shared';
-import { REDIS_DB, REDIS_HOST, REDIS_PORT } from './config';
+import { REDIS_DB, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD } from './config';
 
 type clientTypes = 'client' | 'subscriber' | 'new' | 'bclient';
 
@@ -19,6 +19,7 @@ export function createRedisClient (type: clientTypes, redisUrl?: string) {
         host: REDIS_HOST,
         port: REDIS_PORT,
         db: REDIS_DB,
+        password: REDIS_PASSWORD,
         showFriendlyErrorStack: (process.env.NODE_ENV !== NodeEnv.Production),
         connectTimeout: 10e3,
         maxRetriesPerRequest: null,
@@ -26,8 +27,6 @@ export function createRedisClient (type: clientTypes, redisUrl?: string) {
         retryStrategy(times) {
           return Math.min(times * 50, 3000);
         },
-      }).on('error', err => {
-        console.error('redis', err);
       });
       
     default:
