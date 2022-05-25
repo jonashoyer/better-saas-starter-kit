@@ -96,7 +96,6 @@ export interface NexusGenEnums {
   ProjectRole: prisma.ProjectRole
   StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
   SubscriptionPlan: "BASIC" | "FREE" | "PREMIUM"
-  SubscriptionPlanType: prisma.SubscriptionPlanType
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
 }
 
@@ -181,7 +180,6 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     stripeInvoices: NexusGenRootTypes['StripeInvoice'][]; // [StripeInvoice!]!
     stripePaymentMethods: NexusGenRootTypes['StripePaymentMethod'][]; // [StripePaymentMethod!]!
-    subscriptionPlan: NexusGenEnums['SubscriptionPlanType']; // SubscriptionPlanType!
     userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
   }
@@ -301,7 +299,6 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     stripeInvoices: 'StripeInvoice'
     stripePaymentMethods: 'StripePaymentMethod'
-    subscriptionPlan: 'SubscriptionPlanType'
     userInvites: 'UserInvite'
     users: 'UserProject'
   }

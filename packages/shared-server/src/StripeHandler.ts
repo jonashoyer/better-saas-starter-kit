@@ -1,4 +1,4 @@
-import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice, SubscriptionPlanType, SubscriptionProductType } from '@prisma/client';
+import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice } from '@prisma/client';
 import dayjs from 'dayjs';
 import Stripe from 'stripe'
 

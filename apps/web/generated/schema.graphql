@@ -87,7 +87,6 @@ type Project {
   name: String!
   stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, skip: Int, take: Int): [StripeInvoice!]!
   stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
-  subscriptionPlan: SubscriptionPlanType!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
   users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }
@@ -179,12 +178,6 @@ enum StripeSubscriptionStatus {
 }
 
 enum SubscriptionPlan {
-  BASIC
-  FREE
-  PREMIUM
-}
-
-enum SubscriptionPlanType {
   BASIC
   FREE
   PREMIUM
