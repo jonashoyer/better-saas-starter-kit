@@ -8,7 +8,6 @@ import { IncomingMessage, OutgoingMessage } from 'http';
 import { Session } from '../pages/api/auth/[...nextauth]';
 
 export const stripe = createStripe();
-export const prisma = new PrismaClient();
 export const redis = createRedisClient('client');
 export const queueManager = createAppQueueManager();
 
