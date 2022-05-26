@@ -38,6 +38,7 @@ const ProjectSelector = ({ projects, variant, size }: ProjectSelectorProps) => {
     e.stopPropagation();
     setProjectId(proj.id);
     router.push('/settings');
+    setOpen(false);
   }
 
   return (

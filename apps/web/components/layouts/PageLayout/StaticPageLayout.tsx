@@ -11,11 +11,12 @@ interface StaticPageLayoutProps {
   pageDescription?: string;
   children: React.ReactNode;
   padded?: boolean;
+  fullWidth?: boolean;
 }
 
-const StaticPageLayout = ({ padded, children, pageTitle, pageDescription }: StaticPageLayoutProps) => {
+const StaticPageLayout = ({ padded, children, pageTitle, pageDescription, fullWidth }: StaticPageLayoutProps) => {
 
-  const inner = padded ? <Box sx={{ p: 2, minHeight: '100vh' }}> {children} </Box> : children;
+  const inner = fullWidth || padded ? <Box sx={{ ...(!fullWidth && { maxWidth: 1200, mx: 'auto' }), ...(padded && { p: 2 }), minHeight: '100vh' }}> {children} </Box> : children;
 
   return (
     <React.Fragment>
