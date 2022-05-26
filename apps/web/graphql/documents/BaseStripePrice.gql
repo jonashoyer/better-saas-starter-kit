@@ -1,0 +1,11 @@
+fragment BaseStripePrice on StripePrice {
+  id
+  interval
+  intervalCount
+  metadata
+  unitAmount
+  currency
+  stripeProduct {
+    ...BaseStripeProduct
+  }
+}

@@ -87,6 +87,7 @@ type Project {
   name: String!
   stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, skip: Int, take: Int): [StripeInvoice!]!
   stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
+  stripeSubscriptions(cursor: StripeSubscriptionWhereUniqueInput, skip: Int, take: Int): [StripeSubscription!]!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
   users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }
@@ -148,6 +149,31 @@ input StripePaymentMethodWhereUniqueInput {
   id: String
 }
 
+type StripePrice {
+  active: Boolean!
+  currency: String!
+  id: String!
+  interval: String
+  intervalCount: Int
+  metadata: Json!
+  stripeProduct: StripeProduct
+  trialPeriodDays: Int
+  unitAmount: Int
+}
+
+input StripePriceWhereUniqueInput {
+  id: String
+}
+
+type StripeProduct {
+  active: Boolean!
+  id: String!
+  image: String
+  metadata: Json!
+  name: String!
+  stripePrices(cursor: StripePriceWhereUniqueInput, skip: Int, take: Int): [StripePrice!]!
+}
+
 type StripeSetupIntent {
   clientSecret: String!
 }
@@ -164,6 +190,7 @@ type StripeSubscription {
   metadata: Json!
   quantity: Int!
   status: StripeSubscriptionStatus!
+  stripePrice: StripePrice!
   stripePriceId: String!
 }
 
@@ -177,10 +204,8 @@ enum StripeSubscriptionStatus {
   UNPAID
 }
 
-enum SubscriptionPlan {
-  BASIC
-  FREE
-  PREMIUM
+input StripeSubscriptionWhereUniqueInput {
+  id: String
 }
 
 enum TaxType {

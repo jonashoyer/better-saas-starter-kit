@@ -1,6 +1,6 @@
 import { NextApiHandler } from 'next';
 import { createStripe, stripeWebhookHandler } from 'shared-server';
-import { prisma } from '../../../graphql/context';
+import { prisma } from '../../../utils/prisma';
 
 
 // Stripe requires the raw body to construct the event.

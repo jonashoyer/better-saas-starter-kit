@@ -7,8 +7,8 @@ documents:
 generates:
   types/gql.ts:
     plugins:
-    - typescript-react-apollo
     - typescript
+    - typescript-react-apollo
     - typescript-operations
 
     

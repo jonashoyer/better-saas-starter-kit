@@ -45,6 +45,12 @@ export interface NexusGenInputs {
   StripePaymentMethodWhereUniqueInput: { // input type
     id?: string | null; // String
   }
+  StripePriceWhereUniqueInput: { // input type
+    id?: string | null; // String
+  }
+  StripeSubscriptionWhereUniqueInput: { // input type
+    id?: string | null; // String
+  }
   UpdateProjectInput: { // input type
     id: string; // String!
     name?: string | null; // String
@@ -95,7 +101,6 @@ export interface NexusGenEnums {
   PaymentMethodImportance: prisma.PaymentMethodImportance
   ProjectRole: prisma.ProjectRole
   StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
-  SubscriptionPlan: "BASIC" | "FREE" | "PREMIUM"
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
 }
 
@@ -128,6 +133,8 @@ export interface NexusGenObjects {
   }
   StripeInvoice: prisma.StripeInvoice;
   StripePaymentMethod: prisma.StripePaymentMethod;
+  StripePrice: prisma.StripePrice;
+  StripeProduct: prisma.StripeProduct;
   StripeSetupIntent: { // root type
     clientSecret: string; // String!
   }
@@ -180,6 +187,7 @@ export interface NexusGenFieldTypes {
     name: string; // String!
     stripeInvoices: NexusGenRootTypes['StripeInvoice'][]; // [StripeInvoice!]!
     stripePaymentMethods: NexusGenRootTypes['StripePaymentMethod'][]; // [StripePaymentMethod!]!
+    stripeSubscriptions: NexusGenRootTypes['StripeSubscription'][]; // [StripeSubscription!]!
     userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
   }
@@ -223,6 +231,25 @@ export interface NexusGenFieldTypes {
     type: string; // String!
     updatedAt: NexusGenScalars['DateTime']; // DateTime!
   }
+  StripePrice: { // field return type
+    active: boolean; // Boolean!
+    currency: string; // String!
+    id: string; // String!
+    interval: string | null; // String
+    intervalCount: number | null; // Int
+    metadata: NexusGenScalars['Json']; // Json!
+    stripeProduct: NexusGenRootTypes['StripeProduct'] | null; // StripeProduct
+    trialPeriodDays: number | null; // Int
+    unitAmount: number | null; // Int
+  }
+  StripeProduct: { // field return type
+    active: boolean; // Boolean!
+    id: string; // String!
+    image: string | null; // String
+    metadata: NexusGenScalars['Json']; // Json!
+    name: string; // String!
+    stripePrices: NexusGenRootTypes['StripePrice'][]; // [StripePrice!]!
+  }
   StripeSetupIntent: { // field return type
     clientSecret: string; // String!
   }
@@ -238,6 +265,7 @@ export interface NexusGenFieldTypes {
     metadata: NexusGenScalars['Json']; // Json!
     quantity: number; // Int!
     status: NexusGenEnums['StripeSubscriptionStatus']; // StripeSubscriptionStatus!
+    stripePrice: NexusGenRootTypes['StripePrice']; // StripePrice!
     stripePriceId: string; // String!
   }
   User: { // field return type
@@ -299,6 +327,7 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     stripeInvoices: 'StripeInvoice'
     stripePaymentMethods: 'StripePaymentMethod'
+    stripeSubscriptions: 'StripeSubscription'
     userInvites: 'UserInvite'
     users: 'UserProject'
   }
@@ -342,6 +371,25 @@ export interface NexusGenFieldTypeNames {
     type: 'String'
     updatedAt: 'DateTime'
   }
+  StripePrice: { // field return type name
+    active: 'Boolean'
+    currency: 'String'
+    id: 'String'
+    interval: 'String'
+    intervalCount: 'Int'
+    metadata: 'Json'
+    stripeProduct: 'StripeProduct'
+    trialPeriodDays: 'Int'
+    unitAmount: 'Int'
+  }
+  StripeProduct: { // field return type name
+    active: 'Boolean'
+    id: 'String'
+    image: 'String'
+    metadata: 'Json'
+    name: 'String'
+    stripePrices: 'StripePrice'
+  }
   StripeSetupIntent: { // field return type name
     clientSecret: 'String'
   }
@@ -357,6 +405,7 @@ export interface NexusGenFieldTypeNames {
     metadata: 'Json'
     quantity: 'Int'
     status: 'StripeSubscriptionStatus'
+    stripePrice: 'StripePrice'
     stripePriceId: 'String'
   }
   User: { // field return type name
@@ -454,6 +503,11 @@ export interface NexusGenArgTypes {
       skip?: number | null; // Int
       take?: number | null; // Int
     }
+    stripeSubscriptions: { // args
+      cursor?: NexusGenInputs['StripeSubscriptionWhereUniqueInput'] | null; // StripeSubscriptionWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
     userInvites: { // args
       cursor?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput
       skip?: number | null; // Int
@@ -471,6 +525,13 @@ export interface NexusGenArgTypes {
     }
     getUserInvites: { // args
       projectId: string; // String!
+    }
+  }
+  StripeProduct: {
+    stripePrices: { // args
+      cursor?: NexusGenInputs['StripePriceWhereUniqueInput'] | null; // StripePriceWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
     }
   }
   User: {

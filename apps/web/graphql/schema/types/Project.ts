@@ -10,23 +10,18 @@ export const Project = objectType({
     t.model.id();
     t.model.name();
     t.model.users();
-    t.model.subscriptionPlan();
+    t.model.stripeSubscriptions();
     t.model.stripePaymentMethods();
     t.model.stripeInvoices();
     t.model.userInvites();
   },
 });
 
-export const SubscriptionPlan = enumType({
-  name: 'SubscriptionPlan',
-  members: ['FREE', 'BASIC', 'PREMIUM'],
-})
-
 export const CurrentProject = queryField('currentProject', {
   type: 'Project',
   authorize: requireProjectAccess({
     nullable: true,
-    projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY],
+    projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY],
   }),
   args: {
     projectId: stringArg({ nullable: true }),

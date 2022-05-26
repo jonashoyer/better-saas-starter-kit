@@ -1,6 +1,5 @@
 query CurrentProject($projectId: String) {
   currentProject(projectId: $projectId) {
     ...BaseProjcet
-    subscriptionPlan
   }
 }

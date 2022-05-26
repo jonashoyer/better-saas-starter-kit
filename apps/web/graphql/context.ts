@@ -6,6 +6,7 @@ import { getSession } from 'next-auth/react';
 import Stripe from 'stripe';
 import { IncomingMessage, OutgoingMessage } from 'http';
 import { Session } from '../pages/api/auth/[...nextauth]';
+import { prisma } from '../utils/prisma';
 
 export const stripe = createStripe();
 export const redis = createRedisClient('client');

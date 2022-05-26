@@ -17,13 +17,14 @@ import ProjectPaymentMethodPaper from 'components/layouts/ProjectPaymentMethodPa
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import ProjectInvoicePaper from 'components/layouts/ProjectInvoicePaper';
-import { AppNextPage } from '../types/types';
+import { AppNextPage, StripeProductWithPricing } from '../types/types';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-const Settings: AppNextPage = (props) => {
+const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) => {
 
   const [projectId] = useProject();
+
 
   const { data: selfData } = useSelfQuery();
 
@@ -32,6 +33,8 @@ const Settings: AppNextPage = (props) => {
       projectId,
     },
   });
+
+  console.log({ products: props.products });
 
   return (
     <Elements stripe={stripePromise}>

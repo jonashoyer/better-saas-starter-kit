@@ -59,14 +59,10 @@ export class StripeHandler {
   }
 
   upsertProductRecord(product: Stripe.Product) {
-    if (!product.metadata?.type) {
-      console.error(`Stripe product is missing field 'type' in metadata!`);
-      return;
-    }
+
     const productData = {
       id: product.id,
       active: product.active,
-      type: product.metadata?.type,
       name: product.name,
       image: product.images?.[0] ?? null,
       metadata: product.metadata,
@@ -92,7 +88,7 @@ export class StripeHandler {
       interval: price.recurring?.interval ?? null,
       intervalCount: price.recurring?.interval_count ?? null,
       trialPeriodDays: price.recurring?.trial_period_days ?? null,
-      metadata: price.metadata
+      metadata: price.metadata,
     };
 
     return this.prisma.stripePrice.upsert({
@@ -134,10 +130,6 @@ export class StripeHandler {
   static formatStripeSubscription(s: Stripe.Subscription): StripeSubscription {
     return {
       id: s.id,
-      
-      
-      // planType: s.items.data[0].plan.metadata?.planType,
-      // productType: s.items.data[0].plan.metadata?.productType,
       metadata: s.metadata,
       status: s.status.toUpperCase(),
       stripePriceId: s.items.data[0].price.id,

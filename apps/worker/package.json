@@ -23,5 +23,8 @@
     "tsconfig": "*"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "prisma": "^3.14.0"
+  }
 }

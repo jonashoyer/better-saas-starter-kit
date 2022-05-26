@@ -1,7 +1,6 @@
 query CurrentProjectSettings($projectId: String) {
   currentProject(projectId: $projectId) {
     ...BaseProjcet
-    subscriptionPlan
     users {
       id
       createdAt
@@ -20,8 +19,11 @@ query CurrentProjectSettings($projectId: String) {
       role
       email
     }
+    stripeSubscriptions {
+      ...BaseStripeSubscription
+    }
     stripePaymentMethods {
-      ...BasePaymenthMethod
+      ...BaseStripePaymenthMethod
     }
     stripeInvoices {
       ...BaseStripeInvoice

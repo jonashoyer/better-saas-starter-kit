@@ -1,5 +1,4 @@
 import React from "react";
-import { SubscriptionPlan } from "@prisma/client";
 import { Box,  Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import CheckIcon from '@mui/icons-material/Check';
@@ -29,7 +28,7 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
     return products.sort((a, b) => (productPricingFn(a).unitAmount ?? Infinity) - (productPricingFn(b).unitAmount ?? Infinity) );
   }, [productPricingFn, products]);
 
-  const currentProductIndex = sortedProducts.findIndex(e => e.type == currentProduct?.type);
+  const currentProductIndex = sortedProducts.findIndex(e => e.id == currentProduct?.id);
 
   return (
     <Box sx={{ minWidth: 650, maxWidth: 900 }}>
@@ -42,7 +41,7 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant='h6'>{e.name}</Typography>
-                      <Typography variant='body2'>{t(`pricing:${e.type.toLowerCase()}Description`)}</Typography>
+                      <Typography variant='body2'>{t(`pricing:${e.metadata.key?.toLowerCase()}Description`, { default: '' })}</Typography>
                     </Box>
                   </TableCell>
                 ))}
@@ -95,7 +94,7 @@ const formatPlanFeatureValue = (e: React.ReactNode) => {
 
 export default ProductPricingsTable;
 
-const planFeatures: (Record<SubscriptionPlan, React.ReactNode> & { label: string, description?: string })[] =  [{
+const planFeatures: (Record<string, React.ReactNode> & { label: string, description?: string })[] =  [{
   label: 'Feature#1',
   description: 'A awesome feature',
   FREE: true,

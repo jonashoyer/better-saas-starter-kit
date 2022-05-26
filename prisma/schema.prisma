@@ -1,6 +1,7 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+
 }
 
 generator prisma_client {
@@ -171,28 +172,26 @@ model StripeSubscription {
 
 model StripeProduct {
   id       String  @id
-  type     String  @unique
   active   Boolean
   name     String
   image    String?
   metadata Json
 
-  prices StripePrice[]
+  stripePrices StripePrice[]
 }
 
 model StripePrice {
   id              String  @id
-  productId       String?
+  stripeProductId       String?
   active          Boolean
   currency        String
-  type            String
   unitAmount      Int?
   interval        String?
   intervalCount   Int?
   trialPeriodDays Int?
   metadata        Json
 
-  product             StripeProduct?       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  stripeProduct       StripeProduct?       @relation(fields: [stripeProductId], references: [id], onDelete: Cascade)
   stripeSubscriptions StripeSubscription[]
 }
 

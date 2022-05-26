@@ -1,0 +1,17 @@
+fragment BaseStripeSubscription on StripeSubscription {
+  id
+  created
+  metadata
+  status
+  quantity
+  metadata
+  cancelAt
+  cancelAtPeriodEnd
+  canceledAt
+  currentPeriodEnd
+  currentPeriodStart
+  endedAt
+  stripePrice {
+    ...BaseStripePrice
+  }
+}

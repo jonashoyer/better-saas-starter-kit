@@ -1,0 +1,6 @@
+fragment BaseStripeProduct on StripeProduct {
+  id
+  name
+  image
+  metadata
+}
