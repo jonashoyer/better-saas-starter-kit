@@ -1,13 +1,13 @@
 import React from "react";
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Chip, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
-import { CurrentProjectSettingsQuery, InvoiceStatus } from "types/gql";
+import { ProjectSettingsQuery, InvoiceStatus } from "types/gql";
 import DownloadIcon from '@mui/icons-material/Download';
 import dayjs from 'dayjs';
 import { snakeToReadable } from "../../utils";
 
 interface ProjectInvoicePaperProps {
-  project?: CurrentProjectSettingsQuery['currentProject'];
+  project?: ProjectSettingsQuery['project'];
 }
 
 const ProjectInvoicePaper = ({ project }: ProjectInvoicePaperProps) => {

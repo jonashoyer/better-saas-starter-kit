@@ -2,13 +2,13 @@ import { Session } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import useProject from '../hooks/useProject';
-import { CurrentProjectQuery, SelfProjectsQuery, useCurrentProjectQuery, useSelfProjectsQuery } from '../types/gql';
+import { ProjectQuery, SelfProjectsQuery, useProjectQuery, useSelfProjectsQuery } from '../types/gql';
 
 export type UserContextValue = {
   session: Session | null;
   loading: boolean;
   status: "authenticated" | "loading" | "unauthenticated";
-  project: CurrentProjectQuery['currentProject'] | null;
+  project: ProjectQuery['project'] | null;
   projects: SelfProjectsQuery['selfProjects'] | null;
 }
 
@@ -25,7 +25,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
   const { data: session, status } = useSession();
 
   
-  const { data: currentProjectData, loading: currentProjectLoading } = useCurrentProjectQuery({
+  const { data: projectData, loading: projectLoading } = useProjectQuery({
     variables: {
       projectId,
     },
@@ -33,7 +33,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
   });
   const { data: selfProjectsData } = useSelfProjectsQuery({ context: { serverless: true }, skip: !session });
   
-  const loading = status === 'loading' || currentProjectLoading;
+  const loading = status === 'loading' || projectLoading;
 
   return (
     <UserContext.Provider
@@ -41,7 +41,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
         session,
         loading,
         status,
-        project: currentProjectData?.currentProject ?? null,
+        project: projectData?.project ?? null,
         projects: selfProjectsData?.selfProjects ?? null
       }}
     >

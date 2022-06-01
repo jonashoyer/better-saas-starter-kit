@@ -29,7 +29,7 @@ const ProjectSelector = ({ projects, variant, size }: ProjectSelectorProps) => {
     setOpen(false);
   }
 
-  const currentProject = React.useMemo(() => {
+  const project = React.useMemo(() => {
     if (!projects) return null;
     return projects.find(e => e.id == projectId) ?? projects[0] ?? { id: 'unknown', name: 'Unknown' };
   }, [projects, projectId]);
@@ -75,7 +75,7 @@ const ProjectSelector = ({ projects, variant, size }: ProjectSelectorProps) => {
         <ProjectButton
           dense
           onClick={() => setOpen(true)}
-          project={currentProject}
+          project={project}
           endAdornment={
             <KeyboardArrowDownIcon />
           }

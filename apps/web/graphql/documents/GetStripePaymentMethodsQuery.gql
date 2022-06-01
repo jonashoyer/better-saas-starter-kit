@@ -1,5 +1,5 @@
 query GetPaymentMethods($projectId: String) {
-  currentProject(projectId: $projectId) {
+  project(projectId: $projectId) {
     id
     stripePaymentMethods {
       ...BaseStripePaymenthMethod

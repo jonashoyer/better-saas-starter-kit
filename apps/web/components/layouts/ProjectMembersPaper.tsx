@@ -1,7 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography, IconButton, Menu, MenuItem, ListItemIcon } from '@mui/material';
-import { CurrentProjectSettingsQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation, User, SelfQuery } from 'types/gql';
+import { ProjectSettingsQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation, User, SelfQuery } from 'types/gql';
 import useTranslation from 'next-translate/useTranslation';
 import EmailIcon from '@mui/icons-material/Email';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -10,7 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Lazy from '../elements/Lazy';
 
 export interface ProjectMembersPaperProps {
-  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
+  project?: ProjectSettingsQuery['project'] | Project;
   self?: SelfQuery['self'] | User;
 }
 

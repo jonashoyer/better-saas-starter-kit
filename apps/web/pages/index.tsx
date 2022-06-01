@@ -105,7 +105,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const products = await prisma.stripeProduct.findMany({
     where: { active: true },
     include: {
-      prices: {
+      stripePrices: {
         where: { active: true },
       }
     },

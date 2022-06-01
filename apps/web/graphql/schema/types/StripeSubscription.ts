@@ -49,18 +49,6 @@ export const StripePrice = objectType({
   }
 })
 
-export const StripeProduct = objectType({
-  name: 'StripeProduct',
-  definition(t) {
-    t.model.id();
-    t.model.name();
-    t.model.image();
-    t.model.active();
-    t.model.stripePrices();
-    t.model.metadata();
-  }
-})
-
 export const UpsertSubscriptionInput = inputObjectType({
   name: 'UpsertStripeSubscriptionInput',
   definition(t) {
@@ -86,6 +74,13 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
 
     const subscriptions = await ctx.prisma.stripeSubscription.findMany({
       where: { projectId },
+      include: {
+        stripePrice: {
+          include: {
+            stripeProduct: true,
+          }
+        }
+      }
     });
 
     const quantity = await ctx.prisma.userProject.count({
@@ -93,20 +88,19 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
     });
     
     
-    if (subscriptions.length != 0) {
-      const currentPrice = subscriptions.find(e => (e.metadata as any).type == 'primary');
+    const currentPrimarySubscription = subscriptions.find(e => (e.stripePrice.stripeProduct.metadata as any).type == 'primary');
+    if (currentPrimarySubscription) {
       const price = await ctx.prisma.stripePrice.findUnique({ where: { id: priceId } });
       if (!price) {
         throw new Error('Price do not exists!');
       }
 
-      const currentPlanIndex = isJSONValueObject(currentPrice.metadata) ? Number(currentPrice.metadata.order) || 0 : 0;
-      const planIndex = isJSONValueObject(price.metadata) ? Number(price.metadata.order) || 0 : 0;
-      const beginAtNextPeriod = planIndex <= currentPlanIndex;
-
-      return ctx.getStripeHandler().updateSubscription(currentPrice.id, priceId, quantity, beginAtNextPeriod);
+      const isDowngrade = currentPrimarySubscription.stripePrice.unitAmount < price.unitAmount;
+      const sub = await ctx.getStripeHandler().updateSubscription(currentPrimarySubscription.id, priceId, quantity, isDowngrade);
+      return { ...sub, projectId: input.projectId };
     }
 
-    return ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
+    const sub = await ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
+    return { ...sub, projectId: input.projectId };
   }
 })

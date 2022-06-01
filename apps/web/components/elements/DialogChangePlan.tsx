@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { CurrentProjectSettingsQuery, PaymentMethodImportance, SubscriptionPlan, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
+import { ProjectSettingsQuery, PaymentMethodImportance, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, capitalize, Divider, FormControlLabel, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
 import PaymentMethodForm from './PaymentMethodForm';
@@ -13,13 +13,13 @@ import PaymentIcon from '@mui/icons-material/Payment';
 import { LoadingButton } from '@mui/lab';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
-import usePollPlan from 'hooks/usePollPlan';
+import usePollSubscriptions from 'hooks/usePollSubscriptions';
 import { StripeProductWithPricing } from '../../types/types';
 
 export type DialogChangePlanProps = {
   open: boolean;
   handleClose: () => any;
-  project?: CurrentProjectSettingsQuery['currentProject'];
+  project?: ProjectSettingsQuery['project'];
   products: StripeProductWithPricing[];
   targetProduct?: StripeProductWithPricing;
 }
@@ -58,7 +58,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     },
   })
 
-  const [pollPlan, loadingPlan] = usePollPlan({
+  const [pollPlan, loadingPlan] = usePollSubscriptions({
     projectId: project.id,
     initialDelay: 800,
     delay: 1000,
@@ -78,11 +78,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     }
   })
 
-  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertStripeSubscriptionMutation({
-    onCompleted() {
-      pollPlan();
-    }
-  });
+  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertStripeSubscriptionMutation();
 
   React.useEffect(() => {
     if (!open) return;
@@ -92,7 +88,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   React.useEffect(() => {
     if (!targetProduct) return;
     latestProductRef.current = targetProduct;
-    setPrice(targetProduct.prices.find(e => e.interval == 'year') || targetProduct.prices[0]);
+    setPrice(targetProduct.stripePrices.find(e => e.interval == 'year') || targetProduct.stripePrices[0]);
   }, [targetProduct]);
 
 
@@ -100,9 +96,9 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const isMonthOrYearlyBilling = React.useMemo(() => {
     if (!product) return true;
-    return product.prices.length == 2
-      && product.prices.some(e => e.intervalCount == 1 && e.interval == 'month')
-      && product.prices.some(e => e.intervalCount == 1 && e.interval == 'year');
+    return product.stripePrices.length == 2
+      && product.stripePrices.some(e => e.intervalCount == 1 && e.interval == 'month')
+      && product.stripePrices.some(e => e.intervalCount == 1 && e.interval == 'year');
   }, [product]);
 
 
@@ -110,8 +106,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     if (!product) return;
     if (!isMonthOrYearlyBilling) return null;
     
-    const pm = product.prices.find(e => e.interval == 'month')
-    const py = product.prices.find(e => e.interval == 'year');
+    const pm = product.stripePrices.find(e => e.interval == 'month')
+    const py = product.stripePrices.find(e => e.interval == 'year');
     return ((1 - ((py.unitAmount / 12) / pm.unitAmount)) * 100).toFixed(1);
   }, [isMonthOrYearlyBilling, product])
 
@@ -144,6 +140,10 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     })();
 
   }, [createSetupIntent, currentPaymentMethod, project, stripeClientSecret]);
+
+  const primarySubscription = React.useMemo(() => {
+    return project.stripeSubscriptions.find(e => e.metadata.type == 'primary');
+  }, [project.stripeSubscriptions]);
 
 
   const handleChangePlan = async (data: any) => {
@@ -194,6 +194,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       return createPaymentMethod();
     }
 
+    await pollPlan();
+
     upsertSubscription({
       variables: {
         input: {
@@ -219,8 +221,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: '1' }}>
             <Box sx={{ mb: 2 }}>
-              <Typography variant='h6'>{project.subscriptionPlan == SubscriptionPlan.Free ? t('pricing:upgradeToPlan', { planName: product.type.toLowerCase() }) : t('pricing:changePlanTitle')}</Typography>
-              <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.type?.toLowerCase()}Description`)}</Typography>
+              <Typography variant='h6'>{primarySubscription?.stripePrice.unitAmount == 0 ? t('pricing:upgradeToPlan', { planName: product.metadata.key.toLowerCase() }) : t('pricing:changePlanTitle')}</Typography>
+              <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.metadata.key?.toLowerCase()}Description`)}</Typography>
             </Box>
 
             {isMonthOrYearlyBilling &&
@@ -228,7 +230,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
                 disabled={loading}
                 sx={{ mb: 2 }}
                 control={
-                  <Switch checked={price && price.interval == 'year'} onChange={(_, c) => setPrice(product.prices.find(e => e.interval == (c ? 'year' : 'month')))} />
+                  <Switch checked={price && price.interval == 'year'} onChange={(_, c) => setPrice(product.stripePrices.find(e => e.interval == (c ? 'year' : 'month')))} />
                 }
                 label={<Typography variant='subtitle2'>{`${t('pricing:payAnnually')} (-${yearlyDiscount}%)`}</Typography>}
               />

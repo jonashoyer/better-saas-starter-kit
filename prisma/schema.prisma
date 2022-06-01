@@ -184,6 +184,7 @@ model StripePrice {
   id              String  @id
   stripeProductId       String?
   active          Boolean
+  type            StripePriceType
   currency        String
   unitAmount      Int?
   interval        String?
@@ -193,6 +194,11 @@ model StripePrice {
 
   stripeProduct       StripeProduct?       @relation(fields: [stripeProductId], references: [id], onDelete: Cascade)
   stripeSubscriptions StripeSubscription[]
+}
+
+enum StripePriceType {
+  RECURRING
+  ONE_TIME
 }
 
 enum InvoiceStatus {

@@ -17,7 +17,7 @@ export const Project = objectType({
   },
 });
 
-export const CurrentProject = queryField('currentProject', {
+export const GetProject = queryField('project', {
   type: 'Project',
   authorize: requireProjectAccess({
     nullable: true,

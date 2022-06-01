@@ -25,3 +25,4 @@ export * as UserInvite from './UserInvite';
 export * as StripePaymentMethod from './StripePaymentMethod';
 export * as StripeSubscription from './StripeSubscription';
 export * as StripeInvoice from './StripeInvoice';
+export * as StripeProduct from './StripeProduct';

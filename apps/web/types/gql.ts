@@ -234,21 +234,22 @@ export enum ProjectRole {
 
 export type Query = {
   __typename?: 'Query';
-  currentProject?: Maybe<Project>;
   getUserInvites?: Maybe<Array<Maybe<UserInvite>>>;
   ping: Scalars['String'];
+  project?: Maybe<Project>;
   self?: Maybe<User>;
   selfProjects?: Maybe<Array<Maybe<Project>>>;
-};
-
-
-export type QueryCurrentProjectArgs = {
-  projectId?: Maybe<Scalars['String']>;
+  stripeProducts?: Maybe<Array<Maybe<StripeProduct>>>;
 };
 
 
 export type QueryGetUserInvitesArgs = {
   projectId: Scalars['String'];
+};
+
+
+export type QueryProjectArgs = {
+  projectId?: Maybe<Scalars['String']>;
 };
 
 export type StatusResponse = {
@@ -687,106 +688,6 @@ export function useCreateStripeSetupIntentMutation(baseOptions?: Apollo.Mutation
 export type CreateStripeSetupIntentMutationHookResult = ReturnType<typeof useCreateStripeSetupIntentMutation>;
 export type CreateStripeSetupIntentMutationResult = Apollo.MutationResult<CreateStripeSetupIntentMutation>;
 export type CreateStripeSetupIntentMutationOptions = Apollo.BaseMutationOptions<CreateStripeSetupIntentMutation, CreateStripeSetupIntentMutationVariables>;
-export const CurrentProjectDocument = gql`
-    query CurrentProject($projectId: String) {
-  currentProject(projectId: $projectId) {
-    ...BaseProjcet
-  }
-}
-    ${BaseProjcetFragmentDoc}`;
-
-/**
- * __useCurrentProjectQuery__
- *
- * To run a query within a React component, call `useCurrentProjectQuery` and pass it any options that fit your needs.
- * When your component renders, `useCurrentProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCurrentProjectQuery({
- *   variables: {
- *      projectId: // value for 'projectId'
- *   },
- * });
- */
-export function useCurrentProjectQuery(baseOptions?: Apollo.QueryHookOptions<CurrentProjectQuery, CurrentProjectQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CurrentProjectQuery, CurrentProjectQueryVariables>(CurrentProjectDocument, options);
-      }
-export function useCurrentProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentProjectQuery, CurrentProjectQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CurrentProjectQuery, CurrentProjectQueryVariables>(CurrentProjectDocument, options);
-        }
-export type CurrentProjectQueryHookResult = ReturnType<typeof useCurrentProjectQuery>;
-export type CurrentProjectLazyQueryHookResult = ReturnType<typeof useCurrentProjectLazyQuery>;
-export type CurrentProjectQueryResult = Apollo.QueryResult<CurrentProjectQuery, CurrentProjectQueryVariables>;
-export const CurrentProjectSettingsDocument = gql`
-    query CurrentProjectSettings($projectId: String) {
-  currentProject(projectId: $projectId) {
-    ...BaseProjcet
-    users {
-      id
-      createdAt
-      role
-      user {
-        id
-        createdAt
-        name
-        image
-        email
-      }
-    }
-    userInvites {
-      id
-      createdAt
-      role
-      email
-    }
-    stripeSubscriptions {
-      ...BaseStripeSubscription
-    }
-    stripePaymentMethods {
-      ...BaseStripePaymenthMethod
-    }
-    stripeInvoices {
-      ...BaseStripeInvoice
-    }
-  }
-}
-    ${BaseProjcetFragmentDoc}
-${BaseStripeSubscriptionFragmentDoc}
-${BaseStripePaymenthMethodFragmentDoc}
-${BaseStripeInvoiceFragmentDoc}`;
-
-/**
- * __useCurrentProjectSettingsQuery__
- *
- * To run a query within a React component, call `useCurrentProjectSettingsQuery` and pass it any options that fit your needs.
- * When your component renders, `useCurrentProjectSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCurrentProjectSettingsQuery({
- *   variables: {
- *      projectId: // value for 'projectId'
- *   },
- * });
- */
-export function useCurrentProjectSettingsQuery(baseOptions?: Apollo.QueryHookOptions<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>(CurrentProjectSettingsDocument, options);
-      }
-export function useCurrentProjectSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>(CurrentProjectSettingsDocument, options);
-        }
-export type CurrentProjectSettingsQueryHookResult = ReturnType<typeof useCurrentProjectSettingsQuery>;
-export type CurrentProjectSettingsLazyQueryHookResult = ReturnType<typeof useCurrentProjectSettingsLazyQuery>;
-export type CurrentProjectSettingsQueryResult = Apollo.QueryResult<CurrentProjectSettingsQuery, CurrentProjectSettingsQueryVariables>;
 export const DeleteProjectDocument = gql`
     mutation DeleteProject($id: String!) {
   deleteProject(id: $id) {
@@ -921,7 +822,7 @@ export type DeleteUserProjectMutationResult = Apollo.MutationResult<DeleteUserPr
 export type DeleteUserProjectMutationOptions = Apollo.BaseMutationOptions<DeleteUserProjectMutation, DeleteUserProjectMutationVariables>;
 export const GetPaymentMethodsDocument = gql`
     query GetPaymentMethods($projectId: String) {
-  currentProject(projectId: $projectId) {
+  project(projectId: $projectId) {
     id
     stripePaymentMethods {
       ...BaseStripePaymenthMethod
@@ -989,6 +890,144 @@ export function usePingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PingQ
 export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
 export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
 export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
+export const ProjectDocument = gql`
+    query Project($projectId: String) {
+  project(projectId: $projectId) {
+    ...BaseProjcet
+  }
+}
+    ${BaseProjcetFragmentDoc}`;
+
+/**
+ * __useProjectQuery__
+ *
+ * To run a query within a React component, call `useProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useProjectQuery(baseOptions?: Apollo.QueryHookOptions<ProjectQuery, ProjectQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectQuery, ProjectQueryVariables>(ProjectDocument, options);
+      }
+export function useProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectQuery, ProjectQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectQuery, ProjectQueryVariables>(ProjectDocument, options);
+        }
+export type ProjectQueryHookResult = ReturnType<typeof useProjectQuery>;
+export type ProjectLazyQueryHookResult = ReturnType<typeof useProjectLazyQuery>;
+export type ProjectQueryResult = Apollo.QueryResult<ProjectQuery, ProjectQueryVariables>;
+export const ProjectSettingsDocument = gql`
+    query ProjectSettings($projectId: String) {
+  project(projectId: $projectId) {
+    ...BaseProjcet
+    users {
+      id
+      createdAt
+      role
+      user {
+        id
+        createdAt
+        name
+        image
+        email
+      }
+    }
+    userInvites {
+      id
+      createdAt
+      role
+      email
+    }
+    stripeSubscriptions {
+      ...BaseStripeSubscription
+    }
+    stripePaymentMethods {
+      ...BaseStripePaymenthMethod
+    }
+    stripeInvoices {
+      ...BaseStripeInvoice
+    }
+  }
+}
+    ${BaseProjcetFragmentDoc}
+${BaseStripeSubscriptionFragmentDoc}
+${BaseStripePaymenthMethodFragmentDoc}
+${BaseStripeInvoiceFragmentDoc}`;
+
+/**
+ * __useProjectSettingsQuery__
+ *
+ * To run a query within a React component, call `useProjectSettingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectSettingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectSettingsQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useProjectSettingsQuery(baseOptions?: Apollo.QueryHookOptions<ProjectSettingsQuery, ProjectSettingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectSettingsQuery, ProjectSettingsQueryVariables>(ProjectSettingsDocument, options);
+      }
+export function useProjectSettingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectSettingsQuery, ProjectSettingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectSettingsQuery, ProjectSettingsQueryVariables>(ProjectSettingsDocument, options);
+        }
+export type ProjectSettingsQueryHookResult = ReturnType<typeof useProjectSettingsQuery>;
+export type ProjectSettingsLazyQueryHookResult = ReturnType<typeof useProjectSettingsLazyQuery>;
+export type ProjectSettingsQueryResult = Apollo.QueryResult<ProjectSettingsQuery, ProjectSettingsQueryVariables>;
+export const ProjectSubscriptionsDocument = gql`
+    query ProjectSubscriptions($projectId: String) {
+  project(projectId: $projectId) {
+    id
+    stripeSubscriptions {
+      ...BaseStripeSubscription
+    }
+  }
+}
+    ${BaseStripeSubscriptionFragmentDoc}`;
+
+/**
+ * __useProjectSubscriptionsQuery__
+ *
+ * To run a query within a React component, call `useProjectSubscriptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectSubscriptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectSubscriptionsQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useProjectSubscriptionsQuery(baseOptions?: Apollo.QueryHookOptions<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>(ProjectSubscriptionsDocument, options);
+      }
+export function useProjectSubscriptionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>(ProjectSubscriptionsDocument, options);
+        }
+export type ProjectSubscriptionsQueryHookResult = ReturnType<typeof useProjectSubscriptionsQuery>;
+export type ProjectSubscriptionsLazyQueryHookResult = ReturnType<typeof useProjectSubscriptionsLazyQuery>;
+export type ProjectSubscriptionsQueryResult = Apollo.QueryResult<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>;
 export const SelfProjectsDocument = gql`
     query SelfProjects {
   selfProjects {
@@ -1319,52 +1358,6 @@ export type CreateStripeSetupIntentMutation = (
   )> }
 );
 
-export type CurrentProjectQueryVariables = Exact<{
-  projectId?: Maybe<Scalars['String']>;
-}>;
-
-
-export type CurrentProjectQuery = (
-  { __typename?: 'Query' }
-  & { currentProject?: Maybe<(
-    { __typename?: 'Project' }
-    & BaseProjcetFragment
-  )> }
-);
-
-export type CurrentProjectSettingsQueryVariables = Exact<{
-  projectId?: Maybe<Scalars['String']>;
-}>;
-
-
-export type CurrentProjectSettingsQuery = (
-  { __typename?: 'Query' }
-  & { currentProject?: Maybe<(
-    { __typename?: 'Project' }
-    & { users: Array<(
-      { __typename?: 'UserProject' }
-      & Pick<UserProject, 'id' | 'createdAt' | 'role'>
-      & { user: (
-        { __typename?: 'User' }
-        & Pick<User, 'id' | 'createdAt' | 'name' | 'image' | 'email'>
-      ) }
-    )>, userInvites: Array<(
-      { __typename?: 'UserInvite' }
-      & Pick<UserInvite, 'id' | 'createdAt' | 'role' | 'email'>
-    )>, stripeSubscriptions: Array<(
-      { __typename?: 'StripeSubscription' }
-      & BaseStripeSubscriptionFragment
-    )>, stripePaymentMethods: Array<(
-      { __typename?: 'StripePaymentMethod' }
-      & BaseStripePaymenthMethodFragment
-    )>, stripeInvoices: Array<(
-      { __typename?: 'StripeInvoice' }
-      & BaseStripeInvoiceFragment
-    )> }
-    & BaseProjcetFragment
-  )> }
-);
-
 export type DeleteProjectMutationVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -1424,7 +1417,7 @@ export type GetPaymentMethodsQueryVariables = Exact<{
 
 export type GetPaymentMethodsQuery = (
   { __typename?: 'Query' }
-  & { currentProject?: Maybe<(
+  & { project?: Maybe<(
     { __typename?: 'Project' }
     & Pick<Project, 'id'>
     & { stripePaymentMethods: Array<(
@@ -1440,6 +1433,69 @@ export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 export type PingQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'ping'>
+);
+
+export type ProjectQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type ProjectQuery = (
+  { __typename?: 'Query' }
+  & { project?: Maybe<(
+    { __typename?: 'Project' }
+    & BaseProjcetFragment
+  )> }
+);
+
+export type ProjectSettingsQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type ProjectSettingsQuery = (
+  { __typename?: 'Query' }
+  & { project?: Maybe<(
+    { __typename?: 'Project' }
+    & { users: Array<(
+      { __typename?: 'UserProject' }
+      & Pick<UserProject, 'id' | 'createdAt' | 'role'>
+      & { user: (
+        { __typename?: 'User' }
+        & Pick<User, 'id' | 'createdAt' | 'name' | 'image' | 'email'>
+      ) }
+    )>, userInvites: Array<(
+      { __typename?: 'UserInvite' }
+      & Pick<UserInvite, 'id' | 'createdAt' | 'role' | 'email'>
+    )>, stripeSubscriptions: Array<(
+      { __typename?: 'StripeSubscription' }
+      & BaseStripeSubscriptionFragment
+    )>, stripePaymentMethods: Array<(
+      { __typename?: 'StripePaymentMethod' }
+      & BaseStripePaymenthMethodFragment
+    )>, stripeInvoices: Array<(
+      { __typename?: 'StripeInvoice' }
+      & BaseStripeInvoiceFragment
+    )> }
+    & BaseProjcetFragment
+  )> }
+);
+
+export type ProjectSubscriptionsQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type ProjectSubscriptionsQuery = (
+  { __typename?: 'Query' }
+  & { project?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id'>
+    & { stripeSubscriptions: Array<(
+      { __typename?: 'StripeSubscription' }
+      & BaseStripeSubscriptionFragment
+    )> }
+  )> }
 );
 
 export type SelfProjectsQueryVariables = Exact<{ [key: string]: never; }>;

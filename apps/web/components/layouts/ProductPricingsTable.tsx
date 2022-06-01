@@ -21,14 +21,18 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
   const { t, lang } = useTranslation();
   
   const productPricingFn = React.useMemo(() => {
-    return (product: StripeProductWithPricing) => (product.prices.find(yearlyPriceFindFn) || product.prices.find(monthlyPriceFindFn));  return (product: StripeProductWithPricing) => (product.prices.find(monthlyPriceFindFn) || product.prices.find(yearlyPriceFindFn));
+    return (product: StripeProductWithPricing) => (product.stripePrices.find(yearlyPriceFindFn) || product.stripePrices.find(monthlyPriceFindFn));
   }, []);
   
-  const sortedProducts = React.useMemo(() => {
-    return products.sort((a, b) => (productPricingFn(a).unitAmount ?? Infinity) - (productPricingFn(b).unitAmount ?? Infinity) );
+  const sortedPrimaryProducts = React.useMemo(() => {
+    return products.filter(e => e.metadata.type === 'primary').sort((a, b) => (productPricingFn(a)?.unitAmount ?? Infinity) - (productPricingFn(b)?.unitAmount ?? Infinity) );
   }, [productPricingFn, products]);
 
-  const currentProductIndex = sortedProducts.findIndex(e => e.id == currentProduct?.id);
+  const currentProductIndex = sortedPrimaryProducts.findIndex(e => e.id == currentProduct?.id);
+
+  console.log({
+    currentProduct,
+  })
 
   return (
     <Box sx={{ minWidth: 650, maxWidth: 900 }}>
@@ -37,7 +41,7 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
           <TableHead>
             <TableRow>
               <TableCell colSpan={2} />
-                {sortedProducts.map(e => (
+                {sortedPrimaryProducts.map(e => (
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ textAlign: 'center' }}>
                       <Typography variant='h6'>{e.name}</Typography>
@@ -50,13 +54,13 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
           <TableBody>
             <TableRow>
               <TableCell colSpan={2} component="th" scope="row" />
-              {sortedProducts.map((e, i) => {
+              {sortedPrimaryProducts.map((e, i) => {
                 const price = productPricingFn(e);
                 const isCurrentProduct = i == currentProductIndex;
                 return (
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'column' }}>
-                      <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} />
+                      {price && <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} />}
                       {onPlanSwitch && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>}
                       {!onPlanSwitch && isCurrentProduct && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{t('pricing:currentPlan')}</Button>}
                     </Box>

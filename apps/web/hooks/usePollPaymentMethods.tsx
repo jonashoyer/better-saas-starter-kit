@@ -30,9 +30,9 @@ const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => void
     delay, initialDelay, maxTries, onCompleted, onFailed,
     async onPoll() {
       const { data } = await apolloClient.query({ query: GetPaymentMethodsDocument, variables: { projectId }, fetchPolicy: 'network-only' });
-      if (!data?.currentProject?.paymentMethods) return false;
+      if (!data?.project?.paymentMethods) return false;
 
-      const hash = paymentMethodListHash(data.currentProject.paymentMethods);
+      const hash = paymentMethodListHash(data.project.paymentMethods);
       return hash != currentHashRef.current;
     }
   });

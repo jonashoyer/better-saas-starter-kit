@@ -98,11 +98,12 @@ enum ProjectRole {
 }
 
 type Query {
-  currentProject(projectId: String): Project
   getUserInvites(projectId: String!): [UserInvite]
   ping: String!
+  project(projectId: String): Project
   self: User
   selfProjects: [Project]
+  stripeProducts: [StripeProduct]
 }
 
 type StatusResponse {

@@ -4,13 +4,13 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { CurrentProjectSettingsQuery, Project, useDeleteProjectMutation } from 'types/gql';
+import { ProjectSettingsQuery, Project, useDeleteProjectMutation } from 'types/gql';
 import Lazy from '../elements/Lazy';
 
 const LazyDialogTextfield = dynamic(() => import('../elements/DialogTextfield'));
 
 export interface ProjectDangerZonePaperProps {
-  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
+  project?: ProjectSettingsQuery['project'] | Project;
 }
 
 const ProjectDangerZonePaper = ({ project }: ProjectDangerZonePaperProps) => {

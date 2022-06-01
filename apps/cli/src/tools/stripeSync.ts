@@ -1,7 +1,7 @@
 import { createStripe, StripeHandler } from "shared-server";
 import { config } from 'dotenv';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, StripePriceType } from '@prisma/client';
 
 config({
   path: path.join(process.cwd(), '.env'),
@@ -25,7 +25,6 @@ const prisma = new PrismaClient();
       active: e.active,
       metadata: e.metadata,
       name: e.name,
-      type: e.metadata.type,
       image: e.images?.[0] ?? null,
 
     })),
@@ -35,10 +34,10 @@ const prisma = new PrismaClient();
   await prisma.stripePrice.createMany({
     data: filtedPrices.map(e => ({
       id: e.id,
-      productId: e.product as string,
+      stripeProductId: e.product as string,
       active: e.active,
       currency: e.currency,
-      type: e.type,
+      type: e.type.toUpperCase() as StripePriceType,
       unitAmount: e.unit_amount,
       interval: e.recurring?.interval,
       intervalCount: e.recurring?.interval_count,

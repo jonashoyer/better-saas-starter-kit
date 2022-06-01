@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { getSession } from "next-auth/react";
-import { CurrentProjectSettingsDocument, SelfDocument, useCurrentProjectSettingsQuery, useSelfQuery } from 'types/gql';
+import { ProjectSettingsDocument, SelfDocument, useProjectSettingsQuery, useSelfQuery } from 'types/gql';
 import { prisma } from 'utils/prisma';
 import { GetServerSideProps } from 'next';
 import { initializeApollo } from 'utils/GraphqlClient';
@@ -28,7 +28,7 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
 
   const { data: selfData } = useSelfQuery();
 
-  const { data: currentProjectData } = useCurrentProjectSettingsQuery({
+  const { data: projectData } = useProjectSettingsQuery({
     variables: {
       projectId,
     },
@@ -47,12 +47,12 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
 
       <StaticPageLayout padded pageTitle='Project Settings'>
 
-        <ProjectDetailsPaper project={currentProjectData.currentProject} />
-        <ProjectMembersPaper project={currentProjectData.currentProject} self={selfData?.self} />
-        <ProjectPlanPaper project={currentProjectData.currentProject} products={props.products} />
-        <ProjectPaymentMethodPaper project={currentProjectData.currentProject} />
-        <ProjectInvoicePaper project={currentProjectData.currentProject} />
-        <ProjectDangerZonePaper project={currentProjectData.currentProject} />
+        <ProjectDetailsPaper project={projectData.project} />
+        <ProjectMembersPaper project={projectData.project} self={selfData?.self} />
+        <ProjectPlanPaper project={projectData.project} products={props.products} />
+        <ProjectPaymentMethodPaper project={projectData.project} />
+        <ProjectInvoicePaper project={projectData.project} />
+        <ProjectDangerZonePaper project={projectData.project} />
 
       </StaticPageLayout>
     </Elements>
@@ -67,7 +67,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const products = await prisma.stripeProduct.findMany({
     where: { active: true },
     include: {
-      prices: {
+      stripePrices: {
         where: { active: true },
       }
     },
@@ -81,17 +81,17 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       query: SelfDocument,
     });
 
-    const { data: { currentProject } } = await client.query({
-      query: CurrentProjectSettingsDocument,
+    const { data: { project } } = await client.query({
+      query: ProjectSettingsDocument,
       variables: {
         projectId,
       },
     })
 
-    if (!projectId && currentProject?.id) setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, currentProject.id, { maxAge: 31540000000 });
+    if (!projectId && project?.id) setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, project.id, { maxAge: 31540000000 });
 
     return {
-      props: { products, projectId: currentProject?.id, initialApolloState: client.extract() },
+      props: { products, projectId: project?.id, initialApolloState: client.extract() },
     };
   }
 

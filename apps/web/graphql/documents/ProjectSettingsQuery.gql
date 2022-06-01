@@ -1,5 +1,5 @@
-query CurrentProjectSettings($projectId: String) {
-  currentProject(projectId: $projectId) {
+query ProjectSettings($projectId: String) {
+  project(projectId: $projectId) {
     ...BaseProjcet
     users {
       id

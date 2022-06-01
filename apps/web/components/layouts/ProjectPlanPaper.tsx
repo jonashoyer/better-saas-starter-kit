@@ -4,7 +4,7 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import { isJSONValueObject, formatCurrency } from 'shared';
 import Lazy from 'components/elements/Lazy';
-import { CurrentProjectSettingsQuery, Project, StripePrice, StripeProduct } from 'types/gql';
+import { ProjectSettingsQuery, Project, StripePrice, StripeProduct } from 'types/gql';
 import { Translate } from 'next-translate';
 import ComponentPreview from './ComponentPreview';
 import { StripeProductWithPricing } from '../../types/types';
@@ -13,7 +13,7 @@ const LazyDialogChangePlan = dynamic(() => import('../elements/DialogChangePlan'
 const LazyDialogPlanCompare = dynamic(() => import('../elements/DialogPlanCompare'));
 
 interface ProjectPlanPaperProps {
-  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
+  project?: ProjectSettingsQuery['project'] | Project;
   products: StripeProductWithPricing[];
 }
 
@@ -26,8 +26,14 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
   const [changePlan, setChangePlan] = React.useState(null);
   const [showDialogPlanCompare, setShowDialogPlanCompare] = React.useState(false);
 
-  const productPricingFn = (product: StripeProductWithPricing) => (product.prices.find(yearlyPriceFindFn) || product.prices.find(monthlyPriceFindFn));
-  const sortedProducts = products.sort((a, b) => (productPricingFn(a).unitAmount ?? Infinity) - (productPricingFn(b).unitAmount ?? Infinity) );
+  const productPricingFn = (product: StripeProductWithPricing) => (product.stripePrices.find(yearlyPriceFindFn) || product.stripePrices.find(monthlyPriceFindFn));
+  const sortedProducts = products.sort((a, b) => (productPricingFn(a)?.unitAmount ?? Infinity) - (productPricingFn(b)?.unitAmount ?? Infinity) );
+
+  const currentProduct = React.useMemo(() => {
+    const id = project?.stripeSubscriptions.find(e => e.stripePrice.stripeProduct.metadata.type == 'primary')?.stripePrice.stripeProduct.id ?? null;
+    if (!id) return null;
+    return products.find(e => e.id == id) ?? null;
+  }, [products, project?.stripeSubscriptions]);
 
   return (
     <React.Fragment>
@@ -45,7 +51,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
         handleClose={() => setShowDialogPlanCompare(null)}
         onPlanSwitch={(e: any) => setChangePlan(e)}
         products={products}
-        currentProduct={sortedProducts.find(e => e.metadata.type == 'primary')}
+        currentProduct={currentProduct}
       />
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -86,23 +92,23 @@ export default ProjectPlanPaper;
 
 
 interface ProjectPlanListProps {
-  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
-  sortedProducts: (StripeProduct & { prices: StripePrice[] })[];
+  project?: ProjectSettingsQuery['project'] | Project;
+  sortedProducts: StripeProductWithPricing[];
   productPricingFn: (product: StripeProductWithPricing) => StripePrice;
   t: Translate;
   lang: string;
-  setChangePlan: React.Dispatch<StripeProduct & { prices: StripePrice[] }>;
+  setChangePlan: React.Dispatch<StripeProductWithPricing>;
   setShowDialogPlanCompare: (show: boolean) => any;
 }
 
 const ProjectPlanList = ({ project, sortedProducts, productPricingFn, setChangePlan, setShowDialogPlanCompare, t, lang }: ProjectPlanListProps) => {
 
-  const currentProduct = project.stripeSubscriptions.find(e => e.metadata.type == 'primary');
+  const currentProduct = project.stripeSubscriptions.find(e => e.stripePrice.stripeProduct.metadata.type == 'primary')?.stripePrice.stripeProduct;
   const currentProductIndex = sortedProducts.findIndex(e => e.id == currentProduct?.id);
 
   return (
     <React.Fragment>
-      {sortedProducts.map((e, i) => {
+      {sortedProducts.filter(e => e.metadata.type == 'primary').map((e, i) => {
         const price = productPricingFn(e);
         const isCurrentProduct = i == currentProductIndex;
 
@@ -122,7 +128,7 @@ const ProjectPlanList = ({ project, sortedProducts, productPricingFn, setChangeP
             </Box>
             <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
               <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <PricingDisplay t={t} lang={lang} price={price} hideFree />
+                {price && <PricingDisplay t={t} lang={lang} price={price} hideFree />}
               </Box>
               <Box>
                 <Button sx={{ minWidth: 92 }} disabled={isCurrentProduct} variant='outlined' onClick={() => setChangePlan(e)}>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>
@@ -139,12 +145,12 @@ const ProjectPlanList = ({ project, sortedProducts, productPricingFn, setChangeP
 }
 
 interface ProjectPlanCurrentProps {
-  project?: CurrentProjectSettingsQuery['currentProject'] | Project;
-  sortedProducts: (StripeProduct & { prices: StripePrice[] })[];
+  project?: ProjectSettingsQuery['project'] | Project;
+  sortedProducts: StripeProductWithPricing[];
   productPricingFn: (product: StripeProductWithPricing) => StripePrice;
   t: Translate;
   lang: string;
-  setChangePlan: React.Dispatch<StripeProduct & { prices: StripePrice[] }>;
+  setChangePlan: React.Dispatch<StripeProductWithPricing>;
   setShowDialogPlanCompare: (show: boolean) => any;
 }
 
@@ -152,8 +158,10 @@ const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChan
 
   console.log({ project });
   
-  const price = project.stripeSubscriptions.find(e => e.stripePrice.product.metadata.type == 'primary')?.stripePrice;
-  const currentProduct = price?.product;
+  const price = project.stripeSubscriptions.find(e => e.stripePrice?.stripeProduct?.metadata.type == 'primary')?.stripePrice;
+  const currentProduct = price?.stripeProduct;
+
+  const extraSubscriptions = sortedProducts.filter(e => e.metadata.type == 'extra');
 
   if (!price) {
     return <Typography>Missing price data</Typography>
@@ -161,21 +169,36 @@ const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChan
 
   return (
     <Box>
-
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, mb: 2 }}>
-        <Box sx={{ pr: 1 }}>
-          <Typography variant='subtitle1'>{currentProduct.name}</Typography>
-          <Typography variant='body2' color='textSecondary'>{t(`pricing:${currentProduct?.metadata.key?.toLowerCase()}Description`, { default: '' })}</Typography>
-        </Box>
-        <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <PricingDisplay t={t} lang={lang} price={price} hideFree />
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', my: 1 }}>
+          <Box sx={{ pr: 1 }}>
+            <Typography variant='subtitle1'>{currentProduct.name}</Typography>
+            <Typography variant='body2' color='textSecondary'>{t(`pricing:${currentProduct?.metadata.key?.toLowerCase()}Description`, { default: '' })}</Typography>
+          </Box>
+          <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <PricingDisplay t={t} lang={lang} price={price} hideFree />
+            </Box>
           </Box>
         </Box>
+        <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setShowDialogPlanCompare(true)}>{price.unitAmount == 0 ? t('pricing:upgrade') : t('pricing:switch')}</Button>
       </Box>
-      <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setShowDialogPlanCompare(true)}>{price.unitAmount == 0 ? t('pricing:upgrade') : t('pricing:switch')}</Button>
       <Box>
-        <Typography variant='subtitle1'>{t('pricing:addOns')}</Typography>
+        <Box>
+          {extraSubscriptions.map(e => (
+            <Box key={e.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', my: 1 }}>
+              <Box sx={{ pr: 1 }}>
+                <Typography variant='subtitle1'>{e.name}</Typography>
+                <Typography variant='body2' color='textSecondary'>{t(`pricing:${e?.metadata.key?.toLowerCase()}Description`, {  })}</Typography>
+              </Box>
+              <Box sx={{ textAlign: 'right', display: 'flex', alignItems: 'center' }}>
+                <Box sx={{ px: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <PricingDisplay t={t} lang={lang} price={price} hideFree />
+                </Box>
+              </Box>
+            </Box>
+          ))}
+        </Box>
       </Box>
     </Box>
   )

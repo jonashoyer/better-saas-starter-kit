@@ -63,7 +63,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const products = await prisma.stripeProduct.findMany({
     where: { active: true },
     include: {
-      prices: {
+      stripePrices: {
         where: { active: true },
       }
     },

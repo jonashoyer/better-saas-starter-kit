@@ -192,11 +192,12 @@ export interface NexusGenFieldTypes {
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
   }
   Query: { // field return type
-    currentProject: NexusGenRootTypes['Project'] | null; // Project
     getUserInvites: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     ping: string; // String!
+    project: NexusGenRootTypes['Project'] | null; // Project
     self: NexusGenRootTypes['User'] | null; // User
     selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
+    stripeProducts: Array<NexusGenRootTypes['StripeProduct'] | null> | null; // [StripeProduct]
   }
   StatusResponse: { // field return type
     message: string | null; // String
@@ -332,11 +333,12 @@ export interface NexusGenFieldTypeNames {
     users: 'UserProject'
   }
   Query: { // field return type name
-    currentProject: 'Project'
     getUserInvites: 'UserInvite'
     ping: 'String'
+    project: 'Project'
     self: 'User'
     selfProjects: 'Project'
+    stripeProducts: 'StripeProduct'
   }
   StatusResponse: { // field return type name
     message: 'String'
@@ -520,11 +522,11 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
-    currentProject: { // args
-      projectId?: string | null; // String
-    }
     getUserInvites: { // args
       projectId: string; // String!
+    }
+    project: { // args
+      projectId?: string | null; // String
     }
   }
   StripeProduct: {

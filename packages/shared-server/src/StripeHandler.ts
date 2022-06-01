@@ -1,4 +1,4 @@
-import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice } from '@prisma/client';
+import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice, StripePriceType, StripeSubscriptionStatus } from '@prisma/client';
 import dayjs from 'dayjs';
 import Stripe from 'stripe'
 
@@ -80,10 +80,10 @@ export class StripeHandler {
   upsertPriceRecord(price: Stripe.Price) {
     const priceData = {
       id: price.id,
-      productId: typeof price.product == 'string' ? price.product : price.product.id,
+      stripeProductId: typeof price.product == 'string' ? price.product : price.product.id,
       active: price.active,
       currency: price.currency,
-      type: price.type,
+      type: price.type.toUpperCase() as StripePriceType,
       unitAmount: price.unit_amount,
       interval: price.recurring?.interval ?? null,
       intervalCount: price.recurring?.interval_count ?? null,
@@ -127,11 +127,11 @@ export class StripeHandler {
   //   if (error) throw error;
   // };
 
-  static formatStripeSubscription(s: Stripe.Subscription): StripeSubscription {
+  static formatStripeSubscription(s: Stripe.Subscription): Omit<StripeSubscription, 'projectId'> {
     return {
       id: s.id,
       metadata: s.metadata,
-      status: s.status.toUpperCase(),
+      status: s.status.toUpperCase() as StripeSubscriptionStatus,
       stripePriceId: s.items.data[0].price.id,
 
       quantity: s.items.data[0].quantity ?? 1,
@@ -142,7 +142,8 @@ export class StripeHandler {
       currentPeriodEnd: secondsToDate(s.current_period_end),
       created: secondsToDate(s.created),
       endedAt: s.ended_at ? secondsToDate(s.ended_at) : null,
-    } as Omit<StripeSubscription, 'projectId'> as StripeSubscription;
+      startDate: secondsToDate(s.start_date),
+    };
   }
 
   async createSubscription(stripeCustomerId: string, priceId: string, quantity: number) {
@@ -165,7 +166,6 @@ export class StripeHandler {
     const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     const currentPriceId = subscription.items.data[0].price.id;
-
 
     const getScheduleId = async () => {
 
@@ -191,59 +191,41 @@ export class StripeHandler {
         ],
       });
       return StripeHandler.formatStripeSubscription(updatedSubscription);
-    } else {
+    }
 
-      if (!beginAtNextPeriod) {
-        const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
-          items: [
-            {
-              id: subscription.items.data[0].price.id,
-              deleted: true,
-            },
-            {
-              price: priceId,
-              quantity,
-            },
-          ],
-        });
-        return StripeHandler.formatStripeSubscription(updatedSubscription);
-      }
-
-      const scheduleId = await getScheduleId();
-
-      // const nowUnix = dayjs().unix();
-
-      const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
-        phases: [{
-          items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
-          start_date: subscription.current_period_start,
-          end_date: 'now',
-          proration_behavior: 'none',
-        }, {
-          items: [{ price: priceId, quantity }],
-          start_date: 'now',
-          proration_behavior: 'none',
-        }],
+    if (!beginAtNextPeriod) {
+      const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
+        items: [
+          {
+            id: subscription.items.data[0].price.id,
+            deleted: true,
+          },
+          {
+            price: priceId,
+            quantity,
+          },
+        ],
       });
-
-      const updatedSubscription = typeof updatedSubscriptionSchedule.subscription == 'string' ? (await this.stripe.subscriptions.retrieve(updatedSubscriptionSchedule.subscription)) : updatedSubscriptionSchedule.subscription!;
       return StripeHandler.formatStripeSubscription(updatedSubscription);
     }
 
-    // try {
-    //   const invoice = await this.stripe.invoices.create({
-    //     customer: stripeCustomerId,
-    //     subscription: subscription.id,
-    //     description: `Change to ${quantity} seat(s) on the ${updatedSubscription.plan.product.name} plan`,
-    //   });
-    //   try {
-    //     await this.stripe.invoices.pay(invoice.id);
-    //   } catch {
-    //     console.log('pay')
-    //   }
-    // } catch {
-    //   console.log('invoice')
-    // }
+    const scheduleId = await getScheduleId();
+
+    const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
+      phases: [{
+        items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
+        start_date: subscription.current_period_start,
+        end_date: 'now',
+        proration_behavior: 'none',
+      }, {
+        items: [{ price: priceId, quantity }],
+        start_date: 'now',
+        proration_behavior: 'none',
+      }],
+    });
+
+    const updatedSubscription = typeof updatedSubscriptionSchedule.subscription == 'string' ? (await this.stripe.subscriptions.retrieve(updatedSubscriptionSchedule.subscription)) : updatedSubscriptionSchedule.subscription!;
+    return StripeHandler.formatStripeSubscription(updatedSubscription);
 
   }
 
@@ -268,7 +250,7 @@ export class StripeHandler {
       projectId: project.id,
     };
 
-    await this.prisma.stripeSubscription.upsert({
+    return await this.prisma.stripeSubscription.upsert({
       create: subscriptionData,
       update: subscriptionData,
       where: { id: subscriptionData.id },

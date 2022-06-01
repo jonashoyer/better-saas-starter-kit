@@ -5,7 +5,7 @@ export const formatCurrency = (lang: string, currency: string, amount: number, {
     lang, {
       style: 'currency',
       currency,
-      minimumFractionDigits: shortFraction && amount % 1 == 0 ? 0 : 2
+      minimumFractionDigits: shortFraction && amount % 1 == 0 ? 0 : 2,
     }).format(amount);
 }
 

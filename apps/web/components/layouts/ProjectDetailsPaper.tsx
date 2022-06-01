@@ -2,10 +2,10 @@ import { Paper, TextField, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
-import { CurrentProjectSettingsQuery, Project, useUpdateProjectMutation } from 'types/gql';
+import { ProjectSettingsQuery, Project, useUpdateProjectMutation } from 'types/gql';
 
 export interface ProjectDetailsPaperProps {
-  project?: CurrentProjectSettingsQuery['currentProject'] |  Project;
+  project?: ProjectSettingsQuery['project'] |  Project;
 }
 
 const noop = () => {};

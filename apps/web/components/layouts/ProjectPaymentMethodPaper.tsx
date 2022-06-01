@@ -1,7 +1,7 @@
 import { Box, Button, capitalize, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
-import { CurrentProjectSettingsQuery, PaymentMethodImportance, useDeleteStripePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdateStripePaymentMethodMutation } from 'types/gql';
+import { ProjectSettingsQuery, PaymentMethodImportance, useDeleteStripePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdateStripePaymentMethodMutation } from 'types/gql';
 import PaymentIcon from '@mui/icons-material/Payment';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -13,7 +13,7 @@ import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 import ComponentPreview from './ComponentPreview';
 
 export interface ProjectPaymentMethodPaperProps {
-  project?: CurrentProjectSettingsQuery['currentProject'];
+  project?: ProjectSettingsQuery['project'];
 }
 
 const LazyDialogYN = dynamic(() => import('../elements/DialogYN'));
@@ -177,7 +177,7 @@ export default ProjectPaymentMethodPaper;
 
 interface PaymentMethodPairProps {
   t: any;
-  project?: CurrentProjectSettingsQuery['currentProject'];
+  project?: ProjectSettingsQuery['project'];
   setAddPaymenthMethodDialog: (b: boolean) => any;
   handleUserMenuClick: (paymentMethod: any) => (event: any) => any;
 }
@@ -214,7 +214,7 @@ const PaymentMethodPair = ({ t, project, setAddPaymenthMethodDialog, handleUserM
 
 interface PaymentMethodListProps {
   t: any;
-  project?: CurrentProjectSettingsQuery['currentProject'];
+  project?: ProjectSettingsQuery['project'];
   setAddPaymenthMethodDialog: (b: boolean) => any;
   handleUserMenuClick: (paymentMethod: any) => (event: any) => any;
 }
@@ -243,7 +243,7 @@ const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserM
   )
 }
 
-const PaymentMethodListItem = ({ t, paymentMethod: e, handleUserMenuClick }: { t: any, paymentMethod: CurrentProjectSettingsQuery['currentProject']['stripePaymentMethods'][0], handleUserMenuClick: (paymentMethod: any) => (event: any) => any,  }) => (
+const PaymentMethodListItem = ({ t, paymentMethod: e, handleUserMenuClick }: { t: any, paymentMethod: ProjectSettingsQuery['project']['stripePaymentMethods'][0], handleUserMenuClick: (paymentMethod: any) => (event: any) => any,  }) => (
   <ListItem
     secondaryAction={
       <IconButton onClick={handleUserMenuClick(e)} disabled={e?.importance == PaymentMethodImportance.Primary}>
@@ -266,7 +266,7 @@ const importanceToColor = {
 
 interface PaymentMethodSingleProps {
   t: any;
-  project?: CurrentProjectSettingsQuery['currentProject'];
+  project?: ProjectSettingsQuery['project'];
   setAddPaymenthMethodDialog: (b: boolean) => any;
 }
 
@@ -288,7 +288,7 @@ const PaymentMethodSingle = ({ t, project, setAddPaymenthMethodDialog }: Payment
   )
 }
 
-const PaymentMethodSingleItem = ({ t, paymentMethod: e, setAddPaymenthMethodDialog }: { t: any, paymentMethod: CurrentProjectSettingsQuery['currentProject']['stripePaymentMethods'][0], setAddPaymenthMethodDialog: (b: boolean) => any, }) => (
+const PaymentMethodSingleItem = ({ t, paymentMethod: e, setAddPaymenthMethodDialog }: { t: any, paymentMethod: ProjectSettingsQuery['project']['stripePaymentMethods'][0], setAddPaymenthMethodDialog: (b: boolean) => any, }) => (
   <ListItem
     secondaryAction={
       <Button variant='outlined' onClick={() => setAddPaymenthMethodDialog(true)}>Change</Button>

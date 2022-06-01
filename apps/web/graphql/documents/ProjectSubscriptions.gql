@@ -1,0 +1,8 @@
+query ProjectSubscriptions($projectId: String) {
+  project(projectId: $projectId) {
+    id
+    stripeSubscriptions {
+      ...BaseStripeSubscription
+    }
+  }
+}

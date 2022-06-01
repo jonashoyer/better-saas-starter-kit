@@ -4,7 +4,7 @@ import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
 import { ParsedUrlQuery } from "querystring";
 import { Constants } from "shared";
-import { CurrentProjectDocument, CurrentProjectQuery, SelfProjectsDocument, SelfProjectsQuery } from "../types/gql";
+import { ProjectDocument, ProjectQuery, SelfProjectsDocument, SelfProjectsQuery } from "../types/gql";
 import { initializeApollo } from "./GraphqlClient";
 
 type Context = GetServerSidePropsContext<ParsedUrlQuery>;
@@ -16,7 +16,7 @@ export const getProjectId = (ctx: Context): string | null => ctx.req.cookies[Con
 export interface FetchUserContextResult {
   projectId?: string;
   session: Session;
-  project: CurrentProjectQuery['currentProject'] | null;
+  project: ProjectQuery['project'] | null;
   projects: SelfProjectsQuery['selfProjects'] | null;
   client: ApolloClient<NormalizedCacheObject>;
 }
@@ -36,7 +36,7 @@ export const fetchUserContext = async (ctx: Context, _client?: ApolloClient<Norm
     projectsQuery,
   ] = await Promise.all([
     client.query({
-      query: CurrentProjectDocument,
+      query: ProjectDocument,
       variables: {
         projectId: projectId,
       },
@@ -49,7 +49,7 @@ export const fetchUserContext = async (ctx: Context, _client?: ApolloClient<Norm
   return {
     projectId,
     session,
-    project: projectQuery?.data?.currentProject ?? null,
+    project: projectQuery?.data?.project ?? null,
     projects: projectsQuery?.data?.selfProjects ?? [],
     client,
   }
