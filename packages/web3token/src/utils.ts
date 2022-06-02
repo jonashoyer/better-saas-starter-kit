@@ -1,7 +1,5 @@
-import { recoverTypedSignature_v4 } from "eth-sig-util";
 import Web3 from "web3";
-import { PayloadDeserializer, PayloadSerializer } from ".";
-import { EIP712Message, EIP712MessageTypesType } from "./EIP712Message";
+import { Web3TokenError } from "./errors";
 
 export const asciiToBase64 = (str: string) => {
   if (typeof btoa === 'undefined') {
@@ -18,7 +16,7 @@ export const base64ToASCII = (base64: string) => {
 }
 
 export const strip0x = (s: string) => s.startsWith('0x') ? s.slice(2) : s;
-export const prefix0x = (s: string) => s.startsWith('0x') ? '0x' + s : s;
+export const prefix0x = (s: string) => s.startsWith('0x') ? s : '0x' + s;
 
 export const hexToBase64 = (hex: string) => {
   return asciiToBase64(hex.match(/\w{2}/g)!.map(function(a) {
@@ -45,7 +43,7 @@ export const web3TokenEncode = (payload: string | {}, signature: string) => {
   ].join('.')
 }
 
-export const web3TokenDecode = (token: string) => {
+export const web3TokenDecode = <T = {}>(token: string): { payload: T, signature: string } => {
   const [payload, signature] = token.split('.');
   const parse = (val: string) => val.startsWith('{') ? JSON.parse(val) : val; 
   return {
@@ -54,37 +52,17 @@ export const web3TokenDecode = (token: string) => {
   };
 }
 
-export const signWeb3Token = <T extends EIP712MessageTypesType, S = {}>(web3: Web3, account: string, message: EIP712Message<T>, payloadSerializer: PayloadSerializer<S>): Promise<string> => {
-
-  const s = JSON.stringify(message);
-
-  return new Promise((resolve, reject) => {
-
-    (web3.currentProvider as any).sendAsync({
-      method: "eth_signTypedData_v4",
-      params: [account, s],
-      from: account,
-    }, (err: Error, result: { result: string }) => {
-
-      if (err) return reject(err);
-
-      const signature = result.result;
-      const token = web3TokenEncode(payloadSerializer(message.message), signature);
-
-      resolve(token);
-    });
-  })
+export const signWeb3Token = async (web3: Web3, account: string, message: string, payload: {}): Promise<string> => {
+  const signature = await (web3 as any).eth.personal.sign(message, account);
+  return web3TokenEncode(payload, signature);
 }
 
-export const verifyWeb3Token = <T extends EIP712MessageTypesType, S = {}>(message: EIP712Message<T>, token: string, payloadDeserializer: PayloadDeserializer<S>) => {
-
-  const { payload, signature } = web3TokenDecode(token);
-
-  const restoredMessage = {
-    ...message,
-    message: payloadDeserializer(payload),
+export const verifyWeb3Token = async (web3: Web3, message: string, signature: string) => {
+  if (!signature) throw new Web3TokenError('w3t signature is required');
+  try {
+    const recovered = await web3.eth.personal.ecRecover(message, signature);
+    return recovered.toLowerCase();
+  } catch {
+    throw new Web3TokenError('w3t malformed');
   }
-
-  const recovered = recoverTypedSignature_v4({ data: restoredMessage as any, sig: signature });
-  return recovered.toLowerCase();
 }

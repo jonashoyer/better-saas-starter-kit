@@ -9,11 +9,16 @@
     "dev": "tsc -w",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
     "build": "tsc",
+    "watch": "tsc --watch",
     "test": "ts-node src/test.ts"
   },
   "dependencies": {
     "eth-sig-util": "^3.0.1",
     "tsconfig": "*",
+    "uuid": "^8.3.2",
     "web3": "^1.7.3"
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.3.4"
   }
 }
