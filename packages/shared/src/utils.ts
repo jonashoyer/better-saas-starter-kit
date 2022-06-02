@@ -1,5 +1,8 @@
 import type { Prisma } from "@prisma/client";
 
+export const noop = () => {};
+export const pnoop = Promise.resolve();
+
 export const formatCurrency = (lang: string, currency: string, amount: number, { shortFraction = false }) => {
   return new Intl.NumberFormat(
     lang, {

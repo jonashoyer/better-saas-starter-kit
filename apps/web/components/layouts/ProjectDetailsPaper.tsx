@@ -8,8 +8,6 @@ export interface ProjectDetailsPaperProps {
   project?: ProjectSettingsQuery['project'] |  Project;
 }
 
-const noop = () => {};
-
 const ProjectDetailsPaper = ({ project }: ProjectDetailsPaperProps) => {
 
   const { t } = useTranslation();

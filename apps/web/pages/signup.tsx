@@ -13,11 +13,14 @@ import Link from 'next/link';
 import { signIn } from "next-auth/react";
 // import useWeb3Login from '../hooks/useWeb3Login';
 import { AppNextPage } from '../types/types';
+import { useUserContext } from '../contexts/UserContext';
+import MetamaskIcon from '../components/elements/MetamaskIcon';
 
 const SignupPage: AppNextPage = (props) => {
 
-  // const { loading, logined, auth } = useWeb3Login();
 
+
+  const { w3tSign } = useUserContext();
 
 
   return (
@@ -30,13 +33,14 @@ const SignupPage: AppNextPage = (props) => {
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
         <Box sx={{ flex: '1', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', pb: 8 }}>
-          <Logo />
+          <Logo />  
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Paper sx={{ maxWidth: 360, py: 8, px: 6, pb: 4 }} elevation={2}>
 
             <Box sx={{ mb: 5, gap: .5, display: 'flex', flexDirection: 'column' }}>
+
               <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={() => signIn('github')}>
                 <GitHubIcon />
                 <Typography variant='subtitle2'>Sign up with Github</Typography>
@@ -47,10 +51,10 @@ const SignupPage: AppNextPage = (props) => {
                 <Typography variant='subtitle2'>Sign up with Google</Typography>
               </Button>
 
-              {/* <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={auth}>
-                <Box component='img' sx={{ filter: 'grayscale(100%) brightness(125%)' }} src='/img/metamask-fox.svg' height={22} />
+              <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={w3tSign}>
+                <MetamaskIcon />
                 <Typography variant='subtitle2'>Sign up with Metamask</Typography>
-              </Button> */}
+              </Button>
 
             </Box>
 
@@ -150,5 +154,5 @@ export async function getStaticProps(context) {
   }
 }
 
-SignupPage.authGuard = 'unauth';
+SignupPage.authGuard = 'unauthenticated';
 export default SignupPage;
