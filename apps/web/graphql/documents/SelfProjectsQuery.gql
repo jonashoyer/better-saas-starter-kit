@@ -1,6 +1,11 @@
 query SelfProjects {
-  selfProjects {
-    id
-    name
+  self {
+    ...BaseSelf
+    projects {
+      id
+      project {
+        ...BaseProjcet
+      }
+    }
   }
 }

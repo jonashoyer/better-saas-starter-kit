@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import { Box } from "@mui/system";
 import Logo from "../../elements/Logo";
 import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem, Link as MuiLink } from "@mui/material";
-import { signIn, useSession, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import useTranslation from "next-translate/useTranslation";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -96,7 +96,7 @@ const UserMenu = ({ anchorEl, handleClose }: UserMenuProps) => {
           <ListItemIcon>
             <AccountCircleIcon fontSize="small" />
           </ListItemIcon>
-          {t('common:accountSettings')}
+          {t('common:navUserMenu.account')}
         </MenuItem>
         <Divider />
         <MenuItem sx={{ color: 'error.main' }} onClick={() => signOut({ callbackUrl: '/' })}>

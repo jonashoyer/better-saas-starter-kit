@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import dynamic from 'next/dynamic';
 import Logo from "../../elements/Logo";
 import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem, Link as MuiLink } from "@mui/material";
-import { signIn, useSession, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import useTranslation from "next-translate/useTranslation";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -16,7 +16,7 @@ const LazyDialogAccountSettings = dynamic(() => import('../../elements/DialogAcc
 
 const BaseAppBarContent = () => {
 
-  const { session, loading, projects } = useUserContext();
+  const { user, loading, projects } = useUserContext();
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = React.useState(null);
 
@@ -37,7 +37,7 @@ const BaseAppBarContent = () => {
       </Box>
 
       <Box sx={{ flex: '1', px: 2, display: 'flex', justifyContent: 'flex-end' }}>
-        {(!loading && session) &&
+        {(!loading && user) &&
           <React.Fragment>
             <IconButton
               edge="end"
@@ -48,7 +48,7 @@ const BaseAppBarContent = () => {
               <Avatar
                 sx={{ width: 32, height: 32 }}
                 alt='profile'
-                src={session?.user.image}
+                src={user.image}
               />
             </IconButton>
             <UserMenu
@@ -57,7 +57,7 @@ const BaseAppBarContent = () => {
             />
           </React.Fragment>
         }
-        {(!loading && !session) &&
+        {(!loading && !user) &&
           <Button onClick={() => signIn()} variant='contained' color='primary'>Login</Button>
         }
       </Box>
@@ -74,6 +74,8 @@ export interface UserMenuProps {
 
 const UserMenu = ({ anchorEl, handleClose }: UserMenuProps) => {
   const { t } = useTranslation();
+
+  const { logout } = useUserContext();
 
   const [accountSettingsOpen, setAccountSettingsOpen] = React.useState(false);
 
@@ -122,10 +124,10 @@ const UserMenu = ({ anchorEl, handleClose }: UserMenuProps) => {
           <ListItemIcon>
             <AccountCircleIcon fontSize="small" />
           </ListItemIcon>
-          {t('common:accountSettings')}
+          {t('common:navUserMenu.account')}
         </MenuItem>
         <Divider />
-        <MenuItem sx={{ color: 'error.main' }} onClick={() => signOut({ callbackUrl: '/' })}>
+        <MenuItem sx={{ color: 'error.main' }} onClick={() => logout()}>
           <ListItemIcon>
             <LogoutIcon color='error' fontSize="small" />
           </ListItemIcon>

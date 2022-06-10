@@ -34,8 +34,6 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
     },
   });
 
-  console.log({ products: props.products });
-
   return (
     <Elements stripe={stripePromise}>
 
@@ -47,12 +45,16 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
 
       <StaticPageLayout padded pageTitle='Project Settings'>
 
-        <ProjectDetailsPaper project={projectData.project} />
-        <ProjectMembersPaper project={projectData.project} self={selfData?.self} />
-        <ProjectPlanPaper project={projectData.project} products={props.products} />
-        <ProjectPaymentMethodPaper project={projectData.project} />
-        <ProjectInvoicePaper project={projectData.project} />
-        <ProjectDangerZonePaper project={projectData.project} />
+        {projectData &&
+          <React.Fragment>
+            <ProjectDetailsPaper project={projectData.project} />
+            <ProjectMembersPaper project={projectData.project} self={selfData?.self} />
+            <ProjectPlanPaper project={projectData.project} products={props.products} />
+            <ProjectPaymentMethodPaper project={projectData.project} />
+            <ProjectInvoicePaper project={projectData.project} />
+            <ProjectDangerZonePaper project={projectData.project} />
+          </React.Fragment>
+        }
 
       </StaticPageLayout>
     </Elements>

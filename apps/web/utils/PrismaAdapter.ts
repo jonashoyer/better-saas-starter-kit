@@ -1,12 +1,8 @@
 import type * as Prisma from "@prisma/client"
 import { randomBytes } from "crypto"
-import type { Profile } from "next-auth"
 import type { Adapter } from "next-auth/adapters"
 import jwt from 'jsonwebtoken';
-import { createStripe, StripeHandler } from 'shared-server';
-import cuid from 'cuid';
-import { DEFAULT_SUBSCRIPTION_PRICE_ID } from "config";
-import { isJSONValueObject } from "utils";
+import { userService } from 'shared-server';
 
 const GENERATE_ACCESS_TOKEN = true;
 const ACCESS_TOKEN_EXPIRES_IN = '20m';
@@ -27,76 +23,13 @@ const withAccessToken = (withAccessToken: boolean, session: any) => {
   }
 }
 
-const createUserWithProject = async (profile: Profile & { emailVerified?: Date; password?: string; }) => {
-  const projectId = cuid();
 
-  const name = profile.name || profile.email?.split('@')[0] || 'Unnamed';
-  const firstName = name.split(' ')[0];
-
-  const stripe = new StripeHandler(createStripe(), prisma);
-  const stripeCustomer = await stripe.createCustomer({
-    name,
-    email: profile.email,
-    metadata: {
-      projectId,
-    },
-  });
-  const stripeSubscription = await stripe.createSubscription(stripeCustomer.id, DEFAULT_SUBSCRIPTION_PRICE_ID, 1);
-
-  try {
-
-    const project = await prisma.project.create({
-      data: {
-        id: projectId,
-        name: `${firstName}'s Project`,
-        stripeCustomerId: stripeCustomer.id,
-        // subscriptionPlan: isJSONValueObject(stripeSubscription.metadata) ? stripeSubscription.metadata.type as any : undefined,
-        users: {
-          create: {
-            role: 'ADMIN',
-            user: {
-              create: {
-                name,
-                email: profile.email,
-                image: profile.image,
-                emailVerified: profile.emailVerified?.toISOString() ?? null,
-              }
-            }
-          }
-        },
-        stripeSubscriptions: {
-          create: {
-            ...stripeSubscription,
-            startDate: new Date(),
-          },
-        }
-      },
-      include: {
-        users: {
-          include: {
-            user: true,
-          }
-        }
-      }
-    });
-
-    return {
-      project,
-      user: project.users[0].user,
-    }
-  } catch (err) {
-    console.error(err);
-    await stripe.stripe.subscriptions.del(stripeSubscription.id);
-    await stripe.deleteCustomer(stripeCustomer.id);
-    throw new err;
-  }
-}
 
 export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
   return {
     
     async createUser(profile) {
-      const { user } = await createUserWithProject(profile);
+      const { user } = await userService.createUserWithProject(prisma, profile);
       return user;
     },
 

@@ -9,3 +9,4 @@ export * from './PubSubTriggers';
 export * from './email';
 export * from './utils';
 export * as config from './config';
+export * from './services'

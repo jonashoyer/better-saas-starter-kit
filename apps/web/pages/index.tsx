@@ -73,8 +73,9 @@ export default function Home(props: any) {
           />
         </Box>
 
-        <Box sx={{ textAlign: 'center', bgcolor: '#f3f3f3', pt: 16, pb: 12 }}>
+        <Box sx={{ textAlign: 'center', pt: 16, pb: 12 }}>
           <Typography variant='h4' sx={{ mb: 3 }}>{t('home:featuresTitle')}</Typography>
+          <Typography variant='subtitle1' sx={{ maxWidth: 600, mx: 'auto', mb: 6 }}>{t('home:featuresDescription')}</Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 4, mb: 12 }}>
             <Paper elevation={3} sx={{ p: 4, maxWidth: 300, borderRadius: 4 }}>
               <SquareFootIcon sx={{ mb: 1 }} fontSize='large' color='primary' />
@@ -94,12 +95,12 @@ export default function Home(props: any) {
           </Box>
 
           <Box>
-            <Box sx={{ mb: 12, maxWidth: 1450, mx: 'auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 2, rowGap: 6 }}>
+            <Box sx={{ mb: 12, maxWidth: 1450, mx: 'auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 4 }}>
               {t<{ title: string, description: string }[]>('home:featureList', {}, { returnObjects: true }).map((e, i) => {
                 return (
-                  <Box key={i} sx={{ maxWidth: 450 }}>
-                    <Typography variant='h5' gutterBottom>{e.title}</Typography>
-                    <Typography variant='body1'>{e.description}</Typography>
+                  <Box key={i} sx={{ maxWidth: 450, border: '1px solid #e3e3e3', boxShadow: 1, borderRadius: 4, p: 4 }}>
+                    <Typography variant='h6' textAlign='left' gutterBottom>{e.title}</Typography>
+                    <Typography color='textSecondary' variant='body1' textAlign='left'>{e.description}</Typography>
                   </Box>
                 )
               })}

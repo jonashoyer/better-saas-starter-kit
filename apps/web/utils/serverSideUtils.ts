@@ -4,8 +4,10 @@ import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
 import { ParsedUrlQuery } from "querystring";
 import { Constants } from "shared";
+import { authorizeWeb3Token } from "shared-server";
 import { ProjectDocument, ProjectQuery, SelfProjectsDocument, SelfProjectsQuery } from "../types/gql";
 import { initializeApollo } from "./GraphqlClient";
+import { prisma } from 'utils/prisma';
 
 type Context = GetServerSidePropsContext<ParsedUrlQuery>;
 
@@ -22,35 +24,59 @@ export interface FetchUserContextResult {
 }
 
 
+const getUserSession = async (ctx: Context) => {
+  try {
+
+    if (ctx.req.cookies.w3t) {
+      console.log(ctx.req.cookies.w3t);
+      const { user, decoded } = await authorizeWeb3Token(prisma, ctx.req.cookies.w3t);
+      return { user, expires: new Date(decoded.payload.expiresAt).toISOString() };
+    }
+
+    const session = await getSession(ctx);
+    return session;
+  } catch {
+    return null;
+  }
+}
+
 export const fetchUserContext = async (ctx: Context, _client?: ApolloClient<NormalizedCacheObject>): Promise<FetchUserContextResult> => {
 
   const client = _client || createApolloClient(ctx);
 
   const projectId = getProjectId(ctx);
-  const session = await getSession(ctx);
 
-  console.log({ projectId, session, headers: ctx.req.headers });
+  const session = await getUserSession(ctx);
 
-  const [
-    projectQuery,
-    projectsQuery,
-  ] = await Promise.all([
-    client.query({
-      query: ProjectDocument,
-      variables: {
-        projectId: projectId,
-      },
-    }),
-    client.query({
-      query: SelfProjectsDocument,
-    }),
-  ]);
+  if (!session) return { projectId: null, session: null, project: null, projects: [], client };
 
-  return {
-    projectId,
-    session,
-    project: projectQuery?.data?.project ?? null,
-    projects: projectsQuery?.data?.selfProjects ?? [],
-    client,
+  try {
+
+    const [
+      projectQuery,
+      projectsQuery,
+    ] = await Promise.all([
+      client.query({
+        query: ProjectDocument,
+        variables: {
+          projectId: projectId,
+        },
+      }),
+      client.query({
+        query: SelfProjectsDocument,
+      }),
+    ]);
+
+    console.log('PASSED');
+
+    return {
+      projectId,
+      session,
+      project: projectQuery?.data?.project ?? null,
+      projects: projectsQuery?.data?.selfProjects ?? [],
+      client,
+    }
+  } catch (err) {
+    return { projectId: null, session: null, project: null, projects: [], client };
   }
 }

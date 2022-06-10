@@ -1,12 +1,14 @@
 import { PrismaClient, User } from '@prisma/client';
 import Redis from 'ioredis';
-import { createRedisClient, createStripe, createAppQueueManager, StripeHandler } from 'shared-server';
+import { createRedisClient, createStripe, createAppQueueManager, StripeHandler, authorizeWeb3Token, authorizeAccessToken } from 'shared-server';
 import { ContextFunction } from 'apollo-server-core'
 import { getSession } from 'next-auth/react';
 import Stripe from 'stripe';
 import { IncomingMessage, OutgoingMessage } from 'http';
 import { Session } from '../pages/api/auth/[...nextauth]';
 import { prisma } from '../utils/prisma';
+import { asArray } from 'shared';
+import cookie from 'cookie';
 
 export const stripe = createStripe();
 export const redis = createRedisClient('client');
@@ -26,9 +28,10 @@ export type Context<E = any> = {
 };
 
 export const createContext: ContextFunction<any> = async (ctx)  => {
-  const session = await getSession({ req: ctx.req });
+  const user = await authorize({ req: ctx.req });
 
-  const user = session?.user ? (await prisma.user.findUnique({ where: { id: (session.user as any).id }, include: { projects: { include: { project: true } } } })) : null;
+  console.log('ctx', { user });
+
 
   // if (user) {
   //   try {
@@ -48,6 +51,38 @@ export const createContext: ContextFunction<any> = async (ctx)  => {
     stripe,
     getStripeHandler: () => new StripeHandler(stripe, prisma),
     user,
-    session,
+    session: user?.session,
   }
+}
+
+
+export const authorize = async ({ req, accessToken }: {
+  req: IncomingMessage,
+  accessToken?: string,
+}): Promise<(User & { session?: Session }) | null> => {
+
+  if (accessToken) {
+    return authorizeAccessToken(prisma, accessToken);
+  }
+
+  const session = await getSession({ req });
+
+  if (session) {
+    const user = await prisma.user.findUnique({ where: { id: (session.user as any).id }, include: { projects: { include: { project: true } } } });
+    return { ...user, session } as any;
+  }
+
+  const parsed = cookie.parse(req.headers.cookie || '');
+
+  if (parsed.w3t) {
+    try {
+
+      const { user } = await authorizeWeb3Token(prisma, parsed.w3t);
+      console.log('!!!', user);
+      
+      return user;
+    } catch(err) { console.log(err) }
+  }
+  
+  return null;
 }

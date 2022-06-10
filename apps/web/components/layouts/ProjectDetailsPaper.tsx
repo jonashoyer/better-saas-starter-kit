@@ -3,9 +3,10 @@ import { LoadingButton } from '@mui/lab';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
 import { ProjectSettingsQuery, Project, useUpdateProjectMutation } from 'types/gql';
+import { noop } from 'shared';
 
 export interface ProjectDetailsPaperProps {
-  project?: ProjectSettingsQuery['project'] |  Project;
+  project?: ProjectSettingsQuery['project'] | Project;
 }
 
 const ProjectDetailsPaper = ({ project }: ProjectDetailsPaperProps) => {

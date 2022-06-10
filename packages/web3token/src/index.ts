@@ -56,9 +56,16 @@ export interface Web3TokenSignOptions {
 
 const sign = async (web3: Web3, options: Web3TokenSignOptions) => {
 
-  const address = (await web3.eth.getAccounts())[0];
-  if (!address) throw new Web3TokenError('no account selected');
-  return await signWeb3Token(web3, address, payloadSerializer(optionsToPayload(address, options)), optionsToPayload(address, options, options.omitStatement));
+  console.log({ eth: window.ethereum });
+
+  if (typeof window.ethereum === 'undefined') {
+    throw new Web3TokenError('metamask not installed');
+  }
+  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+  const account = accounts[0];
+
+  if (!account) throw new Web3TokenError('no account selected');
+  return await signWeb3Token(web3, account, payloadSerializer(optionsToPayload(account, options)), optionsToPayload(account, options, options.omitStatement));
 }
 
 
@@ -86,7 +93,7 @@ const verify = async (web3: Web3, token: string, options?: Web3TokenVerifyOption
   }
 
   const message = payloadSerializer(payload, options?.statement);
-  const address = await verifyWeb3Token(web3, message, signature);
+  const address = await verifyWeb3Token(message, signature);
 
   if (payload.address.toLowerCase() != address.toLowerCase()) {
     throw new Web3TokenError('w3t malformed');

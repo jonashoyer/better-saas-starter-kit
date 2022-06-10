@@ -4,18 +4,16 @@ import { Constants } from 'shared';
 import FormTextField from '../components/elements/FormTextField';
 import { useForm } from 'react-hook-form';
 import GoogleIcon from '@mui/icons-material/Google';
-import { useRouter } from 'next/router';
 import Logo from '../components/elements/Logo';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useSession, getProviders, signIn } from "next-auth/react";
-// import useWeb3Login from '../hooks/useWeb3Login';
+import { getProviders, signIn } from "next-auth/react";
 import { AppNextPage } from '../types/types';
+import { useUserContext } from '../contexts/UserContext';
+import MetamaskIcon from '../components/elements/MetamaskIcon';
 
 const LoginPage: AppNextPage = (props) => {
-
-  const { data: session, status } = useSession();
 
   React.useEffect(() => {
     getProviders().then(providers => console.log(providers));
@@ -49,9 +47,7 @@ const LoginPage: AppNextPage = (props) => {
 
 const LoginForm = ({ }) => {
 
-  const router = useRouter();
-
-  // const { loading, logined, auth } = useWeb3Login();
+  const { w3t } = useUserContext();
 
   const { handleSubmit, reset, control, watch, setValue } = useForm({
     defaultValues: {
@@ -60,11 +56,6 @@ const LoginForm = ({ }) => {
     },
   });
 
-
-  // React.useEffect(() => {
-  //   if (!logined) return;
-  //   router.push('/');
-  // }, [logined, router]);
 
   const onLogin = ({ email, password }) => {
     signIn("credentials", { email, password });
@@ -84,10 +75,10 @@ const LoginForm = ({ }) => {
           <Typography variant='subtitle2'>Sign in with Google</Typography>
         </Button>
 
-        {/* <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={auth}>
-          <Box component='img' sx={{ filter: 'grayscale(100%) brightness(125%)' }} src='/img/metamask-fox.svg' height={22} />
+        <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={w3t.sign}>
+          <MetamaskIcon />
           <Typography variant='subtitle2'>Sign in with Metamask</Typography>
-        </Button> */}
+        </Button>
 
       </Box>
       <form onSubmit={handleSubmit(onLogin)}>

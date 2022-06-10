@@ -4,7 +4,6 @@ import { Constants } from 'shared';
 import FormTextField from '../components/elements/FormTextField';
 import { useForm } from 'react-hook-form';
 import GoogleIcon from '@mui/icons-material/Google';
-import { useRouter } from 'next/router';
 import Logo from '../components/elements/Logo';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import usePasswordStrength from '../hooks/usePasswordStrength';
@@ -18,9 +17,7 @@ import MetamaskIcon from '../components/elements/MetamaskIcon';
 
 const SignupPage: AppNextPage = (props) => {
 
-
-
-  const { w3tSign } = useUserContext();
+  const { w3t } = useUserContext();
 
 
   return (
@@ -51,7 +48,7 @@ const SignupPage: AppNextPage = (props) => {
                 <Typography variant='subtitle2'>Sign up with Google</Typography>
               </Button>
 
-              <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={w3tSign}>
+              <Button sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%', py: 1.25 }} onClick={w3t.sign}>
                 <MetamaskIcon />
                 <Typography variant='subtitle2'>Sign up with Metamask</Typography>
               </Button>

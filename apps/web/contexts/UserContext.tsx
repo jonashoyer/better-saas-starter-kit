@@ -1,9 +1,8 @@
-import { Session } from 'next-auth';
-import { useSession } from 'next-auth/react';
+import { SessionContextValue, signOut, useSession } from 'next-auth/react';
 import React from 'react';
 import { useCookie } from 'react-use';
 import useProject from '../hooks/useProject';
-import { ProjectQuery, SelfProjectsQuery, useProjectQuery, useSelfProjectsQuery } from '../types/gql';
+import { ProjectQuery, SelfProjectsQuery, useProjectQuery, useSelfProjectsQuery, BaseSelfFragment } from '../types/gql';
 import { noop, Constants } from 'shared';
 
 import w3t from 'web3token';
@@ -18,29 +17,24 @@ declare global {
 }
 
 export type UserContextValue = {
-  session: Session | null;
+  nextAuth: SessionContextValue;
+  w3t: { web3: Web3 | null, token: string | null, sign: () => void, clear: () => void };
+  user: BaseSelfFragment | null;	
+  logout: () => void;
   loading: boolean;
-  status: "authenticated" | "loading" | "unauthenticated";
   
   project: ProjectQuery['project'] | null;
-  projects: SelfProjectsQuery['selfProjects'] | null;
-
-  web3: Web3 | null;
-  web3Token: string | null;
-  w3tSign: () => void;
-  w3tClear: () => void;
+  projects: Array<SelfProjectsQuery['self']['projects'][0]['project']> | null;
 }
 
 export const UserContext = React.createContext<UserContextValue>({
-    session: null,
-    loading: true,
-    status: "unauthenticated",
-    project: null,
-    projects: null,
-    web3: null,
-    web3Token: null,
-    w3tSign: noop,
-    w3tClear: noop,
+  nextAuth: { data: null, status: 'loading' },
+  w3t: { web3: null, token: null, sign: noop, clear: noop },
+  user: null,
+  logout: noop,
+  loading: true,
+  project: null,
+  projects: null,
 });
 
 export function useUserContext() {
@@ -51,7 +45,7 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
   const [projectId] = useProject();
 
-  const { data: session, status } = useSession();
+  const nextAuthSession = useSession();
 
 
   const web3 = React.useMemo(() => {
@@ -71,17 +65,27 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
     const { address, payload } = await w3t.verify(web3, token, { statement: Constants.WEB3_TOKEN_STATEMENT });
 
-    console.log({ address, payload });
-
   }, [updateWeb3Token, web3]);
 
   const w3tClear = React.useCallback(() => {
     deleteWeb3Token();
   }, [deleteWeb3Token]);
 
+  const w3tValue = React.useMemo(() => ({
+    web3,
+    token: web3Token,
+    sign: w3tSign,
+    clear: w3tClear,
+  }), [w3tClear, w3tSign, web3, web3Token]);
 
 
-  const hasAuth = !!web3Token || !!session; 
+  const logout = React.useCallback(() => {
+    w3tClear();
+    signOut({ callbackUrl: '/' });
+  }, [w3tClear]);
+
+
+  const hasAuth = !!web3Token || !!nextAuthSession.data;
   
   const { data: projectData, loading: projectLoading } = useProjectQuery({
     variables: {
@@ -90,23 +94,20 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
     skip: !hasAuth,
   });
 
-  const { data: selfProjectsData, loading: selfLoading } = useSelfProjectsQuery({ context: { serverless: true }, skip: !hasAuth });
+  const { data: selfData, loading: selfLoading } = useSelfProjectsQuery({ context: { serverless: true }, skip: !hasAuth });
   
-  const loading = status === 'loading' || projectLoading || selfLoading;
+  const loading = nextAuthSession.status === 'loading' || projectLoading || selfLoading;
 
   return (
     <UserContext.Provider
       value={{
-        session,
+        nextAuth: nextAuthSession,
+        w3t: w3tValue,
+        user: selfData?.self ?? null,
+        logout,
         loading,
-        status,
         project: projectData?.project ?? null,
-        projects: selfProjectsData?.selfProjects ?? null,
-
-        web3,
-        web3Token,
-        w3tSign,
-        w3tClear,
+        projects: selfData?.self?.projects.map(e => e.project) ?? null,
       }}
     >
       {children}

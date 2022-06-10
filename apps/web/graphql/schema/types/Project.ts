@@ -2,7 +2,7 @@ import cuid from 'cuid';
 import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { requireAuth, requireProjectAccess } from './permissions';
 import { Constants } from 'shared';
-import { DEFAULT_SUBSCRIPTION_PRICE_ID } from 'config';
+import { DEFAULT_SUBSCRIPTION_PRICE_ID } from 'configServer';
 
 export const Project = objectType({
   name: 'Project',
@@ -42,23 +42,6 @@ export const GetProject = queryField('project', {
     });
 
     return project;
-  }
-})
-
-export const SelfProjects = queryField('selfProjects', {
-  type: 'Project',
-  list: true,
-  authorize: requireAuth,
-  async resolve(root, args, ctx) {
-
-    const userProjects = await ctx.prisma.userProject.findMany({
-      where: { userId: ctx.user.id },
-      include: {
-        project: true,
-      }
-    });
-
-    return userProjects.map(e => e.project);
   }
 })
 

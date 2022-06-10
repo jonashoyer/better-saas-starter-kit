@@ -127,7 +127,7 @@ export class StripeHandler {
   //   if (error) throw error;
   // };
 
-  static formatStripeSubscription(s: Stripe.Subscription): Omit<StripeSubscription, 'projectId'> {
+  static formatStripeSubscription(s: Stripe.Subscription): Omit<StripeSubscription, 'projectId' | 'metadata'> & { metadata: {} } {
     return {
       id: s.id,
       metadata: s.metadata,

@@ -1,5 +1,13 @@
 import Web3 from "web3";
 import { Web3TokenError } from "./errors";
+import {
+  hashPersonalMessage,
+  toBuffer,
+  fromRpcSig,
+  ecrecover,
+  publicToAddress,
+  bufferToHex
+} from 'ethereumjs-util';
 
 export const asciiToBase64 = (str: string) => {
   if (typeof btoa === 'undefined') {
@@ -57,12 +65,25 @@ export const signWeb3Token = async (web3: Web3, account: string, message: string
   return web3TokenEncode(payload, signature);
 }
 
-export const verifyWeb3Token = async (web3: Web3, message: string, signature: string) => {
+export const verifyWeb3Token = async (message: string, signature: string) => {
   if (!signature) throw new Web3TokenError('w3t signature is required');
   try {
-    const recovered = await web3.eth.personal.ecRecover(message, signature);
-    return recovered.toLowerCase();
-  } catch {
+
+    const buf = Buffer.from(message);
+    const msgHash = hashPersonalMessage(buf);
+    const { v, r, s } = fromRpcSig(signature);
+
+    const publicKey = ecrecover(
+      msgHash,
+      v,
+      r,
+      s
+    );
+    const addressBuffer = publicToAddress(publicKey);
+    const address = bufferToHex(addressBuffer).toLowerCase();
+
+    return address.toLowerCase();
+  } catch(err) {
     throw new Web3TokenError('w3t malformed');
   }
 }

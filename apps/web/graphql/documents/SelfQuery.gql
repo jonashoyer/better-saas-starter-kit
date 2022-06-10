@@ -1,8 +1,5 @@
 query Self {
   self {
-    id
-    email
-    emailVerified
-    name
+    ...BaseSelf
   }
 }

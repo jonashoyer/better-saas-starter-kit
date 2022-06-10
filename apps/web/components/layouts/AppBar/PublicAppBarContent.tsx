@@ -3,13 +3,14 @@ import { Box } from '@mui/material';
 import dynamic from 'next/dynamic';
 import Logo from "../../elements/Logo";
 import { Avatar, Button, Divider, IconButton, ListItemIcon, Menu, MenuItem, Link as MuiLink } from "@mui/material";
-import { signIn, useSession, signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import useTranslation from "next-translate/useTranslation";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Lazy from "../../elements/Lazy";
 import Link from "next/link";
 import { useRouter } from 'next/router';
+import { useUserContext } from '../../../contexts/UserContext';
 
 const LazyDialogAccountSettings = dynamic(() => import('../../elements/DialogAccountSettings'));
 
@@ -17,9 +18,7 @@ const BaseAppBarContent = () => {
 
   const router = useRouter();
 
-  const { data: session, status } = useSession();
-
-  const loading = status === 'loading';
+  const { user, loading } = useUserContext();
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] = React.useState(null);
 
@@ -40,13 +39,13 @@ const BaseAppBarContent = () => {
       <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
       </Box>
       <Box sx={{ flexBasis: '300px', px: 2, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        {(!loading && !session) &&
+        {(!loading && !user) &&
           <React.Fragment>
             <Button onClick={() => router.push('/signup')} variant='contained' color='primary'>Sign up</Button>
             <Button onClick={() => router.push('/login')} color='primary'>Login</Button>
           </React.Fragment>
         }
-        {session &&
+        {user &&
           <Button onClick={() => router.push('/dashboard')} color='primary'>Dashboard</Button>
         }
       </Box>
@@ -111,7 +110,7 @@ const UserMenu = ({ anchorEl, handleClose }: UserMenuProps) => {
           <ListItemIcon>
             <AccountCircleIcon fontSize="small" />
           </ListItemIcon>
-          {t('common:accountSettings')}
+          {t('common:navUserMenu.account')}
         </MenuItem>
         <Divider />
         <MenuItem sx={{ color: 'error.main' }} onClick={() => signOut({ callbackUrl: '/' })}>

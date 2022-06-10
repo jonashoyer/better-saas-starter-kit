@@ -7,7 +7,7 @@ import { NextApiResponse } from 'next'
  */
 
 export const setCookie = (
-  res: NextApiResponse | ServerResponse,
+  res: NextApiResponse | ServerResponse,
   name: string,
   value: unknown,
   options: CookieSerializeOptions = {}

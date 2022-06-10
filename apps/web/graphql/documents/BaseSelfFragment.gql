@@ -1,0 +1,7 @@
+fragment BaseSelf on User {
+  id
+  email
+  emailVerified
+  name
+  image
+}
