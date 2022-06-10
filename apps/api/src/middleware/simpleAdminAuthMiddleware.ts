@@ -5,7 +5,7 @@ import { ADMIN_KEY, JWT_SECRET } from '../config';
 import ms from 'ms';
 
 const cookieName = 'bs.admin-tok';
-const expiresIn = '10m';
+const expiresIn = '3h';
 
 const simpleAdminAuthMiddleware: RequestHandler = (req, res, next) => {
   const tok = req.cookies[cookieName];

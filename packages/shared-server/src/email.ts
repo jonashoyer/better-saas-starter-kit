@@ -9,12 +9,12 @@ import { Transporter } from 'nodemailer';
 import { asArray } from 'shared';
 
 export const generateEmailFromTemplate = (templateName: string, options: { language?: string, context?: any, handlebarsOptions?: RuntimeOptions, mjmlOption?: MJMLParsingOptions}) => {
-  const p = path.join(__dirname, 'mjmls', `${templateName}.${options.language ?? 'en'}.mjml`);
+  const p = path.join(__dirname, 'mjmls', options.language ?? 'en', `${templateName}.mjml`);
   if (!fs.existsSync(p)) new Error(`Email template was not found! (${templateName})`);
   const content = fs.readFileSync(p, 'utf8');
   const compiled = compile(content)(options.context, options.handlebarsOptions);
   const { html, errors } = mjml2html(compiled, options.mjmlOption);
-  if (errors) throw errors;
+  if (errors.length > 0) throw errors;
   return html;
 }
 
@@ -33,7 +33,7 @@ export interface EmailOptions {
 
 export type SMTPProvider = 'MAILJET' | 'SENDGRID' | 'NODEMAILER';
 
-export const sendEmail = (smtp: SMTPProvider, options: EmailOptions | EmailOptions[]) => {
+export const sendEmail = (smtp: SMTPProvider, options: EmailOptions | EmailOptions[]) => {
   const payload = asArray(options);
   switch(smtp) {
     case 'MAILJET':
@@ -81,7 +81,7 @@ export const sendgridSendEmail = async (options: EmailOptions[]) => {
 
 export const smtpSendEmail = async (options: EmailOptions[]) => {
   const nodemailer = await getNodemailer();
-  return Promise.all(
+  const result = await Promise.allSettled(
     options.map(e => 
       nodemailer.sendMail({
         from: e.from.name ? { address: e.from.email, name: e.from.name } : e.from.email,
@@ -92,6 +92,9 @@ export const smtpSendEmail = async (options: EmailOptions[]) => {
       })
     )
   )
+
+  const rejected = result.filter(r => r.status === 'rejected');
+  if (rejected.length > 0) throw new Error((rejected[0] as any).reason);
 }
 
 

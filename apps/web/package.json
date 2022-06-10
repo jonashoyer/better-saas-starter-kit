@@ -27,9 +27,11 @@
     "@stripe/stripe-js": "^1.16.0",
     "@svgr/webpack": "^6.2.1",
     "@types/react-dom": "^17.0.9",
+    "apollo-server-cache-redis": "^3.3.1",
     "apollo-server-micro": "^3.0.2",
     "argon2": "^0.28.5",
     "cors": "^2.8.5",
+    "crypto-hash": "^2.0.1",
     "cuid": "^2.1.8",
     "framer-motion": "^6.2.8",
     "graphql-depth-limit": "^1.1.0",
@@ -37,6 +39,7 @@
     "graphql-ws": "^5.8.2",
     "ioredis": "^4.27.6",
     "jsonwebtoken": "^8.5.1",
+    "locales": "*",
     "micro": "^9.3.4",
     "next": "^11.1.0",
     "next-auth": "^4.3.1",
@@ -50,7 +53,6 @@
     "shared": "*",
     "stripe": "^8.163.0",
     "tsconfig": "*",
-    "locales": "*",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

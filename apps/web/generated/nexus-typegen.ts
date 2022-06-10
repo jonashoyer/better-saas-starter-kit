@@ -65,6 +65,7 @@ export interface NexusGenInputs {
     taxType: NexusGenEnums['TaxType']; // TaxType!
   }
   UpdateUserInput: { // input type
+    email?: string | null; // String
     id: string; // String!
     name?: string | null; // String
   }
@@ -169,7 +170,7 @@ export interface NexusGenFieldTypes {
     deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
-    sendVerifyEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
+    sendVerificationEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     updateProject: NexusGenRootTypes['Project'] | null; // Project
     updateStripePaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
     updateTaxId: NexusGenRootTypes['Ok'] | null; // Ok
@@ -196,7 +197,6 @@ export interface NexusGenFieldTypes {
     ping: string; // String!
     project: NexusGenRootTypes['Project'] | null; // Project
     self: NexusGenRootTypes['User'] | null; // User
-    selfProjects: Array<NexusGenRootTypes['Project'] | null> | null; // [Project]
     stripeProducts: Array<NexusGenRootTypes['StripeProduct'] | null> | null; // [StripeProduct]
   }
   StatusResponse: { // field return type
@@ -310,7 +310,7 @@ export interface NexusGenFieldTypeNames {
     deleteTaxId: 'Ok'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
-    sendVerifyEmail: 'StatusResponse'
+    sendVerificationEmail: 'StatusResponse'
     updateProject: 'Project'
     updateStripePaymentMethod: 'StripePaymentMethod'
     updateTaxId: 'Ok'
@@ -337,7 +337,6 @@ export interface NexusGenFieldTypeNames {
     ping: 'String'
     project: 'Project'
     self: 'User'
-    selfProjects: 'Project'
     stripeProducts: 'StripeProduct'
   }
   StatusResponse: { // field return type name
@@ -468,9 +467,6 @@ export interface NexusGenArgTypes {
     }
     deleteUserProject: { // args
       id: string; // String!
-    }
-    sendVerifyEmail: { // args
-      email: string; // String!
     }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!

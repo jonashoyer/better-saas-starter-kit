@@ -1,4 +1,4 @@
-import { createQueueManager } from "./QueueManager";
+import { createQueueManager, QueueManagerOptions } from "./QueueManager";
 import { EmailOptions, generateEmailFromTemplate, sendEmail, SMTPProvider } from "./email";
 import { Job } from "bullmq";
 
@@ -39,4 +39,4 @@ const queues = {
     },
 } as const;
 
-export const createAppQueueManager = () => createQueueManager<typeof queues>({ queues });
+export const createAppQueueManager = <O extends Omit<QueueManagerOptions<any>, 'queues'>>(options?: O) => createQueueManager<typeof queues, O & { queues: typeof queues }>({ queues, ...(options as any) });

@@ -19,6 +19,7 @@
     "@bull-board/api": "^3.5.2",
     "@bull-board/express": "^3.5.2",
     "@graphql-tools/schema": "^8.3.13",
+    "apollo-server-cache-redis": "^3.3.1",
     "apollo-server-core": "^3.8.1",
     "apollo-server-express": "^3.1.2",
     "cookie": "^0.4.1",

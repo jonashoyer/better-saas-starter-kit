@@ -15,6 +15,7 @@ import bullboardRoute from './routes/bullboard';
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
+import { BaseRedisCache } from 'apollo-server-cache-redis';
 
 
 (async function () {
@@ -58,6 +59,12 @@ import { useServer } from 'graphql-ws/lib/use/ws';
     csrfPrevention: true,
     context: createContext,
     validationRules: [depthLimit(4)],
+    persistedQueries: {
+      cache: new BaseRedisCache({
+        client: createRedisClient('client'),
+      }),
+      ttl: 21600, // 6h
+    },
     debug: NODE_ENV === NodeEnv.Development,
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),

@@ -1,9 +1,8 @@
 import React from 'react';
 import { GetPaymentMethodsDocument } from "types/gql";
 import { hashString } from 'utils';
-import { apolloClient } from 'utils/GraphqlClient';
 import usePoll from './usePoll';
-
+import { useApolloClient } from '@apollo/client';
 
 export interface HashablePaymentMethod {
   id: string;
@@ -22,6 +21,9 @@ interface UsePollPaymentMethodsOption {
 }
 
 const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => void, boolean] => {
+
+  const apolloClient =  useApolloClient();
+  
   const { projectId, paymentMethods, onCompleted, onFailed, maxTries = 8, delay = 500, initialDelay = 800 } = option;
   
   const currentHashRef = React.useRef(null);

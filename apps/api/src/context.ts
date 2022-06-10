@@ -17,8 +17,7 @@ import { SubscribeMessage, Context as ContextWS } from 'graphql-ws';
 export const pubsub = createPubsub({ host: REDIS_HOST, port: REDIS_PORT, db: REDIS_DB, password: REDIS_PASSWORD });
 export const prisma = new PrismaClient();
 export const redis = createRedisClient('client');
-export const queueManager = createAppQueueManager(); // :MODULE worker
-
+export const queueManager = createAppQueueManager({ worker: true }); // :MODULE worker
 
 export type Context = {
   req: Request;

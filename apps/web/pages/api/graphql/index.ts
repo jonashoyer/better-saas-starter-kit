@@ -1,4 +1,5 @@
 import { ApolloServer } from "apollo-server-micro";
+import { BaseRedisCache } from 'apollo-server-cache-redis';
 import schema from "../../../graphql/schema";
 import { createContext } from '../../../graphql/context';
 import depthLimit from 'graphql-depth-limit';
@@ -6,6 +7,7 @@ import { RequestHandler } from 'micro'
 import { NextApiHandler } from "next";
 import Cors from 'cors';
 import initMiddleware from "../../../utils/init-middleware";
+import { createRedisClient } from "shared-server";
 
 const cors = initMiddleware(
   Cors({
@@ -18,9 +20,15 @@ const apolloServer = new ApolloServer({
   schema,
   context: createContext,
   validationRules: [depthLimit(4)],
+  persistedQueries: {
+    cache: new BaseRedisCache({
+      client: createRedisClient('client'),
+    }),
+    ttl: 21600, // 6h
+  },
   formatError(err) {
     return err;
-  }
+  },
 });
 
 export const config = {

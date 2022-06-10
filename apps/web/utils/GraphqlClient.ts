@@ -1,36 +1,31 @@
-import React from 'react';
-import { ApolloClient, InMemoryCache, NormalizedCacheObject, ServerError, HttpLink, split } from '@apollo/client';
-import { onError } from "@apollo/client/link/error";
-import { WebSocketLink } from "@apollo/client/link/ws";
+import { ApolloClient, InMemoryCache, HttpLink, split, ApolloLink } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
-import { SubscriptionClient } from 'subscriptions-transport-ws';
-import { signOut } from 'next-auth/react';
 import { GRAPHQL_ENDPOINT, GRAPHQL_WEBSOCKET_ENDPOINT } from '../config';
 import { getURL } from '.';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
+import { RetryLink } from "@apollo/client/link/retry";
+import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
+import { sha256 } from 'crypto-hash';
 
-export let apolloClient: ApolloClient<NormalizedCacheObject>;
-
-// remove cached token on 401 from the server
-const graphqlOnError = onError(({ graphQLErrors, networkError }) => {
-
-  if (
-    (networkError?.name === 'ServerError' && (networkError as ServerError)?.statusCode === 401)
-    || networkError?.message === 'Session not found!'
-    ) {
-    signOut();
-  }
-})
-
-export const memoryCache = new InMemoryCache({});
 const createHttpLink = (uri: string, headers = {}) => {
-  return  new HttpLink({
+  return new HttpLink({
     uri,
     credentials: 'include',
     headers,
     fetch,
   })
+}
+
+const createRetyLink = () => {
+  return new RetryLink({
+    delay: {
+      initial: 150,
+    },
+    attempts: {
+      max: 3,
+    },
+  });
 }
 
 const createWebSocketLink = () => {
@@ -43,61 +38,65 @@ const createWebSocketLink = () => {
   return null;
 }
 
-const createLink = (headers = {}) => {
+export const createLink = (baseLink?: ApolloLink, headers = {}) => {
 
-  const httpLinkSplit = split(
-    ({ operationName, getContext }) => {
-      //NOTE: Custom logic for splitting between serverless and remote server. Change as see fit.
-      return !operationName.toLowerCase().includes('remoteServer') && !getContext().remoteServer;
-    },
-    createHttpLink(`${getURL()}/api/graphql`, headers),
-    createHttpLink(GRAPHQL_ENDPOINT, headers),
-  );
+  const persistedLink = createPersistedQueryLink({ sha256 });
+
+  const link =
+    (baseLink ? baseLink.concat(persistedLink) : persistedLink)
+      .concat(createRetyLink())
+      .concat(
+        split(
+          ({ operationName, getContext }) => {
+            //NOTE: Custom logic for splitting between serverless and remote server. Change as see fit.
+            return !operationName.toLowerCase().includes('remoteServer') && !getContext().remoteServer;
+          },
+          createHttpLink(`${getURL()}/api/graphql`, headers),
+          createHttpLink(GRAPHQL_ENDPOINT, headers),
+        )
+      )
 
   if (process.browser) {
-    return graphqlOnError.concat(
-      split(
-        ({ query }) => {
-          const definition = getMainDefinition(query);
-          return (
-            definition.kind === 'OperationDefinition' &&
-            definition.operation === 'subscription'
-          );
-        },
-        createWebSocketLink(),
-        httpLinkSplit,
-      )
-    );
+    return split(
+      ({ query }) => {
+        const definition = getMainDefinition(query);
+        return (
+          definition.kind === 'OperationDefinition' &&
+          definition.operation === 'subscription'
+        );
+      },
+      createWebSocketLink(),
+      link,
+    )
   }
 
-  return httpLinkSplit;
+  return link;
 }
 
-export function createApolloClient(headers = {}) {
+export function createApolloClient(link: ApolloLink) {
   return new ApolloClient({
-    link: createLink(headers),
-    cache: memoryCache,
+    link,
+    cache: new InMemoryCache({}),
     ssrMode: typeof window === 'undefined',
     ssrForceFetchDelay: 100,
   });
 }
 
-export function initializeApollo(initialState: any = null, headers = {}) {
-  const _apolloClient = apolloClient ?? createApolloClient(headers)
+export interface InitializeApolloOptions {
+  initialState?: any;
+  link?: ApolloLink;
+  headers?: {};
+  baseLink?: ApolloLink;
+}
+
+export function initializeApollo({ initialState, link, headers, baseLink }: InitializeApolloOptions) {
+  const apolloClient = createApolloClient(link ?? createLink(baseLink, headers))
 
   // If your page has Next.js data fetching methods that use Apollo Client, the initial state
   // gets hydrated here
   if (initialState) {
-    _apolloClient.cache.restore(initialState);
+    apolloClient.cache.restore(initialState);
   }
-  // For SSG and SSR always create a new Apollo Client
-  if (typeof window === 'undefined') return _apolloClient;
-  // Create the Apollo Client once in the client
-  if (!apolloClient) apolloClient = _apolloClient;
-
-  return _apolloClient;
-}
-
-export function useApollo(initialState: any) {
-  return React.useMemo(() => initializeApollo(initialState), [initialState]);
+  
+  return apolloClient;
 }

@@ -71,7 +71,7 @@ export type Mutation = {
   deleteTaxId?: Maybe<Ok>;
   deleteUserInvite?: Maybe<UserInvite>;
   deleteUserProject?: Maybe<UserProject>;
-  sendVerifyEmail?: Maybe<StatusResponse>;
+  sendVerificationEmail?: Maybe<StatusResponse>;
   updateProject?: Maybe<Project>;
   updateStripePaymentMethod?: Maybe<StripePaymentMethod>;
   updateTaxId?: Maybe<Ok>;
@@ -127,11 +127,6 @@ export type MutationDeleteUserInviteArgs = {
 
 export type MutationDeleteUserProjectArgs = {
   id: Scalars['String'];
-};
-
-
-export type MutationSendVerifyEmailArgs = {
-  email: Scalars['String'];
 };
 
 
@@ -238,7 +233,6 @@ export type Query = {
   ping: Scalars['String'];
   project?: Maybe<Project>;
   self?: Maybe<User>;
-  selfProjects?: Maybe<Array<Maybe<Project>>>;
   stripeProducts?: Maybe<Array<Maybe<StripeProduct>>>;
 };
 
@@ -433,6 +427,7 @@ export type UpdateTaxIdInput = {
 };
 
 export type UpdateUserInput = {
+  email?: Maybe<Scalars['String']>;
   id: Scalars['String'];
   name?: Maybe<Scalars['String']>;
 };
@@ -512,6 +507,15 @@ export const BaseProjcetFragmentDoc = gql`
     fragment BaseProjcet on Project {
   id
   name
+}
+    `;
+export const BaseSelfFragmentDoc = gql`
+    fragment BaseSelf on User {
+  id
+  email
+  emailVerified
+  name
+  image
 }
     `;
 export const BaseStripeInvoiceFragmentDoc = gql`
@@ -1030,12 +1034,18 @@ export type ProjectSubscriptionsLazyQueryHookResult = ReturnType<typeof useProje
 export type ProjectSubscriptionsQueryResult = Apollo.QueryResult<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>;
 export const SelfProjectsDocument = gql`
     query SelfProjects {
-  selfProjects {
-    id
-    name
+  self {
+    ...BaseSelf
+    projects {
+      id
+      project {
+        ...BaseProjcet
+      }
+    }
   }
 }
-    `;
+    ${BaseSelfFragmentDoc}
+${BaseProjcetFragmentDoc}`;
 
 /**
  * __useSelfProjectsQuery__
@@ -1066,13 +1076,10 @@ export type SelfProjectsQueryResult = Apollo.QueryResult<SelfProjectsQuery, Self
 export const SelfDocument = gql`
     query Self {
   self {
-    id
-    email
-    emailVerified
-    name
+    ...BaseSelf
   }
 }
-    `;
+    ${BaseSelfFragmentDoc}`;
 
 /**
  * __useSelfQuery__
@@ -1100,6 +1107,38 @@ export function useSelfLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SelfQ
 export type SelfQueryHookResult = ReturnType<typeof useSelfQuery>;
 export type SelfLazyQueryHookResult = ReturnType<typeof useSelfLazyQuery>;
 export type SelfQueryResult = Apollo.QueryResult<SelfQuery, SelfQueryVariables>;
+export const SendVerificationEmailDocument = gql`
+    mutation SendVerificationEmail {
+  sendVerificationEmail {
+    ok
+  }
+}
+    `;
+export type SendVerificationEmailMutationFn = Apollo.MutationFunction<SendVerificationEmailMutation, SendVerificationEmailMutationVariables>;
+
+/**
+ * __useSendVerificationEmailMutation__
+ *
+ * To run a mutation, you first call `useSendVerificationEmailMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSendVerificationEmailMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [sendVerificationEmailMutation, { data, loading, error }] = useSendVerificationEmailMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSendVerificationEmailMutation(baseOptions?: Apollo.MutationHookOptions<SendVerificationEmailMutation, SendVerificationEmailMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SendVerificationEmailMutation, SendVerificationEmailMutationVariables>(SendVerificationEmailDocument, options);
+      }
+export type SendVerificationEmailMutationHookResult = ReturnType<typeof useSendVerificationEmailMutation>;
+export type SendVerificationEmailMutationResult = Apollo.MutationResult<SendVerificationEmailMutation>;
+export type SendVerificationEmailMutationOptions = Apollo.BaseMutationOptions<SendVerificationEmailMutation, SendVerificationEmailMutationVariables>;
 export const UpdateProjectDocument = gql`
     mutation UpdateProject($input: UpdateProjectInput!) {
   updateProject(input: $input) {
@@ -1173,6 +1212,8 @@ export const UpdateUserDocument = gql`
   updateUser(input: $input) {
     id
     name
+    email
+    emailVerified
   }
 }
     `;
@@ -1281,9 +1322,47 @@ export function useUpsertStripeSubscriptionMutation(baseOptions?: Apollo.Mutatio
 export type UpsertStripeSubscriptionMutationHookResult = ReturnType<typeof useUpsertStripeSubscriptionMutation>;
 export type UpsertStripeSubscriptionMutationResult = Apollo.MutationResult<UpsertStripeSubscriptionMutation>;
 export type UpsertStripeSubscriptionMutationOptions = Apollo.BaseMutationOptions<UpsertStripeSubscriptionMutation, UpsertStripeSubscriptionMutationVariables>;
+export const VerifyEmailDocument = gql`
+    mutation VerifyEmail($token: String!) {
+  verifyEmail(token: $token) {
+    ...BaseSelf
+  }
+}
+    ${BaseSelfFragmentDoc}`;
+export type VerifyEmailMutationFn = Apollo.MutationFunction<VerifyEmailMutation, VerifyEmailMutationVariables>;
+
+/**
+ * __useVerifyEmailMutation__
+ *
+ * To run a mutation, you first call `useVerifyEmailMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useVerifyEmailMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [verifyEmailMutation, { data, loading, error }] = useVerifyEmailMutation({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useVerifyEmailMutation(baseOptions?: Apollo.MutationHookOptions<VerifyEmailMutation, VerifyEmailMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<VerifyEmailMutation, VerifyEmailMutationVariables>(VerifyEmailDocument, options);
+      }
+export type VerifyEmailMutationHookResult = ReturnType<typeof useVerifyEmailMutation>;
+export type VerifyEmailMutationResult = Apollo.MutationResult<VerifyEmailMutation>;
+export type VerifyEmailMutationOptions = Apollo.BaseMutationOptions<VerifyEmailMutation, VerifyEmailMutationVariables>;
 export type BaseProjcetFragment = (
   { __typename?: 'Project' }
   & Pick<Project, 'id' | 'name'>
+);
+
+export type BaseSelfFragment = (
+  { __typename?: 'User' }
+  & Pick<User, 'id' | 'email' | 'emailVerified' | 'name' | 'image'>
 );
 
 export type BaseStripeInvoiceFragment = (
@@ -1503,10 +1582,18 @@ export type SelfProjectsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type SelfProjectsQuery = (
   { __typename?: 'Query' }
-  & { selfProjects?: Maybe<Array<Maybe<(
-    { __typename?: 'Project' }
-    & Pick<Project, 'id' | 'name'>
-  )>>> }
+  & { self?: Maybe<(
+    { __typename?: 'User' }
+    & { projects: Array<(
+      { __typename?: 'UserProject' }
+      & Pick<UserProject, 'id'>
+      & { project: (
+        { __typename?: 'Project' }
+        & BaseProjcetFragment
+      ) }
+    )> }
+    & BaseSelfFragment
+  )> }
 );
 
 export type SelfQueryVariables = Exact<{ [key: string]: never; }>;
@@ -1516,7 +1603,18 @@ export type SelfQuery = (
   { __typename?: 'Query' }
   & { self?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'email' | 'emailVerified' | 'name'>
+    & BaseSelfFragment
+  )> }
+);
+
+export type SendVerificationEmailMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SendVerificationEmailMutation = (
+  { __typename?: 'Mutation' }
+  & { sendVerificationEmail?: Maybe<(
+    { __typename?: 'StatusResponse' }
+    & Pick<StatusResponse, 'ok'>
   )> }
 );
 
@@ -1555,7 +1653,7 @@ export type UpdateUserMutation = (
   { __typename?: 'Mutation' }
   & { updateUser?: Maybe<(
     { __typename?: 'User' }
-    & Pick<User, 'id' | 'name'>
+    & Pick<User, 'id' | 'name' | 'email' | 'emailVerified'>
   )> }
 );
 
@@ -1582,5 +1680,18 @@ export type UpsertStripeSubscriptionMutation = (
   & { upsertStripeSubscription?: Maybe<(
     { __typename?: 'StripeSubscription' }
     & Pick<StripeSubscription, 'id' | 'metadata' | 'status' | 'stripePriceId' | 'quantity' | 'cancelAtPeriodEnd' | 'cancelAt' | 'canceledAt' | 'currentPeriodStart' | 'currentPeriodEnd' | 'created' | 'endedAt'>
+  )> }
+);
+
+export type VerifyEmailMutationVariables = Exact<{
+  token: Scalars['String'];
+}>;
+
+
+export type VerifyEmailMutation = (
+  { __typename?: 'Mutation' }
+  & { verifyEmail?: Maybe<(
+    { __typename?: 'User' }
+    & BaseSelfFragment
   )> }
 );

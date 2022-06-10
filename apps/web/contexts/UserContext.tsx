@@ -4,10 +4,10 @@ import { useCookie } from 'react-use';
 import useProject from '../hooks/useProject';
 import { ProjectQuery, SelfProjectsQuery, useProjectQuery, useSelfProjectsQuery, BaseSelfFragment } from '../types/gql';
 import { noop, Constants } from 'shared';
-
 import w3t from 'web3token';
 import Web3 from 'web3';
 import ms from 'ms';
+import { remove as cookieRemove } from 'js-cookie'
 
 
 declare global {
@@ -113,4 +113,9 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
       {children}
     </UserContext.Provider>
   )
+}
+
+export const userLogout = () => {
+  signOut({ callbackUrl: '/' });
+  cookieRemove('w3t');
 }

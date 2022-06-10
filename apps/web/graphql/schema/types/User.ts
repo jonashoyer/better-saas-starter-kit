@@ -1,13 +1,14 @@
 import { Context } from 'graphql/context';
-import * as prisma from '@prisma/client';
+import * as Prisma from '@prisma/client';
 import ms from 'ms';
 import { arg, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
 import { ForbiddenError } from 'apollo-server-micro';
 import { requireAuth } from './permissions';
 import crypto from 'crypto';
 import { getURL } from 'utils';
+import { simpleRateLimit } from 'shared-server';
 
-const isSelf = (root: prisma.User, args: any, ctx: Context) => {
+const isSelf = (root: Prisma.User, args: any, ctx: Context) => {
   if (!ctx.user?.id) return false;
   const user = root;
   return user.id === ctx.user?.id;
@@ -40,6 +41,7 @@ export const UpdateUserInput = inputObjectType({
   definition(t) {
     t.string('id', { required: true });
     t.string('name');
+    t.string('email');
   }
 })
 
@@ -51,14 +53,24 @@ export const UpdateUser = mutationField('updateUser', {
   },
   async resolve(root, args, ctx) {
     if (args.input.id != ctx.user.id) throw new ForbiddenError('Not allowed resource!');
-    const user = await ctx.prisma.user.update({
-      where: { id: args.input.id },
-      data: {
-        name: args.input.name,
-      }
-    })
 
-    return user;
+    try {
+
+      const user = await ctx.prisma.user.update({
+        where: { id: args.input.id },
+        data: {
+          ...(args.input.name && ctx.user.name !== args.input.name && { name: args.input.name }),
+          ...(args.input.email && ctx.user.email !== args.input.email && { email: args.input.email, emailVerified: null }),
+        }
+      })
+      
+      return user;
+    } catch (err) {
+      if ((err as Prisma.Prisma.PrismaClientKnownRequestError).code === "P2002") {
+        throw new ForbiddenError('Email already taken!'); // TODO: I18n!
+      }
+      throw err;
+    }
   }
 })
 
@@ -70,30 +82,20 @@ export const VerificationToken = objectType({
   }
 })
 
-export const SendVerifyEmail = mutationField('sendVerifyEmail', {
+export const SendVerificationEmail = mutationField('sendVerificationEmail', {
   type: 'StatusResponse',
-  args: {
-    email: stringArg({ required: true }),
-  },
   authorize: requireAuth,
-  async resolve(root, { email }, ctx) {
+  async resolve(root, args, ctx) {
     
     if (ctx.user.emailVerified) throw new ForbiddenError('Email already verified!');
-
-    const accounts = await ctx.prisma.account.findMany({
-      where: {
-        userId: ctx.user.id,
-      }
-    });
-
-    if (accounts.length == 0) throw new ForbiddenError('User has no account linked!');
-    if (accounts.length > 1) throw new ForbiddenError('User has multiple account linked already!');
+    if (!ctx.user.email) throw new ForbiddenError('No email set!');
+    if (!(await simpleRateLimit(ctx.redis, `rl:verification-email:${ctx.user.id}`, ms('55s')))) throw new ForbiddenError('Please wait a moment before sending another verification email!');
 
     const verificationToken = await ctx.prisma.verificationToken.create({
       data: {
         expires: new Date(Date.now() + ms('1h')),
         token: crypto.randomBytes(32).toString('hex'),
-        identifier: accounts[0].id,
+        identifier: ctx.user.email,
       }
     });
 
@@ -102,7 +104,7 @@ export const SendVerifyEmail = mutationField('sendVerifyEmail', {
       [{
         email: {
           from: { email: 'verify@notifications.better-saas.io', name: 'Better SaaS' },
-          to: { email },
+          to: { email: ctx.user.email },
           subject: 'Verify your email',
         },
         template: {
@@ -111,7 +113,10 @@ export const SendVerifyEmail = mutationField('sendVerifyEmail', {
             url: `${getURL()}?verify=${verificationToken.token}`,
           }
         }
-      }]
+      }],
+      {
+        jobId: ctx.user.id,
+      }
     );
 
     return {
@@ -133,21 +138,10 @@ export const VerifiyEmail = mutationField('verifyEmail', {
     });
 
     if (!verificationToken) throw new ForbiddenError('Bad token!');
-
-    const accounts = await ctx.prisma.account.findMany({
-      where: {
-        userId: ctx.user.id,
-      }
-    });
-
-    if (accounts.length == 0) throw new ForbiddenError('User has no account linked!');
-    if (accounts.length > 1) throw new ForbiddenError('User has multiple account linked already!');
-
-    if (!accounts.some(e => e.id == verificationToken.identifier)) throw new ForbiddenError('Verification not intended for this user!');
     
     const user = await ctx.prisma.user.update({
-      where: { id: accounts[0].id },
-      data: { id: verificationToken.identifier, emailVerified: new Date() },
+      where: { email: verificationToken.identifier },
+      data: { emailVerified: new Date() },
     })
 
     return user;

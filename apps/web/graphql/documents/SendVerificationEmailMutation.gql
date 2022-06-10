@@ -1,0 +1,5 @@
+mutation SendVerificationEmail {
+  sendVerificationEmail {
+    ok
+  }
+}

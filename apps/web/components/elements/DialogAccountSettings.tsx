@@ -1,15 +1,13 @@
-import React from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
+import React, { FormEvent } from 'react';
+import { Link as MuiLink, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
+import Trans from 'next-translate/Trans';
 import { TextField } from '@mui/material';
-import { useSelfQuery, useUpdateUserMutation } from 'types/gql';
+import { useSendVerificationEmailMutation, useUpdateUserMutation } from 'types/gql';
 import { LoadingButton } from '@mui/lab';
 import SpinnerOverlay from './SpinnerOverlay';
+import { useUserContext } from '../../contexts/UserContext';
+import useCountdown from '../../hooks/useCountdown';
 
 export type DialogAccountSettingsProps = {
   open: boolean;
@@ -20,15 +18,25 @@ export default function DialogAccountSettings({ open,  handleClose }: DialogAcco
 
   const { t } = useTranslation();
 
-  const { data: selfData, loading: selfLoading } = useSelfQuery();
+  const { time: verificationCountdownTime, running: verificationCountdownRunning, start: verificationCoundownStart } = useCountdown();
+  console.log({ verificationCountdownTime, verificationCountdownRunning, verificationCoundownStart });
 
+  const { user, loading: userLoading } = useUserContext();
+
+  const [email, setEmail] = React.useState('');
   const [name, setName] = React.useState('');
 
-  const [updateUser, { loading: updateUserLoading }] = useUpdateUserMutation();
+  const [emailLoading, setEmailLoading] = React.useState(false);
+  const [nameLoading, setNameLoading] = React.useState(false);
+
+  const [updateUser] = useUpdateUserMutation();
+  const [sendVerificationEmail] = useSendVerificationEmailMutation();
 
   React.useEffect(() => {
-    setName(selfData?.self?.name ?? '');
-  }, [selfData]);
+    if (!user) return;
+    setEmail(user.email ?? '');
+    setName(user.name ?? '');
+  }, [user]);
 
 
   const innerHandleClose = () => {
@@ -36,51 +44,121 @@ export default function DialogAccountSettings({ open,  handleClose }: DialogAcco
     handleClose();
   }
 
-  const onNameSave = (e: any) => {
+  const onNameSave = async (e: FormEvent) => {
     e?.preventDefault?.();
-    updateUser({
-      variables: {
-        input: {
-          id: selfData?.self.id,
-          name,
-        }
-      }
-    })
+
+    try {
+      setNameLoading(true);
+      await updateUser({
+        variables: {
+          input: {
+            id: user.id,
+            name,
+          }
+        },
+      })
+    } catch { }
+    finally {
+      setNameLoading(false);
+    }
   }
 
-  const loading = selfLoading || updateUserLoading;
+  const onEmailSave = async (e: FormEvent) => {
+    e?.preventDefault?.();
+    try {
+      setEmailLoading(true);
+      await updateUser({
+        variables: {
+          input: {
+            id: user.id,
+            email,
+          }
+        },
+      });
+
+      sendVerificationEmail();
+      verificationCoundownStart(60);
+
+    } catch { }
+    finally {
+      setEmailLoading(false);
+    }
+  }
+
+  const resendVerificationEmail = () => {
+    verificationCoundownStart(60);
+    sendVerificationEmail();
+  }
+
+  const loading = userLoading || nameLoading || emailLoading;
 
   return (
     <Dialog open={open} onClose={innerHandleClose} maxWidth='sm' fullWidth>
-      <DialogTitle>{t('common:accountSettings')}</DialogTitle>
+      <DialogTitle>{t('dialog:accountDialog.account')}</DialogTitle>
       <DialogContent sx={{ position: 'relative' }}>
-        <SpinnerOverlay loading={selfLoading} />
-        <DialogContentText>{}</DialogContentText>
+        <SpinnerOverlay loading={userLoading} />
+
+
         <form onSubmit={onNameSave}>
           <TextField
             margin='normal'
-            label={t('common:name')}
+            label={t('dialog:accountDialog.name')}
             fullWidth
             value={name ?? ''}
             onChange={e => setName(e.target.value)}
-            disabled={updateUserLoading}
+            disabled={nameLoading}
             InputProps={{
               endAdornment: (
                 <LoadingButton
-                  loading={updateUserLoading}
+                  loading={nameLoading}
                   variant='outlined'
                   onClick={onNameSave}
-                  disabled={name == selfData?.self?.name}
+                  disabled={!name || name == user?.name}
                 >
-                  {t('common:save')}
+                  {t('dialog:accountDialog.save')}
                 </LoadingButton>
               )
             }}
           />
         </form>
+
+        <form onSubmit={onEmailSave}>
+          <TextField
+            margin='normal'
+            label={t('dialog:accountDialog.email', { count: 1 })}
+            fullWidth
+            value={email ?? ''}
+            onChange={e => setEmail(e.target.value)}
+            disabled={emailLoading}
+            InputProps={{
+              endAdornment: (
+                <LoadingButton
+                  loading={emailLoading}
+                  variant='outlined'
+                  onClick={onEmailSave}
+                  disabled={!email || email == user?.email}
+                >
+                  {t('dialog:accountDialog.save')}
+                </LoadingButton>
+              )
+            }}
+            helperText={
+              user.email && !user.emailVerified &&
+                <Trans
+                i18nKey='dialog:accountDialog.emailVerification'
+                components={{ 
+                  link: verificationCountdownRunning
+                    ? <MuiLink underline='none' >{t('dialog:accountDialog.emailVerificationCountdown', { countdown: verificationCountdownTime })}</MuiLink>
+                    : <MuiLink sx={{ cursor: 'pointer' }} onClick={resendVerificationEmail}>{t('dialog:accountDialog.emailVerificationResend')}</MuiLink>
+                }}
+              />
+            }
+          />
+        </form>
+
       </DialogContent>
       <DialogActions>
-        <Button disabled={loading} onClick={innerHandleClose}>{t('common:close')}</Button>
+        <Button disabled={loading} onClick={innerHandleClose}>{t('dialog:close')}</Button>
       </DialogActions>
     </Dialog>
   );

@@ -3,7 +3,6 @@ import { createRedisClient } from './redisClient';
 
 interface JobQueueOperationOptions<T = any, R = any, N extends string = string> {
   processor: Processor<T, R, N>;
-  options?: WorkerOptions;
 }
 
 interface JobQueueOptions<K extends string, Q extends { [P in K]: JobQueueOperationOptions<any, any, K>}> {
@@ -11,6 +10,7 @@ interface JobQueueOptions<K extends string, Q extends { [P in K]: JobQueueOperat
     [P in K]: Q[P];
   };
   options?: QueueOptions;
+  workerOptions?: WorkerOptions;
   enableQueueSchedule?: boolean;
   enableQueueEvent?: boolean;
 
@@ -21,42 +21,53 @@ interface JobQueueOptions<K extends string, Q extends { [P in K]: JobQueueOperat
 
 type QueueManagerQueues<Q extends Record<string, JobQueueOptions<string, any>> = any> = { [K in keyof Q]: JobQueueOptions<keyof Q[K]['operations'] & string, Q[K]['operations']> };
 
-type QueueManagerOptions<Q extends Record<string, JobQueueOptions<string, any>>> = {
+export type QueueManagerOptions<Q extends Record<string, JobQueueOptions<string, any>>> = {
   queues: QueueManagerQueues<Q>;
+  worker?: boolean;
 }
 
 
-export interface JobQueue<K extends string, Q extends JobQueueOptions<string, any>> {
-  queue: Q['operations'][keyof Q['operations']]['processor'] extends Processor<infer T, infer R, infer N> ? Queue<Partial<T>, R, K> : never;
-  workers: { [P in keyof Q['operations']]: Q['operations'][P]['processor'] extends Processor<infer T, infer R, infer N> ? Worker<Partial<T>, R, K> : never; }
+type QueueType<K extends string, Q extends JobQueueOptions<string, any>> = Q['operations'][keyof Q['operations']]['processor'] extends Processor<infer T, infer R, infer N> ? Queue<Partial<T>, R, K> : never;
+type WorkerType<K extends string, Q extends JobQueueOptions<string, any>> = Q['operations'][keyof Q['operations']]['processor'] extends Processor<infer T, infer R, infer N> ? Worker<Partial<T>, R, K> : never;
+
+export interface JobQueue<K extends string, Q extends JobQueueOptions<string, any>, W = false> {
+  queue: QueueType<K, Q>;
+  worker: W extends true ? WorkerType<K, Q> : never;
   queueScheduler: Q['enableQueueSchedule'] extends true ? QueueScheduler : never;
   queueEvents: Q['enableQueueEvent'] extends true ? QueueEvents : never;
 }
 
-export type QueueManagerReturn<Q extends Record<string, JobQueueOptions<string, any>>> = {
-  [K in keyof Q]: JobQueue<keyof Q[K]['operations'] & string, Q[K]>;
+export type QueueManagerReturn<Q extends Record<string, JobQueueOptions<string, any>>, W = false> = {
+  [K in keyof Q]: JobQueue<keyof Q[K]['operations'] & string, Q[K], W>;
 }
 
-export const createQueueManager = <Q extends Record<string, JobQueueOptions<string, any>>>(options: QueueManagerOptions<Q>): QueueManagerReturn<Q> => {
+export const createQueueManager = <Q extends Record<string, JobQueueOptions<string, any>>, O extends QueueManagerOptions<Q>>(options: O): QueueManagerReturn<Q, O['worker']> => {
 
   const connection = createRedisClient('new');
   
   return Object.fromEntries(Object.entries(options.queues).map(([key, q]: [string, QueueManagerQueues<Q>[keyof Q]]) => {
     const queue = new Queue(key, { connection, ...q.options });
 
-    const workers = Object.fromEntries(Object.entries(q.operations).map(([key, operation]) => {
-      const worker = new Worker(key, operation.processor, { connection, ...operation.options });
-      return [key, worker];
-    }));
+    const worker = !options.worker ? undefined : new Worker(key, job => {
+      const processor = q.operations[job.name]?.processor;
+      if (!processor) throw new Error(`No processor ${key}.${job.name}!`);
+      return processor(job);
+    }, { connection, ...q.workerOptions })
 
-    const queueScheduler = q.enableQueueSchedule ? new QueueScheduler(key, { connection: createRedisClient('new'), ...q.queueSchedulerOptions }) : undefined;
+    // const workers = !options.worker ? undefined : Object.fromEntries(Object.entries(q.operations).map(([key, operation]) => {
+    //   const worker = new Worker(key, operation.processor, { connection, ...operation.options });
+    //   console.log('worker', worker);
+    //   return [key, worker];
+    // }));
+
+    const queueScheduler = options.worker && q.enableQueueSchedule ? new QueueScheduler(key, { connection: createRedisClient('new'), ...q.queueSchedulerOptions }) : undefined;
     const queueEvents = q.enableQueueEvent ? new QueueEvents(key, { connection: createRedisClient('new'), ...q.queueEventsOptions }) : undefined;
     
     return [
       key,
       {
         queue,
-        workers,
+        worker,
         queueScheduler,
         queueEvents,
       }

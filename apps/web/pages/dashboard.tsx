@@ -17,7 +17,7 @@ import { fetchUserContext } from '../utils/serverSideUtils';
 
 const Dashboard: AppNextPage = (props: any) => {
 
-  const { session, project, projects, loading } = useUserContext();
+  const { user, project, projects, loading } = useUserContext();
 
   return (
     <React.Fragment>
@@ -29,8 +29,8 @@ const Dashboard: AppNextPage = (props: any) => {
       </Head>
 
       <StaticPageLayout padded pageTitle='SaaS Dashboard'>
-        {!session && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
-        {session && <Button onClick={() => signOut()} variant='contained'>Logout</Button>}
+        {!user && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
+        {user && <Button onClick={() => signOut()} variant='contained'>Logout</Button>}
         <Paper sx={{ p: 2, my: 2 }}>
           <Typography variant='subtitle1' color='textSecondary'>Project</Typography>
           {project &&
@@ -39,8 +39,8 @@ const Dashboard: AppNextPage = (props: any) => {
               <Typography color='textSecondary'>{project?.id}</Typography>
             </Box>
           }
-          <Typography variant='subtitle1' color='textSecondary'>Session data</Typography>
-          <Typography variant='body2'>{loading ? 'Loading...' : (session ? JSON.stringify(session, null, 2) : 'No session')}</Typography>
+          <Typography variant='subtitle1' color='textSecondary'>User</Typography>
+          <Typography variant='body2'>{loading ? 'Loading...' : (user ? JSON.stringify(user, null, 2) : 'No session')}</Typography>
         </Paper>
 
         <Box sx={{ py: 1 }}>

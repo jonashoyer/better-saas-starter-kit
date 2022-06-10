@@ -30,8 +30,6 @@ export type Context<E = any> = {
 export const createContext: ContextFunction<any> = async (ctx)  => {
   const user = await authorize({ req: ctx.req });
 
-  console.log('ctx', { user });
-
 
   // if (user) {
   //   try {
@@ -78,7 +76,6 @@ export const authorize = async ({ req, accessToken }: {
     try {
 
       const { user } = await authorizeWeb3Token(prisma, parsed.w3t);
-      console.log('!!!', user);
       
       return user;
     } catch(err) { console.log(err) }

@@ -11,7 +11,7 @@ import { prisma } from 'utils/prisma';
 
 type Context = GetServerSidePropsContext<ParsedUrlQuery>;
 
-export const createApolloClient = (ctx: Context) => initializeApollo({}, ctx.req.headers);;
+export const createApolloClient = (ctx: Context) => initializeApollo({ headers: ctx.req.headers });
 
 export const getProjectId = (ctx: Context): string | null => ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY] ?? null;
 
@@ -19,7 +19,7 @@ export interface FetchUserContextResult {
   projectId?: string;
   session: Session;
   project: ProjectQuery['project'] | null;
-  projects: SelfProjectsQuery['selfProjects'] | null;
+  projects: Array<SelfProjectsQuery['self']['projects'][0]['project']> | null;
   client: ApolloClient<NormalizedCacheObject>;
 }
 
@@ -67,13 +67,11 @@ export const fetchUserContext = async (ctx: Context, _client?: ApolloClient<Norm
       }),
     ]);
 
-    console.log('PASSED');
-
     return {
       projectId,
       session,
       project: projectQuery?.data?.project ?? null,
-      projects: projectsQuery?.data?.selfProjects ?? [],
+      projects: projectsQuery?.data?.self.projects.map(e => e.project) ?? [],
       client,
     }
   } catch (err) {

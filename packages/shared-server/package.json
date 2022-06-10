@@ -14,7 +14,9 @@
   "scripts": {
     "dev": "tsc -w",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
-    "build": "tsc",
+    "build": "npm run build:tsc && npm run build:cp",
+    "build:tsc": "tsc",
+    "build:cp": "cp -f -r ./src/mjmls ./dist",
     "tsc": "tsc",
     "watch": "tsc --watch"
   },

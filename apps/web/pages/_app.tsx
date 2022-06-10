@@ -3,13 +3,15 @@ import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { defaultTheme } from '../constants/theme';
-import { useApollo } from '../utils/GraphqlClient';
 import { ApolloProvider } from '@apollo/client';
 import { SessionProvider } from 'next-auth/react'
 import { ProjectValueProvider } from '../hooks/useProject';
 import WithCookieSnackbar from '../components/layouts/WithCookieSnackbar';
 import { AuthGuard } from '../components/elements/AuthGuard';
 import { UserContextProvider } from '../contexts/UserContext';
+import AppContinual from '../components/elements/AppContinual';
+import { useGraphqlClient } from '../hooks/useGraphqlClient';
+import ErrorSnackbar from '../components/elements/ErrorSnackbar';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -22,7 +24,17 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
   }, []);
 
-  const apolloClient = useApollo(pageProps.initialApolloState);
+  const [requestError, setRequestError] = React.useState(null);
+
+  const apolloClient = useGraphqlClient({
+    initialState: pageProps.initialApolloState,
+    onGraphQLErrors(errors) {
+      setRequestError(errors);
+    },
+    onNetworkError(error) {
+      setRequestError(error);
+    },
+  });
 
   return (
     <SessionProvider session={pageProps.session}>
@@ -31,6 +43,8 @@ function MyApp({ Component, pageProps }: AppProps) {
           <UserContextProvider>
             <ThemeProvider theme={defaultTheme}>
               <CssBaseline />
+              <AppContinual />
+              <ErrorSnackbar error={requestError} onClear={() => setRequestError(null)} />
               <WithCookieSnackbar>
                 <AuthGuard Component={Component} pageProps={pageProps} />
               </WithCookieSnackbar>

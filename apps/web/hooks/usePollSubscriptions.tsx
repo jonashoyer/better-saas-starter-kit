@@ -1,8 +1,8 @@
 import React from 'react';
-import { apolloClient } from 'utils/GraphqlClient';
 import usePoll from './usePoll';
 import { ProjectSubscriptionsDocument, ProjectSubscriptionsQuery } from 'types/gql';
 import { SubscriptionType } from 'shared';
+import { useApolloClient } from '@apollo/client';
 
 interface UsePollSubscriptionsOptions {
 
@@ -18,6 +18,9 @@ interface UsePollSubscriptionsOptions {
 }
 
 const usePollSubscriptions = (options: UsePollSubscriptionsOptions): [() => Promise<void>, boolean] => {
+
+  const apolloClient = useApolloClient();
+
   const { projectId, onCompleted, onFailed, maxTries = 8, delay = 200, initialDelay = 800 } = options;
 
   const lastIdsRef = React.useRef<string[]>(null);

@@ -61,7 +61,7 @@ type Mutation {
   deleteTaxId(projectId: String!): Ok
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
-  sendVerifyEmail(email: String!): StatusResponse
+  sendVerificationEmail: StatusResponse
   updateProject(input: UpdateProjectInput!): Project
   updateStripePaymentMethod(input: UpdateStripePaymentMethodInput!): StripePaymentMethod
   updateTaxId(input: UpdateTaxIdInput!): Ok
@@ -102,7 +102,6 @@ type Query {
   ping: String!
   project(projectId: String): Project
   self: User
-  selfProjects: [Project]
   stripeProducts: [StripeProduct]
 }
 
@@ -268,6 +267,7 @@ input UpdateTaxIdInput {
 }
 
 input UpdateUserInput {
+  email: String
   id: String!
   name: String
 }
