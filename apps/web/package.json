@@ -50,6 +50,7 @@
     "shared": "*",
     "stripe": "^8.163.0",
     "tsconfig": "*",
+    "locales": "*",
     "zxcvbn": "^4.4.2"
   },
   "devDependencies": {

@@ -3,6 +3,8 @@ heroTitle: 'Better SaaS Starter Kit'
 heroSubtitle: 'A starter kit for building SaaS applications'
 heroGetStarted: 'Get started'
 
+
+featuresDescription: 'Utilize a highly customizable SaaS framework that includes features such as OAuth, User Role/Management, Job Queue System, Web3 Authentication, Email System, Stripe Integration, and more.'
 featuresTitle: 'Features'
 featuresItem1Title: 'Production Ready'
 featuresItem1Description: 'A production ready SaaS application with a robust set of features and integrations.'
@@ -12,8 +14,6 @@ featuresItem3Title: 'Great Flexibility'
 featuresItem3Description: 'A robust set of features and integrations that can be customized to fit your needs.'
 
 featureList:
-  - title: 'Advanced SaaS'
-    description: 'Utilize a highly customizable SaaS framework that includes features such as OAuth, User Role/Management, Job Queue System, Web3 Authentication, Email System, Stripe Integration, and more.'
   - title: 'OAuth'
     description: 'Integrate with OAuth using NextAuth.js whitch providers such as Google, Facebook, and more to provide a seamless user experience.'
   - title: 'User Role and Management System'

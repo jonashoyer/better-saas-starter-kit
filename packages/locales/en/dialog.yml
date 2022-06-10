@@ -9,3 +9,14 @@ deleteUserProjectTitle: 'Remove member'
 deleteUserProjectContent: 'Removing this member from the project will revoke the access rights.'
 editMemberTitle: 'Edit member'
 editMemberContent: 'Edit member the rights this user has to the project.'
+
+accountDialog:
+  account: 'Account'
+  email: 'Email'
+  save: 'Save'
+  emailVerification: 'Please verify your email <link></link>'
+  emailVerificationResend: (resend)
+  emailVerificationCountdown: '({{countdown}}s)'
+  name: 'Name'
+
+close: 'Close'

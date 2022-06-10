@@ -8,6 +8,6 @@ module.exports = {
     '/settings': ['settings', 'pricing'],
   },
   async loadLocaleFrom(lang, ns) {
-    return import(`./locales/${lang}/${ns}.yml`).then((m) => m.default)
+    return import(`locales/${lang}/${ns}.yml`).then((m) => m.default)
   }
 }
