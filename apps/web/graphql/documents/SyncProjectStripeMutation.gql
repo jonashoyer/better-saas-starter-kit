@@ -1,0 +1,6 @@
+mutation SyncProjectStripe($projectId: String!) {
+  syncProjectStripe(projectId: $projectId) {
+    ok
+    message
+  }
+}

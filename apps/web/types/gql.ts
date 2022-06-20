@@ -72,6 +72,7 @@ export type Mutation = {
   deleteUserInvite?: Maybe<UserInvite>;
   deleteUserProject?: Maybe<UserProject>;
   sendVerificationEmail?: Maybe<StatusResponse>;
+  syncProjectStripe?: Maybe<Ok>;
   updateProject?: Maybe<Project>;
   updateStripePaymentMethod?: Maybe<StripePaymentMethod>;
   updateTaxId?: Maybe<Ok>;
@@ -130,6 +131,11 @@ export type MutationDeleteUserProjectArgs = {
 };
 
 
+export type MutationSyncProjectStripeArgs = {
+  projectId: Scalars['String'];
+};
+
+
 export type MutationUpdateProjectArgs = {
   input: UpdateProjectInput;
 };
@@ -169,12 +175,6 @@ export type Ok = {
   message?: Maybe<Scalars['String']>;
   ok: Scalars['Boolean'];
 };
-
-export enum PaymentMethodImportance {
-  Backup = 'BACKUP',
-  Other = 'OTHER',
-  Primary = 'PRIMARY'
-}
 
 export type Project = {
   __typename?: 'Project';
@@ -282,7 +282,7 @@ export type StripePaymentMethod = {
   expMonth: Scalars['Int'];
   expYear: Scalars['Int'];
   id: Scalars['String'];
-  importance: PaymentMethodImportance;
+  isDefault: Scalars['Boolean'];
   last4: Scalars['String'];
   project: Project;
   type: Scalars['String'];
@@ -417,7 +417,7 @@ export type UpdateProjectInput = {
 
 export type UpdateStripePaymentMethodInput = {
   id: Scalars['String'];
-  importance?: Maybe<PaymentMethodImportance>;
+  isDefault?: Maybe<Scalars['Boolean']>;
 };
 
 export type UpdateTaxIdInput = {
@@ -546,7 +546,7 @@ export const BaseStripePaymenthMethodFragmentDoc = gql`
   expMonth
   expYear
   type
-  importance
+  isDefault
   updatedAt
 }
     `;
@@ -1139,6 +1139,40 @@ export function useSendVerificationEmailMutation(baseOptions?: Apollo.MutationHo
 export type SendVerificationEmailMutationHookResult = ReturnType<typeof useSendVerificationEmailMutation>;
 export type SendVerificationEmailMutationResult = Apollo.MutationResult<SendVerificationEmailMutation>;
 export type SendVerificationEmailMutationOptions = Apollo.BaseMutationOptions<SendVerificationEmailMutation, SendVerificationEmailMutationVariables>;
+export const SyncProjectStripeDocument = gql`
+    mutation SyncProjectStripe($projectId: String!) {
+  syncProjectStripe(projectId: $projectId) {
+    ok
+    message
+  }
+}
+    `;
+export type SyncProjectStripeMutationFn = Apollo.MutationFunction<SyncProjectStripeMutation, SyncProjectStripeMutationVariables>;
+
+/**
+ * __useSyncProjectStripeMutation__
+ *
+ * To run a mutation, you first call `useSyncProjectStripeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSyncProjectStripeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [syncProjectStripeMutation, { data, loading, error }] = useSyncProjectStripeMutation({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useSyncProjectStripeMutation(baseOptions?: Apollo.MutationHookOptions<SyncProjectStripeMutation, SyncProjectStripeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SyncProjectStripeMutation, SyncProjectStripeMutationVariables>(SyncProjectStripeDocument, options);
+      }
+export type SyncProjectStripeMutationHookResult = ReturnType<typeof useSyncProjectStripeMutation>;
+export type SyncProjectStripeMutationResult = Apollo.MutationResult<SyncProjectStripeMutation>;
+export type SyncProjectStripeMutationOptions = Apollo.BaseMutationOptions<SyncProjectStripeMutation, SyncProjectStripeMutationVariables>;
 export const UpdateProjectDocument = gql`
     mutation UpdateProject($input: UpdateProjectInput!) {
   updateProject(input: $input) {
@@ -1177,7 +1211,7 @@ export const UpdateStripePaymentMethodDocument = gql`
   updateStripePaymentMethod(input: $input) {
     id
     updatedAt
-    importance
+    isDefault
   }
 }
     `;
@@ -1372,7 +1406,7 @@ export type BaseStripeInvoiceFragment = (
 
 export type BaseStripePaymenthMethodFragment = (
   { __typename?: 'StripePaymentMethod' }
-  & Pick<StripePaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'importance' | 'updatedAt'>
+  & Pick<StripePaymentMethod, 'id' | 'createdAt' | 'brand' | 'last4' | 'expMonth' | 'expYear' | 'type' | 'isDefault' | 'updatedAt'>
 );
 
 export type BaseStripePriceFragment = (
@@ -1618,6 +1652,19 @@ export type SendVerificationEmailMutation = (
   )> }
 );
 
+export type SyncProjectStripeMutationVariables = Exact<{
+  projectId: Scalars['String'];
+}>;
+
+
+export type SyncProjectStripeMutation = (
+  { __typename?: 'Mutation' }
+  & { syncProjectStripe?: Maybe<(
+    { __typename?: 'Ok' }
+    & Pick<Ok, 'ok' | 'message'>
+  )> }
+);
+
 export type UpdateProjectMutationVariables = Exact<{
   input: UpdateProjectInput;
 }>;
@@ -1640,7 +1687,7 @@ export type UpdateStripePaymentMethodMutation = (
   { __typename?: 'Mutation' }
   & { updateStripePaymentMethod?: Maybe<(
     { __typename?: 'StripePaymentMethod' }
-    & Pick<StripePaymentMethod, 'id' | 'updatedAt' | 'importance'>
+    & Pick<StripePaymentMethod, 'id' | 'updatedAt' | 'isDefault'>
   )> }
 );
 

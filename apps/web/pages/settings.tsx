@@ -9,6 +9,7 @@ import { Constants } from 'shared';
 import { setCookie } from 'utils/cookies';
 import useProject from 'hooks/useProject';
 import StaticPageLayout from 'components/layouts/PageLayout/StaticPageLayout';
+import ProjectDevelopmentMenu from 'components/layouts/ProjectDevelopmentMenu';
 import ProjectDetailsPaper from 'components/layouts/ProjectDetailsPaper';
 import ProjectMembersPaper from 'components/layouts/ProjectMembersPaper';
 import ProjectDangerZonePaper from 'components/layouts/ProjectDangerZonePaper';
@@ -47,6 +48,7 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
 
         {projectData &&
           <React.Fragment>
+            <ProjectDevelopmentMenu project={projectData.project} />
             <ProjectDetailsPaper project={projectData.project} />
             <ProjectMembersPaper project={projectData.project} self={selfData?.self} />
             <ProjectPlanPaper project={projectData.project} products={props.products} />
@@ -64,7 +66,7 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getSession(ctx) as any;
 
-  const client = initializeApollo({}, ctx.req.headers);
+  const client = initializeApollo({ headers: ctx.req.headers });
 
   const products = await prisma.stripeProduct.findMany({
     where: { active: true },

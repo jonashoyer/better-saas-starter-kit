@@ -213,3 +213,19 @@ export const DeleteTaxId = mutationField('deleteTaxId', {
     return { ok: true };
   }
 })
+
+
+export const SyncProjectStripe = mutationField('syncProjectStripe', {
+  type: Ok,
+  args: {
+    projectId: stringArg({ required: true }),
+  },
+  authorize: requireProjectAccess({
+    projectIdFn: (_, { projectId }) => projectId,
+    role: 'ADMIN',
+  }),
+  async resolve(root, { projectId }, ctx) {
+    await ctx.getStripeHandler().refreshCustomerInfo(projectId);
+    return { ok: true };
+  }
+})
