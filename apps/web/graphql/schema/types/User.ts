@@ -97,7 +97,7 @@ export const SendVerificationEmail = mutationField('sendVerificationEmail', {
         token: crypto.randomBytes(32).toString('hex'),
         identifier: ctx.user.email,
       }
-    });
+    }); 
 
     await ctx.queueManager.email.queue.add(
       'send',
@@ -114,9 +114,6 @@ export const SendVerificationEmail = mutationField('sendVerificationEmail', {
           }
         }
       }],
-      {
-        jobId: ctx.user.id,
-      }
     );
 
     return {

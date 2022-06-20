@@ -6,7 +6,7 @@ export type Workspace = typeof workspaces[number];;
 export interface Module {
   name: string;
   value: string;
-  folder?: string;
+  folder?: string[];
   packageDependencies?: PartialRecord<Workspace, string[]>;
 }
 
@@ -22,14 +22,12 @@ export const modules: Module[] = [
   {
     name: 'Job Queue System (Worker)',
     value: 'worker',
-    folder: 'apps/worker',
-    packageDependencies: {
-      sharedServer: ['']
-    }
+    folder: ['apps/worker'],
   },
   {
     name: 'Web3',
     value: 'web3',
+    folder: ['packages/web3token'],
   },
   {
     name: 'SaaS Project Isolation Implantation',
