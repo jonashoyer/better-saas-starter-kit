@@ -62,6 +62,7 @@ type Mutation {
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
   sendVerificationEmail: StatusResponse
+  syncProjectStripe(projectId: String!): Ok
   updateProject(input: UpdateProjectInput!): Project
   updateStripePaymentMethod(input: UpdateStripePaymentMethodInput!): StripePaymentMethod
   updateTaxId(input: UpdateTaxIdInput!): Ok
@@ -74,12 +75,6 @@ type Mutation {
 type Ok {
   message: String
   ok: Boolean!
-}
-
-enum PaymentMethodImportance {
-  BACKUP
-  OTHER
-  PRIMARY
 }
 
 type Project {
@@ -138,7 +133,7 @@ type StripePaymentMethod {
   expMonth: Int!
   expYear: Int!
   id: String!
-  importance: PaymentMethodImportance!
+  isDefault: Boolean!
   last4: String!
   project: Project!
   type: String!
@@ -257,7 +252,7 @@ input UpdateProjectInput {
 
 input UpdateStripePaymentMethodInput {
   id: String!
-  importance: PaymentMethodImportance
+  isDefault: Boolean
 }
 
 input UpdateTaxIdInput {

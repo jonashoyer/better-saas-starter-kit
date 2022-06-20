@@ -2,6 +2,6 @@ mutation UpdateStripePaymentMethod($input: UpdateStripePaymentMethodInput!) {
   updateStripePaymentMethod(input: $input) {
     id
     updatedAt
-    importance
+    isDefault
   }
 }

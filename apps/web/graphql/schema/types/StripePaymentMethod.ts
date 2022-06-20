@@ -1,5 +1,5 @@
 import { Context } from 'graphql/context';
-import { arg, enumType, inputObjectType, mutationField, objectType, stringArg } from 'nexus';
+import { arg, inputObjectType, mutationField, objectType, stringArg } from 'nexus';
 import { requireProjectAccess, requireProjectResource } from './permissions';
 import * as prisma from '@prisma/client';
 import { UserInputError } from 'apollo-server-errors';
@@ -15,16 +15,10 @@ export const StripePaymentMethod = objectType({
     t.model.expMonth();
     t.model.expYear();
     t.model.type();
-    t.model.importance();
+    t.model.isDefault();
     t.model.project();
   },
 });
-
-export const PaymentMethodImportance = enumType({
-  name: 'PaymentMethodImportance',
-  members: ['PRIMARY', 'BACKUP', 'OTHER']
-})
-
 
 export const StripeSetupIntent = objectType({
   name: 'StripeSetupIntent',
@@ -35,7 +29,7 @@ export const StripeSetupIntent = objectType({
 
 const PaymentMethodFetch = (opt?: { include?: prisma.Prisma.StripePaymentMethodInclude, projectIdFn?: (root: any, args: any, ctx: Context) => string; }) => async (root: any, args: any, ctx: Context) => {
   const { include, projectIdFn } = opt ?? {};
-  const id = projectIdFn?.(root, args, ctx) ?? args?.input?.id ?? args?.id;
+  const id = projectIdFn?.(root, args, ctx) ?? args?.input?.id ?? args?.id;
   if (!id) throw new Error('Payment method fetch did not get a id!');
   const paymentMethod = await ctx.prisma.stripePaymentMethod.findUnique({ where: { id }, include })
   ctx.entity = paymentMethod;
@@ -72,7 +66,7 @@ export const UpdateStripePaymentMethodInput = inputObjectType({
   name: 'UpdateStripePaymentMethodInput',
   definition(t) {
     t.string('id', { required: true });
-    t.field('importance', { type: PaymentMethodImportance });
+    t.boolean('isDefault');
   }
 })
 
@@ -84,45 +78,12 @@ export const UpdateStripePaymentMethod = mutationField('updateStripePaymentMetho
   },
   async resolve(root, { input }, ctx: Context<prisma.StripePaymentMethod & { project: { stripeCustomerId: string, paymentMethods: prisma.StripePaymentMethod[] } }>) {
 
-    
-    let peerPaymentMethodUpdate: any;
-    if (input.importance) {
-
-      const otherPaymentMethods = ctx.entity.project.paymentMethods.filter(e => e.id != input.id);
-
-      if (
-        input.importance == prisma.PaymentMethodImportance.OTHER
-        && !otherPaymentMethods.some(e => e.importance == prisma.PaymentMethodImportance.PRIMARY)
-      ) throw new UserInputError('A primary payment method is needed!');
-
-      if (input.importance == prisma.PaymentMethodImportance.PRIMARY) {
-        const oldPrimary = otherPaymentMethods.find(e => e.importance == prisma.PaymentMethodImportance.PRIMARY);
-        if (oldPrimary) {
-          peerPaymentMethodUpdate = ctx.prisma.stripePaymentMethod.update({
-            where: { id: oldPrimary.id },
-            data: { importance: 'BACKUP' },
-          });
-        }
-        await ctx.getStripeHandler().updateDefaultPaymentMethod(ctx.entity.project.stripeCustomerId, input.id);
-      }
-    }
-
-    const updatePaymenthMethod = ctx.prisma.stripePaymentMethod.update({
-      where: { id: input.id },
-      data: {
-        importance: input.importance,
-      }
-    })
-    
-    if (peerPaymentMethodUpdate) {
-      const [paymentMethod] = await ctx.prisma.$transaction([
-        updatePaymenthMethod,
-        peerPaymentMethodUpdate,
-      ]);
+    if (input.isDefault) {
+      const paymentMethod = await ctx.getStripeHandler().updateDefaultPaymentMethod(ctx.entity.project.stripeCustomerId, ctx.entity.id)
       return paymentMethod;
     }
 
-    return await updatePaymenthMethod;
+    throw new UserInputError('Not implemented');
   }
 })
 
@@ -133,7 +94,7 @@ export const DeleteStripePaymentMethod = mutationField('deleteStripePaymentMetho
     id: stringArg({ required: true }),
   },
   async resolve(root, { id }, ctx: Context<prisma.StripePaymentMethod>) {
-    if (ctx.entity.importance == prisma.PaymentMethodImportance.PRIMARY) throw new Error('A primary payment method is needed!');
+    if (ctx.entity.isDefault) throw new Error('A primary payment method is needed!');
     await ctx.stripe.paymentMethods.detach(id);
     return ctx.prisma.stripePaymentMethod.delete({ where: { id } });
   }

@@ -124,7 +124,7 @@ model StripePaymentMethod {
   expYear  Int
   type     String
 
-  importance PaymentMethodImportance
+  isDefault Boolean
 
   projectId String
 

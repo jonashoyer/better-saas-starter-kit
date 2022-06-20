@@ -6,6 +6,6 @@ fragment BaseStripePaymenthMethod on StripePaymentMethod {
   expMonth
   expYear
   type
-  importance
+  isDefault
   updatedAt
 }

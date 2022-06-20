@@ -57,7 +57,7 @@ export interface NexusGenInputs {
   }
   UpdateStripePaymentMethodInput: { // input type
     id: string; // String!
-    importance?: NexusGenEnums['PaymentMethodImportance'] | null; // PaymentMethodImportance
+    isDefault?: boolean | null; // Boolean
   }
   UpdateTaxIdInput: { // input type
     projectId: string; // String!
@@ -99,7 +99,6 @@ export interface NexusGenInputs {
 export interface NexusGenEnums {
   InvoiceBillingReason: prisma.InvoiceBillingReason
   InvoiceStatus: prisma.InvoiceStatus
-  PaymentMethodImportance: prisma.PaymentMethodImportance
   ProjectRole: prisma.ProjectRole
   StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
@@ -171,6 +170,7 @@ export interface NexusGenFieldTypes {
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     sendVerificationEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
+    syncProjectStripe: NexusGenRootTypes['Ok'] | null; // Ok
     updateProject: NexusGenRootTypes['Project'] | null; // Project
     updateStripePaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
     updateTaxId: NexusGenRootTypes['Ok'] | null; // Ok
@@ -226,7 +226,7 @@ export interface NexusGenFieldTypes {
     expMonth: number; // Int!
     expYear: number; // Int!
     id: string; // String!
-    importance: NexusGenEnums['PaymentMethodImportance']; // PaymentMethodImportance!
+    isDefault: boolean; // Boolean!
     last4: string; // String!
     project: NexusGenRootTypes['Project']; // Project!
     type: string; // String!
@@ -311,6 +311,7 @@ export interface NexusGenFieldTypeNames {
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
     sendVerificationEmail: 'StatusResponse'
+    syncProjectStripe: 'Ok'
     updateProject: 'Project'
     updateStripePaymentMethod: 'StripePaymentMethod'
     updateTaxId: 'Ok'
@@ -366,7 +367,7 @@ export interface NexusGenFieldTypeNames {
     expMonth: 'Int'
     expYear: 'Int'
     id: 'String'
-    importance: 'PaymentMethodImportance'
+    isDefault: 'Boolean'
     last4: 'String'
     project: 'Project'
     type: 'String'
@@ -467,6 +468,9 @@ export interface NexusGenArgTypes {
     }
     deleteUserProject: { // args
       id: string; // String!
+    }
+    syncProjectStripe: { // args
+      projectId: string; // String!
     }
     updateProject: { // args
       input: NexusGenInputs['UpdateProjectInput']; // UpdateProjectInput!

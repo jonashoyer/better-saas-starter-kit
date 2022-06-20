@@ -1,13 +1,12 @@
 import { Box, Button, capitalize, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import React from 'react';
-import { ProjectSettingsQuery, PaymentMethodImportance, useDeleteStripePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdateStripePaymentMethodMutation } from 'types/gql';
+import { ProjectSettingsQuery, useDeleteStripePaymentMethodMutation, useGetPaymentMethodsLazyQuery, useUpdateStripePaymentMethodMutation } from 'types/gql';
 import PaymentIcon from '@mui/icons-material/Payment';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import dynamic from 'next/dynamic';
 import Lazy from 'components/elements/Lazy';
-import { snakeToReadable } from 'utils';
 import { StripePaymentMethod } from '@prisma/client';
 import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 import ComponentPreview from './ComponentPreview';
@@ -87,7 +86,7 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
       variables: {
         input: {
           id: menuPaymentMethod.id,
-          importance: PaymentMethodImportance.Primary,
+          isDefault: true,
         }
       }
     })
@@ -123,9 +122,9 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
         handleClose={() => setDeletePaymentMethodConfirm(false)}
         onSubmit={handleDelete}
         loading={deleteLoading}
-        title='Are you sure?'
-        content='After deleting the paymenth method it will not be used for futrure payments!'
-        submitText='Delete'
+        title={t('pricing:deletePaymentMethodTitle')}
+        content={t('pricing:deletePaymentMethodBody')}
+        submitText={t('pricing:deletePaymentMethodBodySubmit')}
       />
       <Menu
         id="payment-method-menu"
@@ -133,11 +132,11 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
         open={!!menuPaymentMethodAnchorEl}
         onClose={handlePaymentMethodMenuClose}
       >
-        <MenuItem onClick={handleSetAsPrimary} disabled={menuPaymentMethod?.importance == PaymentMethodImportance.Primary}>
-          Set as primary
+        <MenuItem onClick={handleSetAsPrimary} disabled={menuPaymentMethod?.isDefault}>
+          {t('pricing:setAsPrimary')}
         </MenuItem>
-        <MenuItem onClick={handleMenuDelete} disabled={menuPaymentMethod?.importance == PaymentMethodImportance.Primary}>
-          Delete payment method
+        <MenuItem onClick={handleMenuDelete} disabled={menuPaymentMethod?.isDefault}>
+          {t('pricing:deletePaymentMethod')}
         </MenuItem>
       </Menu>
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
@@ -184,8 +183,8 @@ interface PaymentMethodPairProps {
 
 const PaymentMethodPair = ({ t, project, setAddPaymenthMethodDialog, handleUserMenuClick }: PaymentMethodPairProps) => {
   
-  const primary = project.stripePaymentMethods.find(e => e.importance == PaymentMethodImportance.Primary);
-  const backup = project.stripePaymentMethods.find(e => e.importance == PaymentMethodImportance.Backup);
+  const primary = project.stripePaymentMethods.find(e => e.isDefault);
+  const backup = project.stripePaymentMethods.find(e => !e.isDefault);
   
   return (
     <List>
@@ -193,18 +192,18 @@ const PaymentMethodPair = ({ t, project, setAddPaymenthMethodDialog, handleUserM
         ? <PaymentMethodListItem t={t} paymentMethod={primary} handleUserMenuClick={handleUserMenuClick} />
         : <ListItem button onClick={() => setAddPaymenthMethodDialog(true)}>
             <ListItemIcon>
-              <AddCircleIcon color={importanceToColor.PRIMARY as any} />
+              <AddCircleIcon color='primary' />
             </ListItemIcon>
-            <ListItemText primary={'Add primary payment method'} />
+            <ListItemText primary={t('pricing:addPrimaryPaymentMethod')} />
           </ListItem>
       }
       {backup
         ? <PaymentMethodListItem t={t} paymentMethod={backup} handleUserMenuClick={handleUserMenuClick} />
         : <ListItem button disabled={!primary} onClick={() => setAddPaymenthMethodDialog(true)}>
             <ListItemIcon>
-              <AddCircleIcon color={importanceToColor.BACKUP as any} />
+              <AddCircleIcon color='secondary' />
             </ListItemIcon>
-            <ListItemText primary={'Add backup payment method'} />
+            <ListItemText primary={t('pricing:addAlternativePaymentMethod')} />
           </ListItem>
       }
 
@@ -224,8 +223,8 @@ const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserM
     <List>
       {project.stripePaymentMethods.length == 0 &&
         <Box sx={{ textAlign: 'center', py: 2 }}>
-          <Typography gutterBottom>No payment method has been added!</Typography>
-          <Button variant='contained' onClick={() => setAddPaymenthMethodDialog(true)}>Add payment method</Button>
+          <Typography gutterBottom>{t('pricing:noPaymentMethodOnFile')}</Typography>
+          <Button variant='contained' onClick={() => setAddPaymenthMethodDialog(true)}>{t('pricing:addPaymentMethod')}</Button>
         </Box>
       }
       {project.stripePaymentMethods.map(e => {
@@ -236,7 +235,7 @@ const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserM
           <ListItemIcon>
             <AddCircleIcon />
           </ListItemIcon>
-          <ListItemText primary='Add payment method' />
+          <ListItemText primary={t('pricing:addPaymentMethod')} />
         </ListItemButton>
       }
     </List>
@@ -246,23 +245,17 @@ const PaymentMethodList = ({ t, project, setAddPaymenthMethodDialog, handleUserM
 const PaymentMethodListItem = ({ t, paymentMethod: e, handleUserMenuClick }: { t: any, paymentMethod: ProjectSettingsQuery['project']['stripePaymentMethods'][0], handleUserMenuClick: (paymentMethod: any) => (event: any) => any,  }) => (
   <ListItem
     secondaryAction={
-      <IconButton onClick={handleUserMenuClick(e)} disabled={e?.importance == PaymentMethodImportance.Primary}>
+      <IconButton onClick={handleUserMenuClick(e)} disabled={e?.isDefault}>
         <MoreVertIcon />
       </IconButton>
     }
   >
     <ListItemIcon>
-      <PaymentIcon color={importanceToColor[e.importance] as any} />
+      <PaymentIcon color={e.isDefault ? 'primary' : 'secondary'} />
     </ListItemIcon>
-    <ListItemText primary={`${capitalize(e.brand)} •••• ${e.last4} - ${snakeToReadable(e.importance)}`} secondary={`${t('pricing:expires')} ${e.expMonth}/${e.expYear}`} />
+    <ListItemText primary={`${capitalize(e.brand)} •••• ${e.last4}${e.isDefault ? ` - ${t('pricing:cardPrimary')}` : ''}`} secondary={`${t('pricing:expires')} ${e.expMonth}/${e.expYear}`} />
   </ListItem>
 )
-
-const importanceToColor = {
-  'PRIMARY': 'primary',
-  'BACKUP': 'secondary',
-  'OTHER': 'disabled'
-}
 
 interface PaymentMethodSingleProps {
   t: any;
@@ -277,8 +270,8 @@ const PaymentMethodSingle = ({ t, project, setAddPaymenthMethodDialog }: Payment
     <List>
       {project.stripePaymentMethods.length == 0 &&
         <Box sx={{ textAlign: 'center', py: 2 }}>
-          <Typography gutterBottom>No payment method on file</Typography>
-          <Button variant='contained' onClick={() => setAddPaymenthMethodDialog(true)}>Add payment method</Button>
+          <Typography gutterBottom>{t('pricing:noPaymentMethodOnFile')}</Typography>
+          <Button variant='contained' onClick={() => setAddPaymenthMethodDialog(true)}>{t('pricing:addPaymentMethod')}</Button>
         </Box>
       }
       {project.stripePaymentMethods.map(e => {
@@ -295,7 +288,7 @@ const PaymentMethodSingleItem = ({ t, paymentMethod: e, setAddPaymenthMethodDial
     }
   >
     <ListItemIcon>
-      <PaymentIcon color={importanceToColor[e.importance] as any} />
+      <PaymentIcon color={e.isDefault ? 'primary' : 'secondary'} />
     </ListItemIcon>
     <ListItemText primary={`${capitalize(e.brand)} •••• ${e.last4}`} secondary={`${t('pricing:expires')} ${e.expMonth}/${e.expYear}`} />
   </ListItem>

@@ -6,7 +6,7 @@ import { useApolloClient } from '@apollo/client';
 
 export interface HashablePaymentMethod {
   id: string;
-  importance: string;
+  isDefault: boolean;
 }
 
 interface UsePollPaymentMethodsOption {
@@ -50,5 +50,5 @@ const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => void
 export default usePollPaymentMethods;
 
 const paymentMethodListHash = (paymentMethods: HashablePaymentMethod[]) => {
-  return hashString(JSON.stringify(paymentMethods.sort((a, b) => a.id.localeCompare(b.id))));
+  return hashString(JSON.stringify(paymentMethods.map(({ id, isDefault }) => ({ id, isDefault })).sort((a, b) => a.id.localeCompare(b.id))));
 }
