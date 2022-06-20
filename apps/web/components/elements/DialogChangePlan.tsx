@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { ProjectSettingsQuery, PaymentMethodImportance, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
+import { ProjectSettingsQuery, StripePrice, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, capitalize, Divider, FormControlLabel, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
 import PaymentMethodForm from './PaymentMethodForm';
@@ -39,7 +39,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const [stripeClientSecret, setStripeClientSecret] = React.useState(null);
   const [processing, setProcessing] = React.useState(false);
 
-  const [price, setPrice] = React.useState(null);
+  const [price, setPrice] = React.useState<StripePrice | null>(null);
   const latestProductRef = React.useRef(null);
 
   const [pollPaymentMethods, loadingPaymentMethods] = usePollPaymentMethods({
@@ -93,6 +93,9 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
 
   const product: StripeProductWithPricing = targetProduct || latestProductRef.current;
+  const currentPaymentMethod = project.stripePaymentMethods.find(e => e.isDefault) ?? project.stripePaymentMethods[0] ?? null;
+  const interval = price && `${price.intervalCount != 1 ? price.intervalCount : ''} ${t(`pricing:${price.interval}`, { count: price.intervalCount })}`.trimStart();
+  const isFree = price?.unitAmount == 0;
 
   const isMonthOrYearlyBilling = React.useMemo(() => {
     if (!product) return true;
@@ -110,11 +113,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     const py = product.stripePrices.find(e => e.interval == 'year');
     return ((1 - ((py.unitAmount / 12) / pm.unitAmount)) * 100).toFixed(1);
   }, [isMonthOrYearlyBilling, product])
-
-
-  const currentPaymentMethod = project.stripePaymentMethods.find(e => e.importance == PaymentMethodImportance.Primary);
-
-  const interval = price && `${price.intervalCount != 1 ? price.intervalCount : ''} ${t(`pricing:${price.interval}`, { count: price.intervalCount })}`.trimStart();
 
   const planPricingSummary = React.useMemo(() => {
     const defaultFormat = () => {
@@ -190,7 +188,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       console.log('[PaymentMethod]', payload.setupIntent);
     }
 
-    if (!currentPaymentMethod) {
+    if (!isFree && !currentPaymentMethod) {
       return createPaymentMethod();
     }
 
@@ -207,7 +205,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   }
 
   const loading = processing || createSetupIntentLoading || upsertSubscriptionLoading || loadingPlan || loadingPaymentMethods;
-  const canSubmit = !loading && (!!currentPaymentMethod || cardComplete);
+  const canSubmit = !loading && (isFree || !!currentPaymentMethod || cardComplete);
 
   
   const handleCloseProxy = () => {
@@ -221,7 +219,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: '1' }}>
             <Box sx={{ mb: 2 }}>
-              <Typography variant='h6'>{primarySubscription?.stripePrice.unitAmount == 0 ? t('pricing:upgradeToPlan', { planName: product.metadata.key.toLowerCase() }) : t('pricing:changePlanTitle')}</Typography>
+              <Typography variant='h6'>{primarySubscription?.stripePrice.unitAmount == 0 ? t('pricing:upgradeToPlan', { planName: product.metadata.key.toLowerCase() }) : t('pricing:changePlanTitle', { planName: product.metadata.key.toLowerCase() })}</Typography>
               <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.metadata.key?.toLowerCase()}Description`)}</Typography>
             </Box>
 
@@ -235,50 +233,56 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
                 label={<Typography variant='subtitle2'>{`${t('pricing:payAnnually')} (-${yearlyDiscount}%)`}</Typography>}
               />
             }
-            <Box>
-              <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
-              {currentPaymentMethod &&
-                <ListItem dense>
-                  <ListItemIcon>
-                    <PaymentIcon color='primary' />
-                  </ListItemIcon>
-                  <ListItemText primary={`${capitalize(currentPaymentMethod.brand)} •••• ${currentPaymentMethod.last4}`} secondary={`${t('pricing:expires')} ${currentPaymentMethod.expMonth}/${currentPaymentMethod.expYear}`} />
-                </ListItem>
-              }
-              {!currentPaymentMethod &&
-                <PaymentMethodForm
-                  autoFocus
-                  form={form}
-                  setCardComplete={setCardComplete}
-                  loading={loading}
-                  setError={setError}
-                />
-              }
-            </Box>
+            {!isFree &&
+              <Box>
+                <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
+                {currentPaymentMethod &&
+                  <ListItem dense>
+                    <ListItemIcon>
+                      <PaymentIcon color='primary' />
+                    </ListItemIcon>
+                    <ListItemText primary={`${capitalize(currentPaymentMethod.brand)} •••• ${currentPaymentMethod.last4}`} secondary={`${t('pricing:expires')} ${currentPaymentMethod.expMonth}/${currentPaymentMethod.expYear}`} />
+                  </ListItem>
+                }
+                {price && !currentPaymentMethod &&
+                  <PaymentMethodForm
+                    autoFocus
+                    form={form}
+                    setCardComplete={setCardComplete}
+                    loading={loading}
+                    setError={setError} 
+                  />
+                }
+              </Box>
+            }
           </Box>
-          <Divider flexItem variant='middle' orientation='vertical' />
-          <Box sx={{ flex: '0 0 220px' }}>
-            <Typography sx={{ mb: 3 }} fontSize={16}  variant='h6'>{t('pricing:planSummary')}</Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography color='text' variant='body2'>{t('pricing:productNameMemberCount', { productName: product?.name, count: project.users.length })}</Typography>
-              <Typography fontSize='0.875rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
-            </Box>
-            <Typography fontSize='0.725rem' color='textSecondary' variant='body2'>{planPricingSummary}</Typography>
-            <Divider sx={{ my: 1 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography color='textSecondary' variant='body2'>{t('pricing:subtotal')}</Typography>
-              <Typography fontSize='0.75rem' variant='body1'>{price &&  formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography color='textSecondary' variant='body2'>{t('pricing:tax')}</Typography>
-              <Typography fontSize='0.75rem' variant='body1'>-</Typography>
-            </Box>
-            <Divider sx={{ my: 1 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography color='textSecondary' variant='body2'>{t('pricing:total')}</Typography>
-              <Typography fontSize='1.15rem' variant='body1'>{price &&  formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
-            </Box>
-          </Box>
+          {!isFree &&
+            <React.Fragment>
+              <Divider flexItem variant='middle' orientation='vertical' />
+              <Box sx={{ flex: '0 0 220px' }}>
+                <Typography sx={{ mb: 3 }} fontSize={16} variant='h6'>{t('pricing:planSummary')}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography color='text' variant='body2'>{t('pricing:productNameMemberCount', { productName: product?.name, count: project.users.length })}</Typography>
+                  <Typography fontSize='0.875rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+                </Box>
+                <Typography fontSize='0.725rem' color='textSecondary' variant='body2'>{planPricingSummary}</Typography>
+                <Divider sx={{ my: 1 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography color='textSecondary' variant='body2'>{t('pricing:subtotal')}</Typography>
+                  <Typography fontSize='0.75rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography color='textSecondary' variant='body2'>{t('pricing:tax')}</Typography>
+                  <Typography fontSize='0.75rem' variant='body1'>-</Typography>
+                </Box>
+                <Divider sx={{ my: 1 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <Typography color='textSecondary' variant='body2'>{t('pricing:total')}</Typography>
+                  <Typography fontSize='1.15rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+                </Box>
+              </Box>
+            </React.Fragment>
+          }
         </Box>
       </DialogContent>
       <DialogActions>
