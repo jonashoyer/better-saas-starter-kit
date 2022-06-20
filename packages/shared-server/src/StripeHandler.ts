@@ -1,4 +1,4 @@
-import { PaymentMethodImportance, StripeSubscription, PrismaClient, StripeInvoice, StripePriceType, StripeSubscriptionStatus } from '@prisma/client';
+import { StripeSubscription, PrismaClient, StripeInvoice, StripePriceType, StripeSubscriptionStatus } from '@prisma/client';
 import dayjs from 'dayjs';
 import Stripe from 'stripe'
 
@@ -39,7 +39,7 @@ export class StripeHandler {
     return this.stripe.customers.del(id, options);
   }
 
-  createPaymentMethod(params?: Stripe.PaymentMethodCreateParams & { metadata: { importance: PaymentMethodImportance, projectId: string } }, options?: Stripe.RequestOptions) {
+  createPaymentMethod(params?: Stripe.PaymentMethodCreateParams & { metadata: { projectId: string } }, options?: Stripe.RequestOptions) {
     return this.stripe.paymentMethods.create(params, options);
   }
 
@@ -162,7 +162,6 @@ export class StripeHandler {
 
   async updateSubscription(stripeSubscriptionId: string, priceId: string, quantity: number, beginAtNextPeriod?: boolean) {
 
-    
     const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     const currentPriceId = subscription.items.data[0].price.id;
@@ -197,7 +196,7 @@ export class StripeHandler {
       const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
         items: [
           {
-            id: subscription.items.data[0].price.id,
+            id: subscription.items.data[0].id,
             deleted: true,
           },
           {
@@ -304,20 +303,11 @@ export class StripeHandler {
 
     if (!project) throw new Error('Project not found from stripe customer!');
 
-    const getImportance = () => {
-      if (paymentMethod.metadata?.importance) {
-        const importance = paymentMethod.metadata.importance as PaymentMethodImportance;
-        if (importance == PaymentMethodImportance.PRIMARY && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
-        if ((importance == PaymentMethodImportance.PRIMARY || importance == PaymentMethodImportance.BACKUP) && !project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
-        return PaymentMethodImportance.OTHER;
-      }
+    const cust = (await this.stripe.customers.retrieve(stripeCustomerId, { expand: ['invoice_settings.default_payment_method'] })) as Stripe.Response<Stripe.Customer>;
 
-      if (!project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.PRIMARY)) return PaymentMethodImportance.PRIMARY;
-      if (!project.stripePaymentMethods.some(e => e.importance == PaymentMethodImportance.BACKUP)) return PaymentMethodImportance.BACKUP;
-      return PaymentMethodImportance.OTHER;
-    }
+    const isDefault = paymentMethod.id == this.getStripeId(cust.invoice_settings.default_payment_method);
 
-    const importance = getImportance()
+
     const paymentMethodData = {
       id: paymentMethod.id,
       type: paymentMethod.type,
@@ -327,31 +317,44 @@ export class StripeHandler {
       expMonth: paymentMethod.card.exp_month,
       expYear: paymentMethod.card.exp_year,
 
-      importance,
+      isDefault,
       project: {
         connect: { id: project.id },
       },
     };
 
-    if (importance == PaymentMethodImportance.PRIMARY) {
-      await this.updateDefaultPaymentMethod(stripeCustomerId, paymentMethod.id);
-    }
+    const result = await this.prisma.$transaction([
+      this.prisma.stripePaymentMethod.updateMany({
+        where: { id: { not: paymentMethod.id }, projectId: project.id, isDefault: true },
+        data: { isDefault: false },
+      }),
+      this.prisma.stripePaymentMethod.upsert({
+        create: paymentMethodData,
+        update: paymentMethodData,
+        where: {
+          id: paymentMethod.id,
+        }
+      })
+    ])
 
-    return this.prisma.stripePaymentMethod.upsert({
-      create: paymentMethodData,
-      update: paymentMethodData,
-      where: {
-        id: paymentMethod.id,
-      }
-    })
+    return result[result.length - 1];
   }
 
-  updateDefaultPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
-    return this.stripe.customers.update(stripeCustomerId, {
+  async updateDefaultPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
+    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId }, select: { id: true, stripeCustomerId: true } });
+    if (!project) throw new Error('Project not found from stripe customer!');
+
+    await this.stripe.customers.update(stripeCustomerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,
       }
-    })
+    });
+
+
+    return this.prisma.stripePaymentMethod.updateMany({
+      where: { id: { not: paymentMethodId }, projectId: project.id, isDefault: true },
+      data: { isDefault: false },
+    });
   }
 
   deletePaymentMethod(paymentMethodId: string) {
@@ -434,22 +437,28 @@ export class StripeHandler {
     }
   }
 
-  async refreshCustomerInfo(stripeCustomerId: string) {
-    const info = await this.fetchCustomerInfo(stripeCustomerId);
+  async refreshCustomerInfo(projectId: string) {
 
-    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId }});
-
+    const project = await this.prisma.project.findUnique({ where: { id: projectId }, select: { id: true, stripeCustomerId: true }});
     if (!project) throw new Error('Project not found from stripe customer!');
 
-    await Promise.all(info.paymentMethods.map(this.upsertPaymentMethodRecord));
+    const info = await this.fetchCustomerInfo(project.stripeCustomerId);
+
+    await Promise.all(info.paymentMethods.map(e => this.upsertPaymentMethodRecord(e)));
     await this.prisma.stripePaymentMethod.deleteMany({ where: { projectId: project.id, id: { notIn: info.paymentMethods.map(e => e.id) } } });
     
-    await Promise.all(info.subscriptions.map(this.upsertSubscription));
+    await Promise.all(info.subscriptions.map(e => this.upsertSubscription(e)));
     await this.prisma.stripeSubscription.deleteMany({ where: { projectId: project.id, id: { notIn: info.subscriptions.map(e => e.id) } } });
 
-    await Promise.all(info.invoices.map(this.upsertInvoice));
+    await Promise.all(info.invoices.map(e => this.upsertInvoice(e)));
     await this.prisma.stripeInvoice.deleteMany({ where: { projectId: project.id, id: { notIn: info.invoices.map(e => e.id) } } });
 
     return info;
+  }
+
+  getStripeId(id: null | string | { id: string }) {
+    if (id == null) return id;
+    if (typeof id == 'string') return id;
+    return id.id;
   }
 }
