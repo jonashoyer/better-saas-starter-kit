@@ -20,3 +20,6 @@ paidInvoiceReceipts: 'Paid invoice receipts'
 invoiceAmount: 'Invoice amount ${{amount}}'
 
 inviteNewMember: 'Invite new member'
+
+developmentMenu: 'Development Menu'
+syncProjectStripe: 'Sync Project Stripe'

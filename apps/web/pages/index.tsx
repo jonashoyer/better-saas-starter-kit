@@ -1,6 +1,6 @@
 import React from 'react';
 import DynamicPageLayout from 'components/layouts/PageLayout/DynamicPageLayout';
-import { Box, Button, Paper, Typography } from '@mui/material';
+import { Box, Button, Paper, Typography, Link as MuiLink } from '@mui/material';
 import { prisma } from 'utils/prisma';
 import { GetStaticProps } from 'next';
 import { motion } from "framer-motion"
@@ -102,6 +102,29 @@ export default function Home(props: any) {
                     <Typography variant='h6' textAlign='left' gutterBottom>{e.title}</Typography>
                     <Typography color='textSecondary' variant='body1' textAlign='left'>{e.description}</Typography>
                   </Box>
+                )
+              })}
+            </Box>
+          </Box>
+        </Box>
+        <Box sx={{ p: 4 }}>
+          <Box sx={{ textAlign: 'center', pt: 16, pb: 12, bgcolor: 'rgba(248,248,248)', borderRadius: 1 }}>
+            <Typography variant='h4' sx={{ mb: 3 }}>{t('home:builtWithTitle')}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3 }}>
+              {t<{ title: string, href: string }[]>('home:builtWith', {}, { returnObjects: true }).map((e, i) => {
+                return (
+                  <MuiLink key={i} underline='hover' target='_blank' rel='noreferrer' href={e.href}>
+                    <Typography variant='h6' textAlign='left' gutterBottom>{e.title}</Typography>
+                  </MuiLink>
+                ) 
+              })}
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+              {t<{ title: string, href: string }[]>('home:alsoBuiltWith', {}, { returnObjects: true }).map((e, i) => {
+                return (
+                  <MuiLink key={i} underline='hover' target='_blank' rel='noreferrer' href={e.href}>
+                    <Typography variant='subtitle1' textAlign='left' gutterBottom>{e.title}</Typography>
+                  </MuiLink>
                 )
               })}
             </Box>

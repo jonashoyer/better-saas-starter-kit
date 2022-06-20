@@ -22,7 +22,7 @@ year:
   one: 'year'
   other: 'years'
 
-changePlanTitle: 'Changing plan'
+changePlanTitle: 'Changing to {{planName}}'
 upgradeToPlan: 'Upgrade to {{planName}}'
 changePlanContent: 'You are about to change your plan!'
 changePlanConfirm: 'Change plan'
@@ -60,3 +60,18 @@ free: 'Free'
 payAnnually: 'Pay Annually'
 
 addOns: 'Add-ons'
+
+cardPrimary: 'Primary'
+
+noPaymentMethodOnFile: 'No payment method on file'
+
+addPaymentMethod: 'Add payment method'
+
+addPrimaryPaymentMethod: 'Add primary payment method'
+addAlternativePaymentMethod: 'Add alternative payment method'
+
+deletePaymentMethodTitle: 'Are you sure?'
+deletePaymentMethodBody: 'After deleting the payment method it will not be used for future payments!'
+deletePaymentMethodBodySubmit: 'Delete'
+setAsPrimary: 'Set as primary'
+deletePaymentMethod: 'Delete payment method'
