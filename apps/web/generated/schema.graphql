@@ -52,6 +52,7 @@ scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publicati
 scalar Json
 
 type Mutation {
+  cancelSubscriptionDowngrade(projectId: String!): StripeSubscription
   createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
   createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
@@ -69,6 +70,7 @@ type Mutation {
   updateUser(input: UpdateUserInput!): User
   updateUserProject(input: UpdateUserProjectInput!): UserProject
   upsertStripeSubscription(input: UpsertStripeSubscriptionInput!): StripeSubscription
+  userSignup(input: UserSignupInput!): User
   verifyEmail(token: String!): User
 }
 
@@ -187,6 +189,10 @@ type StripeSubscription {
   status: StripeSubscriptionStatus!
   stripePrice: StripePrice!
   stripePriceId: String!
+  upcomingQuantity: Int
+  upcomingStartDate: DateTime
+  upcomingStripePrice: StripePrice
+  upcomingStripePriceId: String
 }
 
 enum StripeSubscriptionStatus {
@@ -321,6 +327,11 @@ input UserProjectProjectIdUserIdCompoundUniqueInput {
 input UserProjectWhereUniqueInput {
   id: String
   projectId_userId: UserProjectProjectIdUserIdCompoundUniqueInput
+}
+
+input UserSignupInput {
+  email: String!
+  password: String!
 }
 
 type VerificationToken {

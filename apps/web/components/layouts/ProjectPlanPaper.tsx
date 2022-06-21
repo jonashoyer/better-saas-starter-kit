@@ -4,10 +4,12 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 import useTranslation from 'next-translate/useTranslation';
 import { isJSONValueObject, formatCurrency } from 'shared';
 import Lazy from 'components/elements/Lazy';
-import { ProjectSettingsQuery, Project, StripePrice, StripeProduct } from 'types/gql';
+import { ProjectSettingsQuery, Project, StripePrice, StripeProduct, useCancelSubscriptionDowngradeMutation } from 'types/gql';
 import { Translate } from 'next-translate';
 import ComponentPreview from './ComponentPreview';
 import { StripeProductWithPricing } from '../../types/types';
+import dayjs from 'dayjs';
+import { LoadingButton } from '@mui/lab';
 
 const LazyDialogChangePlan = dynamic(() => import('../elements/DialogChangePlan'));
 const LazyDialogPlanCompare = dynamic(() => import('../elements/DialogPlanCompare'));
@@ -29,11 +31,17 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
   const productPricingFn = (product: StripeProductWithPricing) => (product.stripePrices.find(yearlyPriceFindFn) || product.stripePrices.find(monthlyPriceFindFn));
   const sortedProducts = products.sort((a, b) => (productPricingFn(a)?.unitAmount ?? Infinity) - (productPricingFn(b)?.unitAmount ?? Infinity) );
 
+  const [cancelDowngrade, { loading: cancelLoading }] = useCancelSubscriptionDowngradeMutation();
+
+  const primarySubscription = React.useMemo(() => {
+    return project?.stripeSubscriptions.find(e => e.stripePrice.stripeProduct.metadata.type == 'primary');
+  }, [project?.stripeSubscriptions]);
+
   const currentProduct = React.useMemo(() => {
-    const id = project?.stripeSubscriptions.find(e => e.stripePrice.stripeProduct.metadata.type == 'primary')?.stripePrice.stripeProduct.id ?? null;
+    const id = primarySubscription?.stripePrice.stripeProduct.id ?? null;
     if (!id) return null;
     return products.find(e => e.id == id) ?? null;
-  }, [products, project?.stripeSubscriptions]);
+  }, [primarySubscription?.stripePrice.stripeProduct.id, products]);
 
   return (
     <React.Fragment>
@@ -52,6 +60,9 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
         onPlanSwitch={(e: any) => setChangePlan(e)}
         products={products}
         currentProduct={currentProduct}
+        upcomingPriceId={primarySubscription.upcomingStripePrice?.id}
+        onCancelDowngrade={() => cancelDowngrade({ variables: { projectId: project!.id } })}
+        cancelLoading={cancelLoading}
       />
       <Paper sx={{ p: 3, mb: 2, maxWidth: 768, mx: 'auto' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -69,6 +80,8 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
                 lang={lang}
                 setChangePlan={setChangePlan}
                 setShowDialogPlanCompare={setShowDialogPlanCompare}
+                onCancelDowngrade={() => cancelDowngrade({ variables: { projectId: project!.id } })}
+                cancelLoading={cancelLoading}
               />,
               <ProjectPlanList
                 key={1}
@@ -152,13 +165,15 @@ interface ProjectPlanCurrentProps {
   lang: string;
   setChangePlan: React.Dispatch<StripeProductWithPricing>;
   setShowDialogPlanCompare: (show: boolean) => any;
+  cancelLoading: boolean;
+  onCancelDowngrade: () => any;
 }
 
-const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChangePlan, setShowDialogPlanCompare, t, lang }: ProjectPlanCurrentProps) => {
+const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChangePlan, setShowDialogPlanCompare, t, lang, cancelLoading, onCancelDowngrade }: ProjectPlanCurrentProps) => {
 
-  console.log({ project });
-  
-  const price = project.stripeSubscriptions.find(e => e.stripePrice?.stripeProduct?.metadata.type == 'primary')?.stripePrice;
+
+  const subscription = project.stripeSubscriptions.find(e => e.stripePrice?.stripeProduct?.metadata.type == 'primary');
+  const price = subscription?.stripePrice;
   const currentProduct = price?.stripeProduct;
 
   const extraSubscriptions = sortedProducts.filter(e => e.metadata.type == 'extra');
@@ -181,7 +196,15 @@ const ProjectPlanCurrent = ({ project, sortedProducts, productPricingFn, setChan
             </Box>
           </Box>
         </Box>
-        <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setShowDialogPlanCompare(true)}>{price.unitAmount == 0 ? t('pricing:upgrade') : t('pricing:switch')}</Button>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', mb: 2 }}>
+          <Button sx={{ minWidth: 92 }} variant='outlined' onClick={() => setShowDialogPlanCompare(true)}>{price.unitAmount == 0 ? t('pricing:upgrade') : t('pricing:switch')}</Button>
+        </Box>
+        {subscription?.upcomingStripePrice &&
+          <Box>
+            <Typography variant='body2' color='textSecondary' gutterBottom>{t('pricing:subscriptionChange', { planName: subscription?.upcomingStripePrice.stripeProduct.name, seats: subscription?.upcomingQuantity <= 1 ? '' : `${subscription?.upcomingQuantity} ${t('pricing:seat', { count: subscription?.upcomingQuantity })}`, date: dayjs(subscription.upcomingStartDate).format('D MMM YYYY') })}</Typography>
+            <LoadingButton sx={{ minWidth: 92 }} loading={cancelLoading} onClick={onCancelDowngrade} variant='outlined' size='small'>{t('pricing:cancelSubscriptionDowngrade')}</LoadingButton>
+          </Box>
+        }
       </Box>
       <Box>
         <Box>

@@ -14,21 +14,21 @@ interface UsePollOption {
 const usePoll = (option: UsePollOption): [() => void, boolean] => {
   const { onCompleted, onFailed, onPoll, maxTries = 8, delay = 200, initialDelay = 800 } = option;
 
-  const [loading, setLoading] = React.useState(false);
+  const [running, setRunning] = React.useState(false);
   const triesRef = React.useRef(0);
 
   const retry = async () => {
     const now = Date.now();
     const result = await onPoll?.();
     if (result) {
-      setLoading(false);
+      setRunning(false);
       triesRef.current = 0;
       return onCompleted?.();
     }
 
     triesRef.current++;
     if (triesRef.current >= maxTries) {
-      setLoading(false);
+      setRunning(false);
       triesRef.current = 0;
       return onFailed?.();
     }
@@ -38,7 +38,7 @@ const usePoll = (option: UsePollOption): [() => void, boolean] => {
   }
 
   const startPoll = async () => {
-    setLoading(true);
+    setRunning(true);
     if (triesRef.current == 0) {
       await sleep(initialDelay);
       retry();
@@ -47,7 +47,7 @@ const usePoll = (option: UsePollOption): [() => void, boolean] => {
     triesRef.current = 0;
   }
 
-  return [startPoll, loading];
+  return [startPoll, running];
 }
 
 export default usePoll;

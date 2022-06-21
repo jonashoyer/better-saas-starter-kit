@@ -21,7 +21,7 @@ const usePollSubscriptions = (options: UsePollSubscriptionsOptions): [() => Prom
 
   const apolloClient = useApolloClient();
 
-  const { projectId, onCompleted, onFailed, maxTries = 8, delay = 200, initialDelay = 800 } = options;
+  const { projectId, onCompleted, onFailed, maxTries = 8, delay = 500, initialDelay = 800 } = options;
 
   const lastIdsRef = React.useRef<string[]>(null);
 
@@ -46,7 +46,7 @@ const usePollSubscriptions = (options: UsePollSubscriptionsOptions): [() => Prom
 export default usePollSubscriptions;
 
 const subscriptionsToStringArray = (subscriptions: ProjectSubscriptionsQuery['project']['stripeSubscriptions'], subscriptionType?: SubscriptionType) => {
-  return subscriptions.filter(e => !subscriptionType || e.stripePrice.stripeProduct.metadata.type === subscriptionType).map(e => e.id);
+  return subscriptions.filter(e => !subscriptionType || e.stripePrice.stripeProduct.metadata.type === subscriptionType).map(e => e.stripePrice.id);
 }
 
 const compare = (a: string[], b: string[]) => {

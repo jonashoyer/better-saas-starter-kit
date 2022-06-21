@@ -1,0 +1,5 @@
+mutation CancelSubscriptionDowngrade($projectId: String!) {
+  cancelSubscriptionDowngrade(projectId: $projectId) {
+    ...BaseStripeSubscription
+  }
+}

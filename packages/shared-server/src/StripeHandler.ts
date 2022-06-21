@@ -128,6 +128,7 @@ export class StripeHandler {
   // };
 
   static formatStripeSubscription(s: Stripe.Subscription): Omit<StripeSubscription, 'projectId' | 'metadata'> & { metadata: {} } {
+    const upcoming = StripeHandler.getUpcomingPhase(s.schedule as Stripe.SubscriptionSchedule | null);
     return {
       id: s.id,
       metadata: s.metadata,
@@ -143,6 +144,16 @@ export class StripeHandler {
       created: secondsToDate(s.created),
       endedAt: s.ended_at ? secondsToDate(s.ended_at) : null,
       startDate: secondsToDate(s.start_date),
+
+      upcomingStripePriceId: null,
+      upcomingQuantity: null,
+      upcomingStartDate: null,
+
+      ...(upcoming && ({
+        upcomingStripePriceId: StripeHandler.getStripeId(upcoming.items[0].price),
+        upcomingQuantity: upcoming.items[0].quantity ?? 1,
+        upcomingStartDate: secondsToDate(upcoming.start_date),
+      })),
     };
   }
 
@@ -165,17 +176,6 @@ export class StripeHandler {
     const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
 
     const currentPriceId = subscription.items.data[0].price.id;
-
-    const getScheduleId = async () => {
-
-      const scheduleId = subscription.schedule;
-      if (scheduleId) return typeof scheduleId == 'string' ? scheduleId : scheduleId.id;
-
-      const schedule = await this.stripe.subscriptionSchedules.create({
-        from_subscription: stripeSubscriptionId,
-      });
-      return schedule.id;
-    }
 
 
     // Create a schedule if it does not exists
@@ -208,18 +208,17 @@ export class StripeHandler {
       return StripeHandler.formatStripeSubscription(updatedSubscription);
     }
 
-    const scheduleId = await getScheduleId();
+    const scheduleId = await this.getSubscriptionScheduleId(subscription);
 
     const updatedSubscriptionSchedule = await this.stripe.subscriptionSchedules.update(scheduleId, {
+      proration_behavior: 'none',
       phases: [{
-        items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
+        items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity, }],
         start_date: subscription.current_period_start,
-        end_date: 'now',
-        proration_behavior: 'none',
+        end_date: subscription.current_period_end,
       }, {
         items: [{ price: priceId, quantity }],
-        start_date: 'now',
-        proration_behavior: 'none',
+        start_date: subscription.current_period_end,
       }],
     });
 
@@ -273,6 +272,27 @@ export class StripeHandler {
     //   );
   };
 
+  async cancelSubscriptionDowngrade(stripeSubscriptionId: string) {
+    
+    const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const scheduleId = await this.getSubscriptionScheduleId(subscription);
+    const schedule = await this.stripe.subscriptionSchedules.retrieve(scheduleId);
+
+    const upcoming = StripeHandler.getUpcomingPhase(schedule);
+    if (!upcoming) throw new Error(`No upcoming subscription found!`);
+
+    await this.stripe.subscriptionSchedules.update(scheduleId, {
+      proration_behavior: 'none',
+      phases: [{
+        items: [{ price: subscription.items.data[0].price.id, quantity: subscription.items.data[0].quantity }],
+        start_date: subscription.current_period_start,
+      }],
+    });
+
+    const newSubscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
+    return StripeHandler.formatStripeSubscription(newSubscription);
+  }
+
   createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam) {
     return this.stripe.checkout.sessions.create({
       customer: customerId,
@@ -305,7 +325,7 @@ export class StripeHandler {
 
     const cust = (await this.stripe.customers.retrieve(stripeCustomerId, { expand: ['invoice_settings.default_payment_method'] })) as Stripe.Response<Stripe.Customer>;
 
-    const isDefault = paymentMethod.id == this.getStripeId(cust.invoice_settings.default_payment_method);
+    const isDefault = paymentMethod.id == StripeHandler.getStripeId(cust.invoice_settings.default_payment_method);
 
 
     const paymentMethodData = {
@@ -420,11 +440,14 @@ export class StripeHandler {
     ] = await Promise.all([
       this.stripe.customers.retrieve(stripeCustomerId, { expand: ['invoice_settings.default_payment_method'] }),
       this.stripe.paymentMethods.list({ customer: stripeCustomerId, type: 'card' }),
-      this.stripe.subscriptions.list({ customer: stripeCustomerId, expand: ['data.latest_invoice'] }),
+      this.stripe.subscriptions.list({ customer: stripeCustomerId, expand: ['data.latest_invoice', 'data.schedule'] }),
       this.stripe.invoices.list({ customer: stripeCustomerId, expand: ['data.payment_intent'] }),
       this.stripe.orders.list({ customer: stripeCustomerId }),
       this.stripe.charges.list({ customer: stripeCustomerId }),
     ]);
+
+    const schedule = StripeHandler.getUpcomingPhase(subscriptionData.data[0].schedule as any);
+    console.log({ a: schedule?.items });
 
 
     return {
@@ -456,9 +479,28 @@ export class StripeHandler {
     return info;
   }
 
-  getStripeId(id: null | string | { id: string }) {
+  async getSubscriptionScheduleId(subscription: Stripe.Response<Stripe.Subscription>) {
+
+    const scheduleId = subscription.schedule;
+    if (scheduleId) return typeof scheduleId == 'string' ? scheduleId : scheduleId.id;
+
+    const schedule = await this.stripe.subscriptionSchedules.create({
+      from_subscription: subscription.id,
+    });
+    return schedule.id;
+  }
+
+  static getStripeId(id: null | string | { id: string }) {
     if (id == null) return id;
     if (typeof id == 'string') return id;
     return id.id;
+  }
+
+  static getUpcomingPhase(schedule: Stripe.SubscriptionSchedule | null) {
+    return schedule?.phases?.filter(e => dayjs().unix() < e.start_date).sort((a, b) => a.start_date - b.start_date)[0] ?? null;
+  }
+  static asNonString<T = any>(e: T): Exclude<T, string> {
+    if (typeof e == 'string') throw new Error(`Cannot convert string to non-string (${e})!`);
+    return e as any;
   }
 }

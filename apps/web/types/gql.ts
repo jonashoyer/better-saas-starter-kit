@@ -62,6 +62,7 @@ export enum InvoiceStatus {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  cancelSubscriptionDowngrade?: Maybe<StripeSubscription>;
   createCheckoutSession?: Maybe<CheckoutSession>;
   createManyUserInvite?: Maybe<Array<Maybe<UserInvite>>>;
   createProject?: Maybe<Project>;
@@ -79,7 +80,13 @@ export type Mutation = {
   updateUser?: Maybe<User>;
   updateUserProject?: Maybe<UserProject>;
   upsertStripeSubscription?: Maybe<StripeSubscription>;
+  userSignup?: Maybe<User>;
   verifyEmail?: Maybe<User>;
+};
+
+
+export type MutationCancelSubscriptionDowngradeArgs = {
+  projectId: Scalars['String'];
 };
 
 
@@ -163,6 +170,11 @@ export type MutationUpdateUserProjectArgs = {
 
 export type MutationUpsertStripeSubscriptionArgs = {
   input: UpsertStripeSubscriptionInput;
+};
+
+
+export type MutationUserSignupArgs = {
+  input: UserSignupInput;
 };
 
 
@@ -347,6 +359,10 @@ export type StripeSubscription = {
   status: StripeSubscriptionStatus;
   stripePrice: StripePrice;
   stripePriceId: Scalars['String'];
+  upcomingQuantity?: Maybe<Scalars['Int']>;
+  upcomingStartDate?: Maybe<Scalars['DateTime']>;
+  upcomingStripePrice?: Maybe<StripePrice>;
+  upcomingStripePriceId?: Maybe<Scalars['String']>;
 };
 
 export enum StripeSubscriptionStatus {
@@ -498,6 +514,11 @@ export type UserProjectWhereUniqueInput = {
   projectId_userId?: Maybe<UserProjectProjectIdUserIdCompoundUniqueInput>;
 };
 
+export type UserSignupInput = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+};
+
 export type VerificationToken = {
   __typename?: 'VerificationToken';
   id: Scalars['String'];
@@ -588,8 +609,46 @@ export const BaseStripeSubscriptionFragmentDoc = gql`
   stripePrice {
     ...BaseStripePrice
   }
+  upcomingQuantity
+  upcomingStartDate
+  upcomingStripePrice {
+    ...BaseStripePrice
+  }
 }
     ${BaseStripePriceFragmentDoc}`;
+export const CancelSubscriptionDowngradeDocument = gql`
+    mutation CancelSubscriptionDowngrade($projectId: String!) {
+  cancelSubscriptionDowngrade(projectId: $projectId) {
+    ...BaseStripeSubscription
+  }
+}
+    ${BaseStripeSubscriptionFragmentDoc}`;
+export type CancelSubscriptionDowngradeMutationFn = Apollo.MutationFunction<CancelSubscriptionDowngradeMutation, CancelSubscriptionDowngradeMutationVariables>;
+
+/**
+ * __useCancelSubscriptionDowngradeMutation__
+ *
+ * To run a mutation, you first call `useCancelSubscriptionDowngradeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelSubscriptionDowngradeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelSubscriptionDowngradeMutation, { data, loading, error }] = useCancelSubscriptionDowngradeMutation({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useCancelSubscriptionDowngradeMutation(baseOptions?: Apollo.MutationHookOptions<CancelSubscriptionDowngradeMutation, CancelSubscriptionDowngradeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelSubscriptionDowngradeMutation, CancelSubscriptionDowngradeMutationVariables>(CancelSubscriptionDowngradeDocument, options);
+      }
+export type CancelSubscriptionDowngradeMutationHookResult = ReturnType<typeof useCancelSubscriptionDowngradeMutation>;
+export type CancelSubscriptionDowngradeMutationResult = Apollo.MutationResult<CancelSubscriptionDowngradeMutation>;
+export type CancelSubscriptionDowngradeMutationOptions = Apollo.BaseMutationOptions<CancelSubscriptionDowngradeMutation, CancelSubscriptionDowngradeMutationVariables>;
 export const CreateManyUserInviteDocument = gql`
     mutation CreateManyUserInvite($input: CreateUserInviteInput!) {
   createManyUserInvite(input: $input) {
@@ -1356,6 +1415,39 @@ export function useUpsertStripeSubscriptionMutation(baseOptions?: Apollo.Mutatio
 export type UpsertStripeSubscriptionMutationHookResult = ReturnType<typeof useUpsertStripeSubscriptionMutation>;
 export type UpsertStripeSubscriptionMutationResult = Apollo.MutationResult<UpsertStripeSubscriptionMutation>;
 export type UpsertStripeSubscriptionMutationOptions = Apollo.BaseMutationOptions<UpsertStripeSubscriptionMutation, UpsertStripeSubscriptionMutationVariables>;
+export const UserSignupDocument = gql`
+    mutation UserSignup($input: UserSignupInput!) {
+  userSignup(input: $input) {
+    ...BaseSelf
+  }
+}
+    ${BaseSelfFragmentDoc}`;
+export type UserSignupMutationFn = Apollo.MutationFunction<UserSignupMutation, UserSignupMutationVariables>;
+
+/**
+ * __useUserSignupMutation__
+ *
+ * To run a mutation, you first call `useUserSignupMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUserSignupMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [userSignupMutation, { data, loading, error }] = useUserSignupMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUserSignupMutation(baseOptions?: Apollo.MutationHookOptions<UserSignupMutation, UserSignupMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UserSignupMutation, UserSignupMutationVariables>(UserSignupDocument, options);
+      }
+export type UserSignupMutationHookResult = ReturnType<typeof useUserSignupMutation>;
+export type UserSignupMutationResult = Apollo.MutationResult<UserSignupMutation>;
+export type UserSignupMutationOptions = Apollo.BaseMutationOptions<UserSignupMutation, UserSignupMutationVariables>;
 export const VerifyEmailDocument = gql`
     mutation VerifyEmail($token: String!) {
   verifyEmail(token: $token) {
@@ -1425,11 +1517,27 @@ export type BaseStripeProductFragment = (
 
 export type BaseStripeSubscriptionFragment = (
   { __typename?: 'StripeSubscription' }
-  & Pick<StripeSubscription, 'id' | 'created' | 'metadata' | 'status' | 'quantity' | 'cancelAt' | 'cancelAtPeriodEnd' | 'canceledAt' | 'currentPeriodEnd' | 'currentPeriodStart' | 'endedAt'>
+  & Pick<StripeSubscription, 'id' | 'created' | 'metadata' | 'status' | 'quantity' | 'cancelAt' | 'cancelAtPeriodEnd' | 'canceledAt' | 'currentPeriodEnd' | 'currentPeriodStart' | 'endedAt' | 'upcomingQuantity' | 'upcomingStartDate'>
   & { stripePrice: (
     { __typename?: 'StripePrice' }
     & BaseStripePriceFragment
-  ) }
+  ), upcomingStripePrice?: Maybe<(
+    { __typename?: 'StripePrice' }
+    & BaseStripePriceFragment
+  )> }
+);
+
+export type CancelSubscriptionDowngradeMutationVariables = Exact<{
+  projectId: Scalars['String'];
+}>;
+
+
+export type CancelSubscriptionDowngradeMutation = (
+  { __typename?: 'Mutation' }
+  & { cancelSubscriptionDowngrade?: Maybe<(
+    { __typename?: 'StripeSubscription' }
+    & BaseStripeSubscriptionFragment
+  )> }
 );
 
 export type CreateManyUserInviteMutationVariables = Exact<{
@@ -1727,6 +1835,19 @@ export type UpsertStripeSubscriptionMutation = (
   & { upsertStripeSubscription?: Maybe<(
     { __typename?: 'StripeSubscription' }
     & Pick<StripeSubscription, 'id' | 'metadata' | 'status' | 'stripePriceId' | 'quantity' | 'cancelAtPeriodEnd' | 'cancelAt' | 'canceledAt' | 'currentPeriodStart' | 'currentPeriodEnd' | 'created' | 'endedAt'>
+  )> }
+);
+
+export type UserSignupMutationVariables = Exact<{
+  input: UserSignupInput;
+}>;
+
+
+export type UserSignupMutation = (
+  { __typename?: 'Mutation' }
+  & { userSignup?: Maybe<(
+    { __typename?: 'User' }
+    & BaseSelfFragment
   )> }
 );
 

@@ -14,4 +14,10 @@ fragment BaseStripeSubscription on StripeSubscription {
   stripePrice {
     ...BaseStripePrice
   }
+
+  upcomingQuantity
+  upcomingStartDate
+  upcomingStripePrice {
+    ...BaseStripePrice
+  }
 }

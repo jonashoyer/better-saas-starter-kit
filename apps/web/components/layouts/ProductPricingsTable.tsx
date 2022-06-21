@@ -5,18 +5,22 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { StripeProductWithPricing } from "../../types/types";
 import { PricingDisplay } from "./ProjectPlanPaper";
+import { LoadingButton } from "@mui/lab";
 
 export interface ProductPricingsLayoutProps {
   products: StripeProductWithPricing[];
   currentProduct?: StripeProductWithPricing;
+  upcomingPriceId?: string;
   component?: any;
   onPlanSwitch?: (product: StripeProductWithPricing) => any;
+  onCancelDowngrade?: () => any;
+  cancelLoading?: boolean;
 }
 
 const monthlyPriceFindFn = e => e.interval == 'month';
 const yearlyPriceFindFn = e => e.interval == 'year';
 
-const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduct }: ProductPricingsLayoutProps) => {
+const ProductPricingsTable = ({ component, products, onPlanSwitch, onCancelDowngrade, cancelLoading, currentProduct, upcomingPriceId }: ProductPricingsLayoutProps) => {
 
   const { t, lang } = useTranslation();
   
@@ -29,10 +33,6 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
   }, [productPricingFn, products]);
 
   const currentProductIndex = sortedPrimaryProducts.findIndex(e => e.id == currentProduct?.id);
-
-  console.log({
-    currentProduct,
-  })
 
   return (
     <Box sx={{ minWidth: 650, maxWidth: 900 }}>
@@ -57,12 +57,13 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, currentProduc
               {sortedPrimaryProducts.map((e, i) => {
                 const price = productPricingFn(e);
                 const isCurrentProduct = i == currentProductIndex;
+                const isUpcoming = price?.id == upcomingPriceId;
+
                 return (
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'column' }}>
                       {price && <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} />}
-                      {onPlanSwitch && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? t('pricing:current') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade'))}</Button>}
-                      {!onPlanSwitch && isCurrentProduct && <Button sx={{ mt: .5 }} disabled={isCurrentProduct} onClick={() => onPlanSwitch(e)} variant='outlined' size='small'>{t('pricing:currentPlan')}</Button>}
+                      {onPlanSwitch && <LoadingButton sx={{ mt: .5 }} loading={isCurrentProduct && cancelLoading} disabled={isUpcoming || (!upcomingPriceId && isCurrentProduct)} onClick={() => isCurrentProduct ? onCancelDowngrade() : onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? (upcomingPriceId ? t('pricing:stay') : t('pricing:current')) : (isUpcoming ? t('pricing:upcoming') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade')))}</LoadingButton>}
                     </Box>
                   </TableCell>
                 )

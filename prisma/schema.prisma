@@ -86,11 +86,11 @@ model UserProject {
 }
 
 model Project {
-  id               String           @id @default(cuid())
+  id               String   @id @default(cuid())
   name             String
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  stripeCustomerId String           @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  stripeCustomerId String   @unique
   stripeTaxId      String?
 
   users                UserProject[]
@@ -148,11 +148,11 @@ enum StripeSubscriptionStatus {
 }
 
 model StripeSubscription {
-  id               String                   @id
+  id String @id
 
-  metadata         Json
-  status           StripeSubscriptionStatus
-  stripePriceId    String
+  metadata      Json
+  status        StripeSubscriptionStatus
+  stripePriceId String
 
   quantity          Int
   cancelAtPeriodEnd Boolean
@@ -165,9 +165,14 @@ model StripeSubscription {
   startDate          DateTime
   endedAt            DateTime?
 
-  projectId   String
-  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  stripePrice StripePrice @relation(fields: [stripePriceId], references: [id], onDelete: Cascade)
+  upcomingStripePriceId String?
+  upcomingQuantity      Int?
+  upcomingStartDate     DateTime?
+
+  projectId           String
+  project             Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stripePrice         StripePrice  @relation(fields: [stripePriceId], references: [id], onDelete: Cascade, name: "StripeSubscription_StripePrice")
+  upcomingStripePrice StripePrice? @relation(fields: [upcomingStripePriceId], references: [id], onDelete: SetNull, name: "StripeSubscription_UpcomingStripePrice")
 }
 
 model StripeProduct {
@@ -181,8 +186,8 @@ model StripeProduct {
 }
 
 model StripePrice {
-  id              String  @id
-  stripeProductId       String?
+  id              String          @id
+  stripeProductId String?
   active          Boolean
   type            StripePriceType
   currency        String
@@ -192,8 +197,9 @@ model StripePrice {
   trialPeriodDays Int?
   metadata        Json
 
-  stripeProduct       StripeProduct?       @relation(fields: [stripeProductId], references: [id], onDelete: Cascade)
-  stripeSubscriptions StripeSubscription[]
+  stripeProduct               StripeProduct?       @relation(fields: [stripeProductId], references: [id], onDelete: Cascade)
+  stripeSubscriptions         StripeSubscription[] @relation(name: "StripeSubscription_StripePrice")
+  upcomingStripeSubscriptions StripeSubscription[] @relation(name: "StripeSubscription_UpcomingStripePrice")
 }
 
 enum StripePriceType {

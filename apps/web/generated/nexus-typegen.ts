@@ -94,6 +94,10 @@ export interface NexusGenInputs {
     id?: string | null; // String
     projectId_userId?: NexusGenInputs['UserProjectProjectIdUserIdCompoundUniqueInput'] | null; // UserProjectProjectIdUserIdCompoundUniqueInput
   }
+  UserSignupInput: { // input type
+    email: string; // String!
+    password: string; // String!
+  }
 }
 
 export interface NexusGenEnums {
@@ -160,6 +164,7 @@ export interface NexusGenFieldTypes {
     sessionId: string | null; // String
   }
   Mutation: { // field return type
+    cancelSubscriptionDowngrade: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
     createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     createProject: NexusGenRootTypes['Project'] | null; // Project
@@ -177,6 +182,7 @@ export interface NexusGenFieldTypes {
     updateUser: NexusGenRootTypes['User'] | null; // User
     updateUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
     upsertStripeSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
+    userSignup: NexusGenRootTypes['User'] | null; // User
     verifyEmail: NexusGenRootTypes['User'] | null; // User
   }
   Ok: { // field return type
@@ -268,6 +274,10 @@ export interface NexusGenFieldTypes {
     status: NexusGenEnums['StripeSubscriptionStatus']; // StripeSubscriptionStatus!
     stripePrice: NexusGenRootTypes['StripePrice']; // StripePrice!
     stripePriceId: string; // String!
+    upcomingQuantity: number | null; // Int
+    upcomingStartDate: NexusGenScalars['DateTime'] | null; // DateTime
+    upcomingStripePrice: NexusGenRootTypes['StripePrice'] | null; // StripePrice
+    upcomingStripePriceId: string | null; // String
   }
   User: { // field return type
     createdAt: NexusGenScalars['DateTime']; // DateTime!
@@ -301,6 +311,7 @@ export interface NexusGenFieldTypeNames {
     sessionId: 'String'
   }
   Mutation: { // field return type name
+    cancelSubscriptionDowngrade: 'StripeSubscription'
     createCheckoutSession: 'CheckoutSession'
     createManyUserInvite: 'UserInvite'
     createProject: 'Project'
@@ -318,6 +329,7 @@ export interface NexusGenFieldTypeNames {
     updateUser: 'User'
     updateUserProject: 'UserProject'
     upsertStripeSubscription: 'StripeSubscription'
+    userSignup: 'User'
     verifyEmail: 'User'
   }
   Ok: { // field return type name
@@ -409,6 +421,10 @@ export interface NexusGenFieldTypeNames {
     status: 'StripeSubscriptionStatus'
     stripePrice: 'StripePrice'
     stripePriceId: 'String'
+    upcomingQuantity: 'Int'
+    upcomingStartDate: 'DateTime'
+    upcomingStripePrice: 'StripePrice'
+    upcomingStripePriceId: 'String'
   }
   User: { // field return type name
     createdAt: 'DateTime'
@@ -439,6 +455,9 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    cancelSubscriptionDowngrade: { // args
+      projectId: string; // String!
+    }
     createCheckoutSession: { // args
       metadata: NexusGenScalars['Json'] | null; // Json
       price: string; // String!
@@ -489,6 +508,9 @@ export interface NexusGenArgTypes {
     }
     upsertStripeSubscription: { // args
       input: NexusGenInputs['UpsertStripeSubscriptionInput']; // UpsertStripeSubscriptionInput!
+    }
+    userSignup: { // args
+      input: NexusGenInputs['UserSignupInput']; // UserSignupInput!
     }
     verifyEmail: { // args
       token: string; // String!

@@ -7,6 +7,7 @@ import { createClient } from 'graphql-ws';
 import { RetryLink } from "@apollo/client/link/retry";
 import { createPersistedQueryLink } from "@apollo/client/link/persisted-queries";
 import { sha256 } from 'crypto-hash';
+import { OperationDefinitionNode } from 'graphql';
 
 const createHttpLink = (uri: string, headers = {}) => {
   return new HttpLink({
@@ -22,8 +23,12 @@ const createRetyLink = () => {
     delay: {
       initial: 150,
     },
-    attempts: {
-      max: 3,
+    attempts(count, operation, error) {
+      if ((operation.query.definitions.find(e => e.kind == 'OperationDefinition') as OperationDefinitionNode)?.operation == 'mutation') return false;
+      if (3 < count) return false;
+      if (error?.statusCode && 400 <= error?.statusCode) return false; 
+
+      return true;
     },
   });
 }

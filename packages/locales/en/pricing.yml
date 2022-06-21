@@ -54,6 +54,8 @@ recommended: 'Recommended'
 currentPlan: 'Current plan'
 upgrade: 'Upgrade'
 downgrade: 'Downgrade'
+stay: 'Stay'
+upcoming: 'Upcoming'
 
 free: 'Free'
 
@@ -75,3 +77,10 @@ deletePaymentMethodBody: 'After deleting the payment method it will not be used 
 deletePaymentMethodBodySubmit: 'Delete'
 setAsPrimary: 'Set as primary'
 deletePaymentMethod: 'Delete payment method'
+
+cancelSubscriptionDowngrade: 'Cancel'
+subscriptionChange: 'Your subscription will change to {{planName}} {{seats}} the {{date}}'
+
+seat:
+  one: 'seat'
+  other: 'seats'
