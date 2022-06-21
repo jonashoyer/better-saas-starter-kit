@@ -3,14 +3,24 @@ import type { Profile } from "next-auth"
 import { PrismaClient } from '@prisma/client';
 import w3t from "web3token";
 import Web3 from 'web3';
-import { Constants } from "shared";
+import { Constants, isJWT } from "shared";
 import { createUserWithProject } from '../services/userService';
 import jwt from 'jsonwebtoken';
-import { AUTH_SECRET } from "../config";
+import { JWT_SECRET, NEXT_AUTH_SECRET } from "../config";
 
 export const getSession = async (prisma: PrismaClient, sessionToken: string) => {
 
   // TODO: Caching layer...
+
+  if (isJWT(sessionToken)) {
+    const tok = verifyNextAuthJWT(sessionToken);
+    return {
+      sessionToken,
+      userId: tok.sub!,
+      expires: new Date(tok.exp! * 1000),
+      user: { id: tok.sub! },
+    }
+  }
   
   const session = await prisma.session.findUnique({
     where: { sessionToken },
@@ -24,6 +34,10 @@ export const getSession = async (prisma: PrismaClient, sessionToken: string) => 
   }
 
   return session;
+}
+
+export const verifyNextAuthJWT = (tok: string) => {
+  return jwt.verify(tok, NEXT_AUTH_SECRET) as jwt.JwtPayload;
 }
 
 export const getUserProjectRole = async (prisma: PrismaClient, userId: string, projectId: string) => {
@@ -84,10 +98,10 @@ export const authorizeWeb3Token = async (prisma: PrismaClient, token: string) =>
 
 
 export const authorizeAccessToken = async (prisma: PrismaClient, accessToken: string) => {
-  const decoded = jwt.verify(accessToken, AUTH_SECRET);
+  const decoded = jwt.verify(accessToken, JWT_SECRET);
   if (typeof decoded != 'object') return null;
   const user = await prisma.user.findUnique({
-    where: { id: decoded.userId },
+    where: { id: decoded.sub },
   });
   return user;
 }

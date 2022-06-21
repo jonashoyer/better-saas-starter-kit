@@ -89,7 +89,6 @@ const LoginForm = ({ }) => {
             control={control}
             fullWidth
             label='Email'
-          // disabled={loading}
           />
           <FormTextField
             size='small'

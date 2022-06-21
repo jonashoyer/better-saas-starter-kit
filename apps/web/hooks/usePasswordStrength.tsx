@@ -1,15 +1,15 @@
 import React from 'react';
 
-const defaultPasswordStrengthLevels = [[12, 'Too weak'], [19, 'Strong'], [35, 'Excellent'], [Infinity, 'God like']];
+const defaultPasswordStrengthLevels = [{ maxStrength: 12, label: 'Too weak' }, { maxStrength: 19, label: 'Strong' }, { maxStrength: 35, label: 'Excellent' }, { maxStrength: Infinity, label: 'God Like' }];
 
-export interface usePasswordStrength {
+export interface UsePasswordStrengthOptions {
   password?: string;
-  strengthLevels?: [number, string, string][];
+  strengthLevels?: { maxStrength: number, label: string, description?: string }[];
 }
 
-const usePasswordStrength = ({ password, strengthLevels = defaultPasswordStrengthLevels }) => {
+const usePasswordStrength = ({ password, strengthLevels = defaultPasswordStrengthLevels }: UsePasswordStrengthOptions) => {
   
-  const [strength, setStrength] = React.useState<null | { label: string, color?: string, index: number, progress: number, feedback: string | null }>(null);
+  const [strength, setStrength] = React.useState<null | { label: string, color?: string, level: number, progress: number, feedback: string | null }>(null);
   const [zxcvbn, setZxcvbn] = React.useState(null);
 
   React.useEffect(() => {
@@ -26,15 +26,15 @@ const usePasswordStrength = ({ password, strengthLevels = defaultPasswordStrengt
 
     const strength = zxcvbn(password);
 
-    const strengthLevel = strengthLevels.reduce<null | { label: string, color?: string, index: number }>((result, e, index) => {
+    const strengthLevel = strengthLevels.sort((a, b) => a.maxStrength - b.maxStrength).reduce<null | { label: string, color?: string, level: number }>((result, e, index) => {
       if (result) return result;
-      if (e[0] <= strength.guesses_log10) return null;
-      return { label: e[1] as string, color: e[2] as string, index };
+      if (e.maxStrength <= strength.guesses_log10) return null;
+      return { level: index, ...e };
     }, null);
 
     if (!strengthLevel) return;
 
-    setStrength({ ...strengthLevel, progress: ((strengthLevel.index + 1) / strengthLevels.length) * 100, feedback: strength.feedback.warning || null });
+    setStrength({ ...strengthLevel, progress: ((strengthLevel.level + 1) / strengthLevels.length) * 100, feedback: strength.feedback.warning || null });
 
   }, [password, strengthLevels, zxcvbn]);
 

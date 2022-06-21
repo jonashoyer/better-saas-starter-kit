@@ -1,0 +1,5 @@
+mutation UserSignup($input: UserSignupInput!) {
+  userSignup(input: $input) {
+    ...BaseSelf
+  }
+}

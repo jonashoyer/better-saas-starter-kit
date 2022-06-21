@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import ms from 'ms';
 
 export const noop = () => {};
 export const pnoop = Promise.resolve();
@@ -26,4 +27,12 @@ export const isJSONValueObject = (jsonValue: Prisma.JsonValue): jsonValue is Pri
 export const inlineLog = (...msg: any[]) => {
   console.log(...msg);
   return true;
+}
+
+export const s = (str: string) => {
+  return Math.floor(ms(str) / 1000);
+}
+
+export const isJWT = (str: string) => {
+  return str.startsWith('ey') && str.split('.').length == 3;
 }

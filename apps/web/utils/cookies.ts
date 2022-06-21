@@ -1,5 +1,5 @@
 import { serialize, CookieSerializeOptions } from 'cookie'
-import { ServerResponse } from 'http';
+import { OutgoingMessage, ServerResponse } from 'http';
 import { NextApiResponse } from 'next'
 
 /**
@@ -7,7 +7,7 @@ import { NextApiResponse } from 'next'
  */
 
 export const setCookie = (
-  res: NextApiResponse | ServerResponse,
+  res: NextApiResponse | ServerResponse | OutgoingMessage,
   name: string,
   value: unknown,
   options: CookieSerializeOptions = {}

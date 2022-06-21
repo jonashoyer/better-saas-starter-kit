@@ -10,10 +10,14 @@ import usePasswordStrength from '../hooks/usePasswordStrength';
 import Head from 'next/head';
 import Link from 'next/link';
 import { signIn } from "next-auth/react";
-// import useWeb3Login from '../hooks/useWeb3Login';
 import { AppNextPage } from '../types/types';
 import { useUserContext } from '../contexts/UserContext';
 import MetamaskIcon from '../components/elements/MetamaskIcon';
+import { useUserSignupMutation } from '../types/gql';
+import { LoadingButton } from '@mui/lab';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+import useTranslation from 'next-translate/useTranslation';
 
 const SignupPage: AppNextPage = (props) => {
 
@@ -70,27 +74,61 @@ const SignupPage: AppNextPage = (props) => {
 
 const SignupForm = ({ }) => {
 
+  const { t } = useTranslation();
+
+  const schema = React.useMemo(() => {
+    return yup.object().shape({
+      email: yup.string().email('Must be a valid email').max(255).required('Email is required'),
+      password: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters long').max(255),
+    }).required();
+  }, []);
 
 
-  const { handleSubmit, reset, control, watch, setValue } = useForm({
+  const [signup, { loading }] = useUserSignupMutation();
+
+
+  const { handleSubmit, reset, control, watch, setValue, setError } = useForm({
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
       confirmPassword: '',
     },
+    resolver: yupResolver(schema),
   });
 
-  const onSignup = ({ username, password }) => {
-
-  }
-
-
-
   const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
 
 
   const { strength } = usePasswordStrength({ password });
+
+  const onSignup = ({ email, password, confirmPassword }) => {
+
+    if (password !== confirmPassword) {
+      setError('confirmPassword', { message: 'Passwords do not match', type: 'passwordsDoNotMatch' } );
+      return;
+    }
+
+    if (strength.level < 1) {
+      setError('password', { message: 'Password is too weak', type: 'passwordWeak' } );
+      return;
+    }
+
+    console.log({
+      email,
+      password,
+      confirmPassword,
+    })
+
+    signup({
+      variables: {
+        input: {
+          email,
+          password,
+        },
+      }
+    });
+  }
+
 
   return (
     <form onSubmit={handleSubmit(onSignup)}>
@@ -101,7 +139,7 @@ const SignupForm = ({ }) => {
           control={control}
           fullWidth
           label='Email'
-        // disabled={loading}
+          disabled={loading}
         />
         <FormTextField
           size='small'
@@ -110,14 +148,15 @@ const SignupForm = ({ }) => {
           control={control}
           fullWidth
           label='Password'
-          inputProps={{ maxLength: 128 }}
+          inputProps={{ maxLength: 255 }}
           helperText={strength?.feedback}
+          disabled={loading}
         />
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', minHeight: 20, mb: .5 }}>
           {strength &&
             <React.Fragment>
-              <LinearProgress sx={{ flex: '1' }} color={strength.index < 1 ? 'error' : 'inherit'} variant="determinate" value={strength.progress} />
-              <Typography sx={{ lineHeight: 1, minWidth: 64, textAlign: 'center'}} color={strength.index < 1 ? 'error' : 'inherit'} variant='body2'>{strength.label}</Typography>
+              <LinearProgress sx={{ flex: '1' }} color={strength.level < 1 ? 'error' : 'inherit'} variant="determinate" value={strength.progress} />
+              <Typography sx={{ lineHeight: 1, minWidth: 64, textAlign: 'center'}} color={strength.level < 1 ? 'error' : 'inherit'} variant='body2'>{strength.label}</Typography>
             </React.Fragment>
             }
         </Box>
@@ -129,15 +168,15 @@ const SignupForm = ({ }) => {
           control={control}
           fullWidth
           label='Confirm Password'
-          inputProps={{ maxLength: 128 }}
-          error={confirmPassword && password !== confirmPassword}
+          inputProps={{ maxLength: 255 }}
+          disabled={loading}
         />
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 1, pt: 1 }}>
-        <Button sx={{ minWidth: 120 }} variant='contained' type='submit'>Signup</Button>
+        <LoadingButton loading={loading} sx={{ minWidth: 120 }} variant='contained' type='submit'>Signup</LoadingButton>
         <Link passHref href='/login'>
-          <Button size='small' sx={{ minWidth: 120 }}>login</Button>
+          <Button size='small' sx={{ minWidth: 120 }} disabled={loading}>login</Button>
         </Link>
       </Box>
     </form>

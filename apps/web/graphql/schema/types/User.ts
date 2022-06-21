@@ -6,7 +6,10 @@ import { ForbiddenError } from 'apollo-server-micro';
 import { requireAuth } from './permissions';
 import crypto from 'crypto';
 import { getURL } from 'utils';
-import { simpleRateLimit } from 'shared-server';
+import { simpleRateLimit, userService } from 'shared-server';
+import { createUserWithProject } from 'shared-server/dist/services/userService';
+import argon2 from 'argon2';
+import { setCookie } from '../../../utils/cookies';
 
 const isSelf = (root: Prisma.User, args: any, ctx: Context) => {
   if (!ctx.user?.id) return false;
@@ -33,6 +36,46 @@ export const UserSelf = queryField('self', {
   authorize: requireAuth,
   resolve: async (parent, args, ctx) => {
     return ctx.user;
+  },
+})
+
+export const UserSignupInput = inputObjectType({
+  name: 'UserSignupInput',
+  definition(t) {
+    t.string('email', { required: true });
+    t.string('password', { required: true });
+  }
+})
+
+export const UserSignup = mutationField('userSignup', {
+  type: 'User',
+  args: {
+    input: arg({ type: UserSignupInput, required: true }),
+  },
+  async resolve(root, { input }, ctx) {
+
+    const { email, password } = input;
+
+    const userExists = await ctx.prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    if (userExists) throw new ForbiddenError('User already exists');
+
+    const accountExists = await ctx.prisma.account.findUnique({ where: { provider_providerAccountId: { provider: 'password', providerAccountId: email.toLowerCase() } } });
+    if (accountExists) throw new ForbiddenError('User already exists');
+
+
+    const account: Prisma.Prisma.AccountCreateWithoutUserInput = {
+      type: 'credentials',
+      provider: 'credentials',
+      providerAccountId: email.toLowerCase(),
+      accessToken: await argon2.hash(password),
+    }
+
+    const { user } = await createUserWithProject(ctx.prisma, { email: email.toLowerCase() }, account);
+
+    const session = await userService.generateUserSession(ctx.prisma, user.id);
+    setCookie(ctx.res, 'sid', session.sessionToken);
+
+    return user;
   },
 })
 

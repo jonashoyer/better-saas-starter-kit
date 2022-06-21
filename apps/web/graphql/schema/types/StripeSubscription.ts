@@ -1,6 +1,5 @@
-import { arg, enumType, inputObjectType, mutationField, objectType } from 'nexus';
+import { arg, enumType, inputObjectType, mutationField, objectType, stringArg } from 'nexus';
 import { requireProjectAccess } from './permissions';
-import { isJSONValueObject } from 'shared';
 
 export const StripeSubscriptionStatus = enumType({
   name: 'StripeSubscriptionStatus',
@@ -31,6 +30,12 @@ export const StripeSubscription = objectType({
     t.model.created();
     t.model.endedAt();
     t.model.stripePrice();
+
+    t.model.upcomingStripePriceId();
+    t.model.upcomingQuantity();
+    t.model.upcomingStartDate();
+    t.model.upcomingStripePrice();
+
   }
 })
 
@@ -95,12 +100,45 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
         throw new Error('Price do not exists!');
       }
 
-      const isDowngrade = currentPrimarySubscription.stripePrice.unitAmount < price.unitAmount;
+      const isDowngrade = currentPrimarySubscription.stripePrice.unitAmount > price.unitAmount;
       const sub = await ctx.getStripeHandler().updateSubscription(currentPrimarySubscription.id, priceId, quantity, isDowngrade);
       return { ...sub, projectId: input.projectId };
     }
 
     const sub = await ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
     return { ...sub, projectId: input.projectId };
+  }
+})
+
+export const cancelSubscriptionDowngrade = mutationField('cancelSubscriptionDowngrade', {
+  type: StripeSubscription,
+  args: {
+    projectId: stringArg({ required: true }),
+  },
+  authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, args) => args.projectId}),
+  async resolve(root, { projectId }, ctx) {
+    
+    const subscriptions = await ctx.prisma.stripeSubscription.findMany({
+      where: { projectId },
+      include: {
+        stripePrice: {
+          include: {
+            stripeProduct: true,
+          }
+        }
+      }
+    });
+    const currentPrimarySubscription = subscriptions.find(e => (e.stripePrice.stripeProduct.metadata as any).type == 'primary');
+
+    if (!currentPrimarySubscription) {
+      throw new Error('No primary subscription found!');
+    }
+
+    const subscription = await ctx.getStripeHandler().cancelSubscriptionDowngrade(currentPrimarySubscription.id);
+
+    return {
+      ...subscription,
+      projectId,
+    }
   }
 })

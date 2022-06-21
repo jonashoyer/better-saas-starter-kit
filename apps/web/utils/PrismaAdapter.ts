@@ -1,27 +1,14 @@
 import type * as Prisma from "@prisma/client"
-import { randomBytes } from "crypto"
 import type { Adapter } from "next-auth/adapters"
+import { isJWT } from "shared";
+import { userService, verifyNextAuthJWT } from 'shared-server';
 import jwt from 'jsonwebtoken';
-import { userService } from 'shared-server';
 
 const GENERATE_ACCESS_TOKEN = true;
-const ACCESS_TOKEN_EXPIRES_IN = '20m';
-const secret = process.env.JWT_SECRET || randomBytes(32).toString('hex');
+
 
 // const SESSION_MAX_AGE = ms('30d');
 // const SESSION_UPDATE_AGE = ms('1d');
-
-const generateJWT = (userId: string) => {
-  return jwt.sign({ userId: userId }, secret, { expiresIn: ACCESS_TOKEN_EXPIRES_IN });
-}
-
-const withAccessToken = (withAccessToken: boolean, session: any) => {
-  if (!withAccessToken) return session;
-  return {
-    ...session,
-    accessToken: generateJWT(session.userId),
-  }
-}
 
 
 
@@ -53,11 +40,9 @@ export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
     //   return user;
     // },
 
+
     getUser(id) {
-      // TODO: Caching layer?
-      return prisma.user.findUnique({
-        where: { id },
-      })
+      return userService.getUser(prisma, id);
     },
 
     getUserByEmail(email) {
@@ -95,33 +80,52 @@ export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
 
     async createSession(data) {
       const session = await prisma.session.create({ data });
-      return withAccessToken(GENERATE_ACCESS_TOKEN, session);
+      return userService.withAccessToken(GENERATE_ACCESS_TOKEN, session);
     },
 
     async getSessionAndUser(sessionToken) {
+      if (isJWT(sessionToken)) {
+        const tok = verifyNextAuthJWT(sessionToken);
+        const user = await prisma.user.findUnique({ where: { id: tok.sub! } });
+        
+        const session = {
+          id: '<null>',
+          sessionToken,
+          userId: tok.sub!,
+          expires: new Date(tok.exp! * 1000),
+          user: { id: tok.sub! },
+        }
+
+        return {
+          user,
+          session: userService.withAccessToken(GENERATE_ACCESS_TOKEN, session),
+        }
+      }
       
-      const userAndSession = await prisma.session.findUnique({
+      const sessionWithUser = await prisma.session.findUnique({
         where: { sessionToken },
         include: { user: true },
       });
 
-      if (!userAndSession) return null;
-      const { user, ...session } = userAndSession;
+      if (!sessionWithUser) return null;
+      const { user, ...session } = sessionWithUser;
       
       if (session && session.expires < new Date()) {
         await prisma.session.delete({ where: { sessionToken } })
         return null
       }
 
-      return { user, session: withAccessToken(GENERATE_ACCESS_TOKEN, session) };
+      return { user, session: userService.withAccessToken(GENERATE_ACCESS_TOKEN, session) };
     },
 
     async updateSession(data) {
+      if (isJWT(data.sessionToken)) return data as any;
       const session = await prisma.session.update({ where: { sessionToken: data.sessionToken }, data })
-      return withAccessToken(GENERATE_ACCESS_TOKEN, session);
+      return userService.withAccessToken(GENERATE_ACCESS_TOKEN, session);
     },
 
     async deleteSession(sessionToken) {
+      if (isJWT(sessionToken)) return;
       await prisma.session.delete({ where: { sessionToken } })
     },
 

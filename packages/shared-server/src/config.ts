@@ -4,8 +4,9 @@ dotenv.config();
 
 // MODULE oauth
 export const JWT_SECRET = process.env.JWT_SECRET || '_default_non_secure_';
-export const AUTH_SECRET = process.env.AUTH_SECRET || '_secret_';
+export const NEXT_AUTH_SECRET = process.env.NEXT_AUTH_SECRET || '_secret_';
 // END_MODULE oauth
+
 
 export const NODE_ENV = (process.env.NODE_ENV || NodeEnv.Development) as NodeEnv;
 

@@ -6,10 +6,22 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import EmailProvider from "next-auth/providers/email";
 import argon2 from 'argon2';
 import { prisma } from '../../../utils/prisma';
+import jwt from 'jsonwebtoken';
+import { NEXT_AUTH_SECRET } from "../../../configServer";
 
 const prismaAdapter = PrismaAdapter(prisma);
 
 export default NextAuth({
+  cookies: {
+    sessionToken: {
+      name: 'sid',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+      }
+    },
+  },
   pages: {
     signIn: '/login',
     signOut: '',
@@ -30,35 +42,36 @@ export default NextAuth({
       clientId: process.env.GITHUB_ID,
       clientSecret: process.env.GITHUB_SECRET,
     }),
-    // CredentialsProvider({
-    //   name: "Credentials",
-    //   // The credentials is used to generate a suitable form on the sign in page.
-    //   // You can specify whatever fields you are expecting to be submitted.
-    //   // e.g. domain, username, password, 2FA token, etc.
-    //   // You can pass any HTML attribute to the <input> tag through the object.
-    //   credentials: {
-    //     email: { label: "Email", type: "email" },
-    //     password: {  label: "Password", type: "password" },
-    //   },
-    //   async authorize(credentials) {
-    //     try {
-    //       const user = await prisma.user.findUnique({ where: { email: credentials.email } });
-    //       if (!user || !user.password) return null;
-    //       const verified = await argon2.verify(user.password, credentials.password);
-    //       if (!verified) return null;
-    //       return user;
-    //     } catch (err) {
-    //       console.error(err);
-    //       return null;
-    //     }
-    //   }
-    // }),
+    CredentialsProvider({
+      id: 'credentials',
+      name: 'Credentials',
+      credentials: { email: {}, password: {} },
+      async authorize({ email, password }, req) {
+        // You can also use the `req` object to obtain additional parameters
+        // (i.e., the request IP address)
+
+        const account = await prisma.account.findUnique({ where: { provider_providerAccountId: { provider: 'credentials', providerAccountId: email.toLowerCase() } }, include: { user: true } })
+        if (!account) return null
+
+        const match = await argon2.verify(account.accessToken, password);
+        if (!match) return null;
+        return { id: account.user.id };
+      },
+    })
   ],
   debug: false,
   theme: { colorScheme: "light" },
   
   adapter: prismaAdapter,
-  secret: process.env.SECRET,
+  jwt: {
+    async encode ({ secret, token }) {
+      return jwt.sign({ sub: token.sub }, secret, { expiresIn: '14d', noTimestamp: true });
+    },
+    async decode ({ secret, token }) {
+      return jwt.verify(token as string, secret) as any;
+    },
+  },
+  secret: NEXT_AUTH_SECRET,
   callbacks: {
     async session({ session, user }) {
       return {
