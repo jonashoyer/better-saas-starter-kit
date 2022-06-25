@@ -62,7 +62,7 @@ export const getUserProjectRole = async (prisma: PrismaClient, userId: string, p
 
 export const authorizeWeb3Token = async (prisma: PrismaClient, token: string) => {
 
-  const decoded = await w3t.verify(new Web3(), token, { statement: Constants.WEB3_TOKEN_STATEMENT });
+  const decoded = await w3t.verify(token, { statement: Constants.WEB3_TOKEN_STATEMENT });
   
   const account = await prisma.account.findUnique({
     where: {
@@ -93,7 +93,7 @@ export const authorizeWeb3Token = async (prisma: PrismaClient, token: string) =>
     return { user, decoded };
   }
   
-  return { user: account.user, decoded: null };
+  return { user: account.user, decoded };
 }
 
 

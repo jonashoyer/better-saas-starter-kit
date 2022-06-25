@@ -45,14 +45,6 @@ export const authorize = async ({ req, sessionToken, accessToken }: {
   if (accessToken) {
     return authorizeAccessToken(prisma, accessToken);
   }
-
-  if (req) {
-    const parsed = cookie.parse(req.headers.cookie || '');
-    if (parsed.w3t) {
-      const { user } = await authorizeWeb3Token(prisma, parsed.w3t);
-      return user;
-    }
-  }
   
   if (req || sessionToken) {
     const session = await getSession({ req, sessionToken } as any);

@@ -87,3 +87,13 @@ export const verifyWeb3Token = async (message: string, signature: string) => {
     throw new Web3TokenError('w3t malformed');
   }
 }
+
+export const isW3T = (str: string) => {
+  const arr = str.split('.');
+  return arr.length == 2 && arr[1].length == 88 && isBase64(arr[0]) && isBase64(arr[1]);
+}
+
+const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+export const isBase64 = (str: string) => {
+  return base64regex.test(str);
+}

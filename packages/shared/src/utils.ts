@@ -34,5 +34,6 @@ export const s = (str: string) => {
 }
 
 export const isJWT = (str: string) => {
-  return str.startsWith('ey') && str.split('.').length == 3;
+  const arr = str.split('.');
+  return arr[0].startsWith('ey') && arr[1].startsWith('ey') && str.split('.').length == 3;
 }

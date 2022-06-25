@@ -1,8 +1,8 @@
 import type * as Prisma from "@prisma/client"
 import type { Adapter } from "next-auth/adapters"
 import { isJWT } from "shared";
-import { userService, verifyNextAuthJWT } from 'shared-server';
-import jwt from 'jsonwebtoken';
+import { authorizeWeb3Token, userService, verifyNextAuthJWT } from 'shared-server';
+import { isW3T } from "web3token";
 
 const GENERATE_ACCESS_TOKEN = true;
 
@@ -89,11 +89,28 @@ export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
         const user = await prisma.user.findUnique({ where: { id: tok.sub! } });
         
         const session = {
-          id: '<null>',
+          id: 'jwt',
           sessionToken,
           userId: tok.sub!,
           expires: new Date(tok.exp! * 1000),
           user: { id: tok.sub! },
+        }
+
+        return {
+          user,
+          session: userService.withAccessToken(GENERATE_ACCESS_TOKEN, session),
+        }
+      }
+
+      if (isW3T(sessionToken)) {
+        const { user, decoded } = await authorizeWeb3Token(prisma, sessionToken);
+
+        const session = {
+          id: 'w3t',
+          sessionToken,
+          userId: user.id,
+          expires: new Date(decoded.payload.expiresAt),
+          user: { id: user.id },
         }
 
         return {
@@ -119,13 +136,13 @@ export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
     },
 
     async updateSession(data) {
-      if (isJWT(data.sessionToken)) return data as any;
+      if (isJWT(data.sessionToken) || isW3T(data.sessionToken)) return data as any;
       const session = await prisma.session.update({ where: { sessionToken: data.sessionToken }, data })
       return userService.withAccessToken(GENERATE_ACCESS_TOKEN, session);
     },
 
     async deleteSession(sessionToken) {
-      if (isJWT(sessionToken)) return;
+      if (isJWT(sessionToken) || isW3T(sessionToken)) return;
       await prisma.session.delete({ where: { sessionToken } })
     },
 

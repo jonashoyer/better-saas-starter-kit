@@ -8,13 +8,14 @@ import argon2 from 'argon2';
 import { prisma } from '../../../utils/prisma';
 import jwt from 'jsonwebtoken';
 import { NEXT_AUTH_SECRET } from "../../../configServer";
+import { Constants, s } from 'shared';
 
 const prismaAdapter = PrismaAdapter(prisma);
 
 export default NextAuth({
   cookies: {
     sessionToken: {
-      name: 'sid',
+      name: Constants.NEXT_AUTH_SESSION_TOKEN_COOKIE,
       options: {
         httpOnly: true,
         sameSite: 'lax',
@@ -61,11 +62,14 @@ export default NextAuth({
   ],
   debug: false,
   theme: { colorScheme: "light" },
+  session: {
+    maxAge: s(Constants.NEXT_AUTH_SESSION_MAX_AGE),
+  },
   
   adapter: prismaAdapter,
   jwt: {
     async encode ({ secret, token }) {
-      return jwt.sign({ sub: token.sub }, secret, { expiresIn: '14d', noTimestamp: true });
+      return jwt.sign({ sub: token.sub }, secret, { expiresIn: Constants.NEXT_AUTH_SESSION_MAX_AGE, noTimestamp: true });
     },
     async decode ({ secret, token }) {
       return jwt.verify(token as string, secret) as any;

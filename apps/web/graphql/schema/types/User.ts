@@ -71,6 +71,7 @@ export const UserSignup = mutationField('userSignup', {
     }
 
     const { user } = await createUserWithProject(ctx.prisma, { email: email.toLowerCase() }, account);
+    ctx.user = user; // :/
 
     const session = await userService.generateUserSession(ctx.prisma, user.id);
     setCookie(ctx.res, 'sid', session.sessionToken);

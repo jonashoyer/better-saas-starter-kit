@@ -74,7 +74,7 @@ export interface Web3TokenVerifyOptions {
   statement?: string;
 }
 
-const verify = async (web3: Web3, token: string, options?: Web3TokenVerifyOptions) => {
+const verify = async (token: string, options?: Web3TokenVerifyOptions) => {
   const { payload, signature } = web3TokenDecode<ReturnType<typeof optionsToPayload>>(token);
   if (payload.domain && options?.domain) {
     

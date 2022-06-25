@@ -1,4 +1,4 @@
-import { SessionContextValue, signOut, useSession } from 'next-auth/react';
+import { SessionContextValue, signOut, signIn, useSession } from 'next-auth/react';
 import React from 'react';
 import { useCookie } from 'react-use';
 import useProject from '../hooks/useProject';
@@ -6,10 +6,9 @@ import { ProjectQuery, SelfProjectsQuery, useProjectQuery, useSelfProjectsQuery,
 import { noop, Constants } from 'shared';
 import w3t from 'web3token';
 import Web3 from 'web3';
-import ms from 'ms';
-import { remove as cookieRemove } from 'js-cookie'
 
 
+// TODO: Move this
 declare global {
   // allow global `var` declarations
   // eslint-disable-next-line no-var
@@ -18,7 +17,7 @@ declare global {
 
 export type UserContextValue = {
   nextAuth: SessionContextValue;
-  w3t: { web3: Web3 | null, token: string | null, sign: () => void, clear: () => void };
+  w3t: { web3: Web3 | null, sign: () => void };
   user: BaseSelfFragment | null;	
   logout: () => void;
   loading: boolean;
@@ -29,7 +28,7 @@ export type UserContextValue = {
 
 export const UserContext = React.createContext<UserContextValue>({
   nextAuth: { data: null, status: 'loading' },
-  w3t: { web3: null, token: null, sign: noop, clear: noop },
+  w3t: { web3: null, sign: noop },
   user: null,
   logout: noop,
   loading: true,
@@ -54,38 +53,31 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
     return new Web3(window.ethereum);
   }, []);
 
-  const [web3Token, updateWeb3Token, deleteWeb3Token] = useCookie('w3t');
+  const [_, updateSessionToken] = useCookie(Constants.NEXT_AUTH_SESSION_TOKEN_COOKIE);
 
   const w3tSign = React.useCallback(async () => {
 
     if (!web3) return;
-    const token = await w3t.sign(web3, { statement: Constants.WEB3_TOKEN_STATEMENT, expiresIn: '24h', domain: window.location.hostname, omitStatement: true });
+    const token = await w3t.sign(web3, { statement: Constants.WEB3_TOKEN_STATEMENT, expiresIn: Constants.NEXT_AUTH_SESSION_MAX_AGE, domain: window.location.hostname, omitStatement: true });
 
-    updateWeb3Token(token, { expires: new Date(Date.now() + ms('24h')) });
+    updateSessionToken(token);
+    signIn('w3t', { callbackUrl: '/dashboard' });
 
-    const { address, payload } = await w3t.verify(web3, token, { statement: Constants.WEB3_TOKEN_STATEMENT });
-
-  }, [updateWeb3Token, web3]);
-
-  const w3tClear = React.useCallback(() => {
-    deleteWeb3Token();
-  }, [deleteWeb3Token]);
+  }, [updateSessionToken, web3]);
 
   const w3tValue = React.useMemo(() => ({
     web3,
-    token: web3Token,
     sign: w3tSign,
-    clear: w3tClear,
-  }), [w3tClear, w3tSign, web3, web3Token]);
+  }), [w3tSign, web3]);
 
 
   const logout = React.useCallback(() => {
-    w3tClear();
+    // w3tClear();
     signOut({ callbackUrl: '/' });
-  }, [w3tClear]);
+  }, []);
 
 
-  const hasAuth = !!web3Token || !!nextAuthSession.data;
+  const hasAuth = !!nextAuthSession.data;
   
   const { data: projectData, loading: projectLoading } = useProjectQuery({
     variables: {
@@ -117,5 +109,4 @@ export const UserContextProvider = ({ children }: { children: React.ReactNode })
 
 export const userLogout = () => {
   signOut({ callbackUrl: '/' });
-  cookieRemove('w3t');
 }
