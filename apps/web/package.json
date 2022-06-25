@@ -12,8 +12,7 @@
     "analyze:server": "cross-env ANALYZE=true BUNDLE_ANALYZE=server next build",
     "analyze:browser": "cross-env ANALYZE=true BUNDLE_ANALYZE=browser next build",
     "generate:gql": "npx gql-gen --config codegen.yml",
-    "generate:nexus": "ts-node --transpile-only -r tsconfig-paths/register graphql/schema",
-    "sync:stripe": "ts-node tools/syncStripe"
+    "generate:nexus": "ts-node --transpile-only -r tsconfig-paths/register graphql/schema"
   },
   "dependencies": {
     "@apollo/client": "^3.6.5",

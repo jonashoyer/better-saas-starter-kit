@@ -29,17 +29,6 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
   const [addPaymenthMethodDialog, setAddPaymenthMethodDialog] = React.useState(false);
   const [deletePaymentMethodConfirm, setDeletePaymentMethodConfirm] = React.useState(null);
 
-  const [pollPaymentMethods, pollingPaymentMethods] = usePollPaymentMethods({
-    projectId: project.id,
-    paymentMethods: project.stripePaymentMethods,
-    onCompleted() {
-      setAddPaymenthMethodDialog(false);
-    },
-    onFailed() {
-      console.error('timeouted!');
-    }
-  })
-
   const [getPaymenMethods, { loading: getPaymentMethodsLoading }] = useGetPaymentMethodsLazyQuery({
     variables: {
       projectId: project.id,
@@ -112,9 +101,7 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
       <Lazy
         Component={LazyDialogPaymentMethod}
         open={addPaymenthMethodDialog}
-        onCreated={pollPaymentMethods}
         handleClose={() => setAddPaymenthMethodDialog(false)}
-        loading={pollingPaymentMethods}
       />
       <Lazy
         Component={LazyDialogYN}

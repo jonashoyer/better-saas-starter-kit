@@ -1,5 +1,0 @@
-mutation UserLogin($input: UserLoginInput!) {
-  userLogin(input: $input) {
-    ...BaseSelf
-  }
-}

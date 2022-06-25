@@ -1,5 +1,5 @@
 import React from 'react';
-import { GetPaymentMethodsDocument } from "types/gql";
+import { GetPaymentMethodsDocument, GetPaymentMethodsQuery } from "types/gql";
 import { hashString } from 'utils';
 import usePoll from './usePoll';
 import { useApolloClient } from '@apollo/client';
@@ -11,7 +11,6 @@ export interface HashablePaymentMethod {
 
 interface UsePollPaymentMethodsOption {
   projectId: string;
-  paymentMethods: HashablePaymentMethod[];
   onCompleted?: () => any;
   onFailed?: () => any;
 
@@ -20,31 +19,32 @@ interface UsePollPaymentMethodsOption {
   initialDelay?: number;
 }
 
-const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => void, boolean] => {
+const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => Promise<void>, boolean, () => void] => {
 
   const apolloClient =  useApolloClient();
   
-  const { projectId, paymentMethods, onCompleted, onFailed, maxTries = 8, delay = 500, initialDelay = 800 } = option;
+  const { projectId, onCompleted, onFailed, maxTries = 8, delay = 1500, initialDelay = 800 } = option;
   
   const currentHashRef = React.useRef(null);
 
-  const [startPoll, loading] = usePoll({
+  const [startPoll, loading, stopPoll] = usePoll({
     delay, initialDelay, maxTries, onCompleted, onFailed,
     async onPoll() {
-      const { data } = await apolloClient.query({ query: GetPaymentMethodsDocument, variables: { projectId }, fetchPolicy: 'network-only' });
-      if (!data?.project?.paymentMethods) return false;
+      const { data } = await apolloClient.query<GetPaymentMethodsQuery>({ query: GetPaymentMethodsDocument, variables: { projectId }, fetchPolicy: 'network-only' });
+      if (!data?.project?.stripePaymentMethods) return false;
 
-      const hash = paymentMethodListHash(data.project.paymentMethods);
+      const hash = paymentMethodListHash(data.project.stripePaymentMethods);
       return hash != currentHashRef.current;
     }
   });
 
-  const pollUpdate = async () => {
-    currentHashRef.current = paymentMethodListHash(paymentMethods);
+  const proxyStartPoll = async () => {
+    const { data } = await apolloClient.query<GetPaymentMethodsQuery>({ query: GetPaymentMethodsDocument, variables: { projectId }, fetchPolicy: 'cache-first' });
+    currentHashRef.current = paymentMethodListHash(data.project?.stripePaymentMethods);
     startPoll();
   }
 
-  return [pollUpdate, loading];
+  return [proxyStartPoll, loading, stopPoll];
 }
 
 export default usePollPaymentMethods;

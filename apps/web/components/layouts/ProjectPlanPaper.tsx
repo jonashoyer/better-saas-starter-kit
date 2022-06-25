@@ -60,7 +60,7 @@ const ProjectPlanPaper = ({ project, products }: ProjectPlanPaperProps) => {
         onPlanSwitch={(e: any) => setChangePlan(e)}
         products={products}
         currentProduct={currentProduct}
-        upcomingPriceId={primarySubscription.upcomingStripePrice?.id}
+        upcomingPriceId={primarySubscription?.upcomingStripePrice?.id}
         onCancelDowngrade={() => cancelDowngrade({ variables: { projectId: project!.id } })}
         cancelLoading={cancelLoading}
       />

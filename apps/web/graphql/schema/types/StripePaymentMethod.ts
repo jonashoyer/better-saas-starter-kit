@@ -79,8 +79,8 @@ export const UpdateStripePaymentMethod = mutationField('updateStripePaymentMetho
   async resolve(root, { input }, ctx: Context<prisma.StripePaymentMethod & { project: { stripeCustomerId: string, paymentMethods: prisma.StripePaymentMethod[] } }>) {
 
     if (input.isDefault) {
-      const paymentMethod = await ctx.getStripeHandler().updateDefaultPaymentMethod(ctx.entity.project.stripeCustomerId, ctx.entity.id)
-      return paymentMethod;
+      await ctx.getStripeHandler().updateDefaultPaymentMethod(ctx.entity.project.stripeCustomerId, ctx.entity.id)
+      return await ctx.prisma.stripePaymentMethod.findUnique({ where: { id: ctx.entity.id } });
     }
 
     throw new UserInputError('Not implemented');
@@ -96,6 +96,6 @@ export const DeleteStripePaymentMethod = mutationField('deleteStripePaymentMetho
   async resolve(root, { id }, ctx: Context<prisma.StripePaymentMethod>) {
     if (ctx.entity.isDefault) throw new Error('A primary payment method is needed!');
     await ctx.stripe.paymentMethods.detach(id);
-    return ctx.prisma.stripePaymentMethod.delete({ where: { id } });
+    return ctx.entity;
   }
 })

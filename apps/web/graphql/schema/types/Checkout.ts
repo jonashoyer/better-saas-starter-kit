@@ -9,6 +9,7 @@ export const CheckoutSession = objectType({
   }
 })
 
+// WIP!
 export const CreateCheckoutSession = mutationField("createCheckoutSession", {
   type: "CheckoutSession",
   args: {

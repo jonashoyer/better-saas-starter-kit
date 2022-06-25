@@ -35,6 +35,10 @@ export class StripeHandler {
     return this.stripe.customers.create(params, options);
   }
 
+  updateCustomer(id: string, params:  Stripe.CustomerUpdateParams, options?: Stripe.RequestOptions) {
+    return this.stripe.customers.update(id, params, options);
+  }
+
   deleteCustomer(id: string, options?: Stripe.RequestOptions) {
     return this.stripe.customers.del(id, options);
   }
@@ -272,7 +276,7 @@ export class StripeHandler {
     //   );
   };
 
-  async cancelSubscriptionDowngrade(stripeSubscriptionId: string) {
+  async cancelSubscriptionDowngrade(stripeSubscriptionId: string, preapply = false) {
     
     const subscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
     const scheduleId = await this.getSubscriptionScheduleId(subscription);
@@ -289,8 +293,40 @@ export class StripeHandler {
       }],
     });
 
+    if (preapply) {
+      await this.prisma.stripeSubscription.update({
+        where: { id: subscription.id },
+        data: {
+          upcomingQuantity: null,
+          upcomingStripePriceId: null,
+          upcomingStartDate: null,
+        }
+      });
+    }
+
     const newSubscription = await this.stripe.subscriptions.retrieve(stripeSubscriptionId);
     return StripeHandler.formatStripeSubscription(newSubscription);
+  }
+
+  async subscriptionScheduleUpdate(stripeSubscriptionSchedule: Stripe.SubscriptionSchedule) {
+    const subscriptionId = StripeHandler.getStripeId(stripeSubscriptionSchedule.subscription);
+    if (!subscriptionId) throw new Error(`No upcoming subscription found!`);
+    const upcoming = StripeHandler.getUpcomingPhase(stripeSubscriptionSchedule);
+
+    return await this.prisma.stripeSubscription.update({
+      where: { id: subscriptionId },
+      data: {
+        upcomingStripePriceId: null,
+        upcomingQuantity: null,
+        upcomingStartDate: null,
+
+        ...(upcoming && ({
+          upcomingStripePriceId: StripeHandler.getStripeId(upcoming.items[0].price),
+          upcomingQuantity: upcoming.items[0].quantity ?? 1,
+          upcomingStartDate: secondsToDate(upcoming.start_date),
+        })),
+      },
+    });
   }
 
   createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam) {
@@ -324,9 +360,7 @@ export class StripeHandler {
     if (!project) throw new Error('Project not found from stripe customer!');
 
     const cust = (await this.stripe.customers.retrieve(stripeCustomerId, { expand: ['invoice_settings.default_payment_method'] })) as Stripe.Response<Stripe.Customer>;
-
-    const isDefault = paymentMethod.id == StripeHandler.getStripeId(cust.invoice_settings.default_payment_method);
-
+    const isDefault = cust.invoice_settings.default_payment_method == null || paymentMethod.id == StripeHandler.getStripeId(cust.invoice_settings.default_payment_method);
 
     const paymentMethodData = {
       id: paymentMethod.id,
@@ -355,9 +389,17 @@ export class StripeHandler {
           id: paymentMethod.id,
         }
       })
-    ])
+    ]);
+
+    if (cust.invoice_settings.default_payment_method == null) {
+      await this.updateDefaultPaymentMethod(cust.id, paymentMethod.id);
+    }
 
     return result[result.length - 1];
+  }
+
+  async deletePaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
+    await this.prisma.stripePaymentMethod.delete({ where: { id: paymentMethod.id } });
   }
 
   async updateDefaultPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
@@ -368,12 +410,6 @@ export class StripeHandler {
       invoice_settings: {
         default_payment_method: paymentMethodId,
       }
-    });
-
-
-    return this.prisma.stripePaymentMethod.updateMany({
-      where: { id: { not: paymentMethodId }, projectId: project.id, isDefault: true },
-      data: { isDefault: false },
     });
   }
 

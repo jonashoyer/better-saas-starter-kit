@@ -134,7 +134,7 @@ export const cancelSubscriptionDowngrade = mutationField('cancelSubscriptionDown
       throw new Error('No primary subscription found!');
     }
 
-    const subscription = await ctx.getStripeHandler().cancelSubscriptionDowngrade(currentPrimarySubscription.id);
+    const subscription = await ctx.getStripeHandler().cancelSubscriptionDowngrade(currentPrimarySubscription.id, true);
 
     return {
       ...subscription,

@@ -6,19 +6,19 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import useTranslation from 'next-translate/useTranslation';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useCreateStripeSetupIntentMutation } from 'types/gql';
+import { ProjectSettingsQuery, useCreateStripeSetupIntentMutation } from 'types/gql';
 import useProject from 'hooks/useProject';
 import FormTextField from './FormTextField';
 import { useForm } from 'react-hook-form';
 import { Box } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import PaymentMethodForm from './PaymentMethodForm';
+import usePollPaymentMethods from '../../hooks/usePollPaymentMethods';
 
 export type DialogPaymentMethodProps = {
+  project?: ProjectSettingsQuery['project'];
   open: boolean;
-  loading?: boolean;
   handleClose: () => any;
-  onCreated?: () => any;
 }
 
 // https://stripe.com/docs/stripe-js/react
@@ -26,9 +26,19 @@ export type DialogPaymentMethodProps = {
 // https://github.com/stripe-samples/subscription-use-cases
 // https://stripe.com/docs/payments/save-and-reuse
 
-export default function DialogPaymentMethod({ open, loading: outterLoading, onCreated, handleClose }: DialogPaymentMethodProps) {
+export default function DialogPaymentMethod({ project, open, handleClose }: DialogPaymentMethodProps) {
 
   const { t, lang } = useTranslation();
+
+  const [pollPaymentMethods, pollingPaymentMethods, stopPollPaymentMethods] = usePollPaymentMethods({
+    projectId: project.id,
+    onCompleted() {
+      handleClose();
+    },
+    onFailed() {
+      console.error('timeouted!');
+    }
+  })
 
   const [projectId] = useProject();
 
@@ -52,10 +62,20 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
     }
   })
 
+  const newSetupIntent = React.useCallback(async () => {
+    try {
+      const { data } = await createSetupIntent()
+      setClientSecret(data.createStripeSetupIntent.clientSecret);
+    } catch {
+      // TODO:
+      // console.error(err);
+    }
+  }, [createSetupIntent]);
+
   React.useEffect(() => {
     if (!open) return;
     if (isSetupIntentUsedRef.current) {
-      createSetupIntent(null);
+      newSetupIntent();
       isSetupIntentUsedRef.current = false;
     }
 
@@ -63,21 +83,15 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
     setCardComplete(false);
     setProcessing(false);
     setError(null);
-  }, [reset, open, createSetupIntent]);
+  }, [reset, open, newSetupIntent]);
 
   
 
   React.useEffect(() => {
     if (clientSecret) return;
-    createSetupIntent()
-    .then(({ data }) => {
-      setClientSecret(data.createStripeSetupIntent.clientSecret);
-    }).catch(err => {
-      // TODO: Catch this
-      console.error(err);
-    })
+    newSetupIntent();
 
-  }, [clientSecret, createSetupIntent]);
+  }, [clientSecret, newSetupIntent]);
 
   const confirmCardSetup = async (data) => {
 
@@ -95,6 +109,8 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
     if (cardComplete) {
       setProcessing(true);
     }
+
+    await pollPaymentMethods();
 
     const payload = await stripe.confirmCardSetup(
       clientSecret,
@@ -116,15 +132,15 @@ export default function DialogPaymentMethod({ open, loading: outterLoading, onCr
     if (payload.error) {
       console.log('[error]', payload.error);
       setError(payload.error);
+      stopPollPaymentMethods();
       return;
     }
 
     isSetupIntentUsedRef.current = true;
     console.log('[PaymentMethod]', payload.setupIntent);
-    onCreated?.();
   };
 
-  const loading = processing || createSetupIntentLoading || outterLoading;
+  const loading = processing || createSetupIntentLoading || pollingPaymentMethods;
 
 
   // TODO: Add spinner overlay

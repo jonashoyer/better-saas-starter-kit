@@ -1,8 +1,9 @@
 import cuid from 'cuid';
 import { arg, enumType, inputObjectType, mutationField, objectType, queryField, stringArg } from 'nexus';
-import { requireAuth, requireProjectAccess } from './permissions';
-import { Constants } from 'shared';
+import { hasUserProjectAccess, requireAuth, requireProjectAccess } from './permissions';
+import { Constants, s } from 'shared';
 import { DEFAULT_SUBSCRIPTION_PRICE_ID } from 'configServer';
+import { setCookie } from '../../../utils/cookies';
 
 export const Project = objectType({
   name: 'Project',
@@ -19,27 +20,32 @@ export const Project = objectType({
 
 export const GetProject = queryField('project', {
   type: 'Project',
-  authorize: requireProjectAccess({
-    nullable: true,
-    projectIdFn: (root, args, ctx) => args.projectId ?? ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY],
-  }),
+  authorize: requireAuth,
   args: {
     projectId: stringArg({ nullable: true }),
   },
+  nullable: true,
   async resolve(root, { projectId }, ctx) {
 
     const getProjetId = async () => {
-      if (projectId) return projectId;
-      if (ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY]) return ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY];
+
+      if (projectId && await hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId)) return projectId;
+      const cookieProjectId = ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY];
+      if (cookieProjectId && await hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId)) return cookieProjectId;
       const userProject = await ctx.prisma.userProject.findFirst({
-        where: { userId: ctx.user!.id }
+        where: { userId: ctx.user!.id },
       })
-      return userProject.projectId;
+      return userProject?.projectId;
     }
 
+    const activeProjectId = await getProjetId();
+    if (!activeProjectId) return null;
+    
     const project = await ctx.prisma.project.findUnique({
-      where: { id: (await getProjetId()) },
+      where: { id: activeProjectId },
     });
+
+    setCookie(ctx.res, Constants.PROJECT_ID_COOKIE_KEY, project.id, { path: '/', maxAge: s('1y') });
 
     return project;
   }
@@ -66,7 +72,7 @@ export const CreateProject = mutationField('createProject', {
     const stripe = ctx.getStripeHandler();
 
     const stripeCustomer = await stripe.createCustomer({
-      name,
+      name: input.name,
       email: ctx.user.email,
       metadata: {
         projectId,

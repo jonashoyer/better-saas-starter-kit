@@ -35,6 +35,7 @@ const relevantEvents = new Set([
   'invoice.paid',
   'invoice.payment_failed',
   'payment_method.attached',
+  'payment_method.detached',
 ]);
 
 export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): NextApiHandler => async (req, res) => {
@@ -73,9 +74,6 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
           // NOTE: Use metadata to trace user and product
           await handler.manageChargeSucceeded(obj);
           break;
-        case 'payment_method.updated':
-          await handler.upsertPaymentMethodRecord(obj);
-          break;
         case 'product.created':
         case 'product.updated':
           await handler.upsertProductRecord(obj);
@@ -90,7 +88,7 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
           await handler.upsertSubscription(obj);
           break;
         case 'subscription_schedule.updated':
-          console.dir(obj, { depth: null });
+          await handler.subscriptionScheduleUpdate(obj);
           break;
         case 'customer.subscription.trial_will_end':
           // Send notification to your user that the trial will end
@@ -122,7 +120,12 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
           await handler.upsertInvoice(obj);
           break;
         case 'payment_method.attached':
+        case 'payment_method.updated':
           await handler.upsertPaymentMethodRecord(obj);
+          break;
+        case 'payment_method.detached':
+          console.log({ paymentDel: obj });
+          await handler.deletePaymentMethodRecord(obj);
           break;
         default:
           throw new Error('Unhandled relevant event!');

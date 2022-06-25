@@ -42,27 +42,15 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const [price, setPrice] = React.useState<StripePrice | null>(null);
   const latestProductRef = React.useRef(null);
 
-  const [pollPaymentMethods, loadingPaymentMethods] = usePollPaymentMethods({
-    projectId: project.id,
-    paymentMethods: project.stripePaymentMethods,
-    onCompleted() {
-      setProcessing(false);
-      upsertSubscription({
-        variables: {
-          input: {
-            projectId: project.id,
-            priceId: price.id,
-          }
-        }
-      })
-    },
-  })
+  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertStripeSubscriptionMutation();
 
-  const [pollPlan, loadingPlan] = usePollSubscriptions({
+
+  const [pollPlan, loadingPlan, stopPollPlan] = usePollSubscriptions({
     projectId: project.id,
     initialDelay: 800,
-    delay: 1000,
-    maxTries: 5,
+    delay: 1500,
+    maxTries: 8,
+    upcomingChange: true,
     onCompleted() {
       handleClose();
     },
@@ -72,13 +60,30 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     }
   })
 
+  const [pollPaymentMethods, loadingPaymentMethods, stopPollPaymentMethods] = usePollPaymentMethods({
+    projectId: project.id,
+    async onCompleted() {
+      setProcessing(false);
+
+      await pollPlan();
+
+      upsertSubscription({
+        variables: {
+          input: {
+            projectId: project.id,
+            priceId: price.id,
+          }
+        },
+      })
+    },
+  })
+
   const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateStripeSetupIntentMutation({
     variables: {
       projectId: project.id,
     }
   })
 
-  const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertStripeSubscriptionMutation();
 
   React.useEffect(() => {
     if (!open) return;
@@ -127,6 +132,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   React.useEffect(() => {
     if (stripeClientSecret || currentPaymentMethod) return;
     if (!project) return;
+    if (!open) return;
     (async () => {
       try {
         const { data } = await createSetupIntent();
@@ -137,7 +143,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       }
     })();
 
-  }, [createSetupIntent, currentPaymentMethod, project, stripeClientSecret]);
+  }, [createSetupIntent, currentPaymentMethod, open, project, stripeClientSecret]);
 
   const primarySubscription = React.useMemo(() => {
     return project.stripeSubscriptions.find(e => e.metadata.type == 'primary');
@@ -181,6 +187,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
         console.log('[error]', payload.error);
         setError(payload.error);
         setProcessing(false);
+        stopPollPaymentMethods();
         return;
       }
 
