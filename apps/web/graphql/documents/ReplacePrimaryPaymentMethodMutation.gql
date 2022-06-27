@@ -1,0 +1,7 @@
+mutation ReplacePrimaryPaymentMethod($id: String!) {
+  replacePrimaryPaymentMethod(id: $id) {
+    id
+    updatedAt
+    isDefault
+  }
+}

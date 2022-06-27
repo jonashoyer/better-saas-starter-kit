@@ -72,6 +72,7 @@ export type Mutation = {
   deleteTaxId?: Maybe<Ok>;
   deleteUserInvite?: Maybe<UserInvite>;
   deleteUserProject?: Maybe<UserProject>;
+  replacePrimaryPaymentMethod?: Maybe<StripePaymentMethod>;
   sendVerificationEmail?: Maybe<StatusResponse>;
   syncProjectStripe?: Maybe<Ok>;
   updateProject?: Maybe<Project>;
@@ -134,6 +135,11 @@ export type MutationDeleteUserInviteArgs = {
 
 
 export type MutationDeleteUserProjectArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationReplacePrimaryPaymentMethodArgs = {
   id: Scalars['String'];
 };
 
@@ -1091,6 +1097,41 @@ export function useProjectSubscriptionsLazyQuery(baseOptions?: Apollo.LazyQueryH
 export type ProjectSubscriptionsQueryHookResult = ReturnType<typeof useProjectSubscriptionsQuery>;
 export type ProjectSubscriptionsLazyQueryHookResult = ReturnType<typeof useProjectSubscriptionsLazyQuery>;
 export type ProjectSubscriptionsQueryResult = Apollo.QueryResult<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>;
+export const ReplacePrimaryPaymentMethodDocument = gql`
+    mutation ReplacePrimaryPaymentMethod($id: String!) {
+  replacePrimaryPaymentMethod(id: $id) {
+    id
+    updatedAt
+    isDefault
+  }
+}
+    `;
+export type ReplacePrimaryPaymentMethodMutationFn = Apollo.MutationFunction<ReplacePrimaryPaymentMethodMutation, ReplacePrimaryPaymentMethodMutationVariables>;
+
+/**
+ * __useReplacePrimaryPaymentMethodMutation__
+ *
+ * To run a mutation, you first call `useReplacePrimaryPaymentMethodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useReplacePrimaryPaymentMethodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [replacePrimaryPaymentMethodMutation, { data, loading, error }] = useReplacePrimaryPaymentMethodMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useReplacePrimaryPaymentMethodMutation(baseOptions?: Apollo.MutationHookOptions<ReplacePrimaryPaymentMethodMutation, ReplacePrimaryPaymentMethodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ReplacePrimaryPaymentMethodMutation, ReplacePrimaryPaymentMethodMutationVariables>(ReplacePrimaryPaymentMethodDocument, options);
+      }
+export type ReplacePrimaryPaymentMethodMutationHookResult = ReturnType<typeof useReplacePrimaryPaymentMethodMutation>;
+export type ReplacePrimaryPaymentMethodMutationResult = Apollo.MutationResult<ReplacePrimaryPaymentMethodMutation>;
+export type ReplacePrimaryPaymentMethodMutationOptions = Apollo.BaseMutationOptions<ReplacePrimaryPaymentMethodMutation, ReplacePrimaryPaymentMethodMutationVariables>;
 export const SelfProjectsDocument = gql`
     query SelfProjects {
   self {
@@ -1716,6 +1757,19 @@ export type ProjectSubscriptionsQuery = (
       { __typename?: 'StripeSubscription' }
       & BaseStripeSubscriptionFragment
     )> }
+  )> }
+);
+
+export type ReplacePrimaryPaymentMethodMutationVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type ReplacePrimaryPaymentMethodMutation = (
+  { __typename?: 'Mutation' }
+  & { replacePrimaryPaymentMethod?: Maybe<(
+    { __typename?: 'StripePaymentMethod' }
+    & Pick<StripePaymentMethod, 'id' | 'updatedAt' | 'isDefault'>
   )> }
 );
 

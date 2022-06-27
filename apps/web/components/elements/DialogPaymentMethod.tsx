@@ -6,8 +6,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import useTranslation from 'next-translate/useTranslation';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { ProjectSettingsQuery, useCreateStripeSetupIntentMutation } from 'types/gql';
-import useProject from 'hooks/useProject';
+import { ProjectSettingsQuery, useCreateStripeSetupIntentMutation, useReplacePrimaryPaymentMethodMutation } from 'types/gql';
 import FormTextField from './FormTextField';
 import { useForm } from 'react-hook-form';
 import { Box } from '@mui/material';
@@ -19,6 +18,7 @@ export type DialogPaymentMethodProps = {
   project?: ProjectSettingsQuery['project'];
   open: boolean;
   handleClose: () => any;
+  replacePrimary?: boolean;
 }
 
 // https://stripe.com/docs/stripe-js/react
@@ -26,21 +26,48 @@ export type DialogPaymentMethodProps = {
 // https://github.com/stripe-samples/subscription-use-cases
 // https://stripe.com/docs/payments/save-and-reuse
 
-export default function DialogPaymentMethod({ project, open, handleClose }: DialogPaymentMethodProps) {
+export default function DialogPaymentMethod({ project, open, handleClose, replacePrimary }: DialogPaymentMethodProps) {
 
   const { t, lang } = useTranslation();
 
-  const [pollPaymentMethods, pollingPaymentMethods, stopPollPaymentMethods] = usePollPaymentMethods({
-    projectId: project.id,
+  const [replacePrimaryPaymentMethod, { loading: loadingReplacePrimaryPaymentMethod }] = useReplacePrimaryPaymentMethodMutation({
     onCompleted() {
+      handleClose();
+    },
+    update(cache, { data }) {
+      
+      cache.modify({
+        id: cache.identify({ id: project.id, __typename: 'Project' }),
+        fields: {
+          stripeSubscriptions(arr, { readField }) {
+            return arr.filter(e => readField('id', e) === data.replacePrimaryPaymentMethod.id);
+          }
+        },
+      })
+    },
+  });
+
+  const [primaryReplacement, setPrimaryReplacement] = React.useState<string | null>(null);
+
+  const [pollPaymentMethods, pollingPaymentMethods, stopPollPaymentMethods] = usePollPaymentMethods({
+    projectId: project?.id,
+    onCompleted() {
+
+      if (replacePrimary && primaryReplacement) {
+        replacePrimaryPaymentMethod({
+          variables: {
+            id: primaryReplacement,
+          }
+        });
+        return;
+      }
+
       handleClose();
     },
     onFailed() {
       console.error('timeouted!');
     }
-  })
-
-  const [projectId] = useProject();
+  });
 
   const stripe = useStripe();
   const elements = useElements();
@@ -58,7 +85,7 @@ export default function DialogPaymentMethod({ project, open, handleClose }: Dial
 
   const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateStripeSetupIntentMutation({
     variables: {
-      projectId,
+      projectId: project?.id,
     }
   })
 
@@ -83,6 +110,7 @@ export default function DialogPaymentMethod({ project, open, handleClose }: Dial
     setCardComplete(false);
     setProcessing(false);
     setError(null);
+    setPrimaryReplacement(null);
   }, [reset, open, newSetupIntent]);
 
   
@@ -138,15 +166,16 @@ export default function DialogPaymentMethod({ project, open, handleClose }: Dial
 
     isSetupIntentUsedRef.current = true;
     console.log('[PaymentMethod]', payload.setupIntent);
+    setPrimaryReplacement(payload.setupIntent.payment_method);
   };
 
-  const loading = processing || createSetupIntentLoading || pollingPaymentMethods;
+  const loading = processing || createSetupIntentLoading || pollingPaymentMethods || loadingReplacePrimaryPaymentMethod;
 
 
   // TODO: Add spinner overlay
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
-      <DialogTitle>{t('settings:addPaymentMethod')}</DialogTitle>
+      <DialogTitle>{replacePrimary ? t('settings:newPaymentMethod') : t('settings:addPaymentMethod')}</DialogTitle>
       <form onSubmit={form.handleSubmit(confirmCardSetup)}>
         <DialogContent>
           <PaymentMethodForm

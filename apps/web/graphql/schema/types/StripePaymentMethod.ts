@@ -99,3 +99,20 @@ export const DeleteStripePaymentMethod = mutationField('deleteStripePaymentMetho
     return ctx.entity;
   }
 })
+
+export const ReplacePrimaryPaymentMethod = mutationField('replacePrimaryPaymentMethod', {
+  type: 'StripePaymentMethod',
+  authorize: requireProjectResource({ role: 'ADMIN', projectIdFn: PaymentMethodFetch({ include: { project: { select: { stripeCustomerId: true, stripePaymentMethods: true } } } }) }),
+  args: {
+    id: stringArg({ required: true }), 
+  },
+  async resolve(root, { id }, ctx: Context<prisma.StripePaymentMethod & { project: { stripeCustomerId: string, paymentMethods: prisma.StripePaymentMethod[] } }>) {
+
+    await ctx.getStripeHandler().replaceDefaultPaymentMethod(ctx.entity.project.stripeCustomerId, id);
+
+    return {
+      ...ctx.entity,
+      isDefault: true,
+    }
+  }
+})

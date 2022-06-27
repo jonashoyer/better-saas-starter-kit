@@ -43,7 +43,7 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
   const [updatePaymentMethod, { loading: updateLoading }] = useUpdateStripePaymentMethodMutation({
     onCompleted() {
       getPaymenMethods();
-    }
+    },
   });
   const [deletePaymentMethod, { loading: deleteLoading }] = useDeleteStripePaymentMethodMutation({
     update(cache, { data }) {
@@ -100,8 +100,10 @@ const ProjectPaymentMethodPaper = ({ project }: ProjectPaymentMethodPaperProps) 
     <React.Fragment>
       <Lazy
         Component={LazyDialogPaymentMethod}
+        project={project}
         open={addPaymenthMethodDialog}
         handleClose={() => setAddPaymenthMethodDialog(false)}
+        replacePrimary
       />
       <Lazy
         Component={LazyDialogYN}

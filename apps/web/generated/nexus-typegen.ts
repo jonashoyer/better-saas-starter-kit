@@ -174,6 +174,7 @@ export interface NexusGenFieldTypes {
     deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    replacePrimaryPaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
     sendVerificationEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     syncProjectStripe: NexusGenRootTypes['Ok'] | null; // Ok
     updateProject: NexusGenRootTypes['Project'] | null; // Project
@@ -321,6 +322,7 @@ export interface NexusGenFieldTypeNames {
     deleteTaxId: 'Ok'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
+    replacePrimaryPaymentMethod: 'StripePaymentMethod'
     sendVerificationEmail: 'StatusResponse'
     syncProjectStripe: 'Ok'
     updateProject: 'Project'
@@ -486,6 +488,9 @@ export interface NexusGenArgTypes {
       id: string; // String!
     }
     deleteUserProject: { // args
+      id: string; // String!
+    }
+    replacePrimaryPaymentMethod: { // args
       id: string; // String!
     }
     syncProjectStripe: { // args

@@ -62,6 +62,7 @@ type Mutation {
   deleteTaxId(projectId: String!): Ok
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
+  replacePrimaryPaymentMethod(id: String!): StripePaymentMethod
   sendVerificationEmail: StatusResponse
   syncProjectStripe(projectId: String!): Ok
   updateProject(input: UpdateProjectInput!): Project
