@@ -31,11 +31,34 @@ export class StripeHandler {
     return customer.id;
   }
 
+  async mangeCustomerUpdate(customer: Stripe.Customer) {
+    const defaultPaymentMethodId = StripeHandler.getStripeId(customer.invoice_settings.default_payment_method);
+
+    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId: customer.id }, select: { id: true, stripeCustomerId: true } });
+    if (!project) throw new Error(`Project not found with stripe customer id (${customer.id})!`);
+
+    await this.prisma.$transaction([
+      this.prisma.stripePaymentMethod.updateMany({
+        where: { ...(defaultPaymentMethodId && { id: { not: defaultPaymentMethodId } }), projectId: project.id, isDefault: true },
+        data: { isDefault: false },
+      }),
+      ...(defaultPaymentMethodId ?
+        [
+          this.prisma.stripePaymentMethod.update({
+            where: { id: defaultPaymentMethodId },
+            data: { isDefault: true },
+          })
+        ]
+      : []),
+    ]);
+    
+  }
+
   createCustomer(params?: Stripe.CustomerCreateParams & { metadata: { projectId: string } }, options?: Stripe.RequestOptions) {
     return this.stripe.customers.create(params, options);
   }
 
-  updateCustomer(id: string, params:  Stripe.CustomerUpdateParams, options?: Stripe.RequestOptions) {
+  updateCustomer(id: string, params: Stripe.CustomerUpdateParams, options?: Stripe.RequestOptions) {
     return this.stripe.customers.update(id, params, options);
   }
 
@@ -398,14 +421,25 @@ export class StripeHandler {
     return result[result.length - 1];
   }
 
+  async replaceDefaultPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
+
+    await this.updateDefaultPaymentMethod(stripeCustomerId, paymentMethodId);
+
+    const paymentMethods = await this.stripe.paymentMethods.list({ type: 'card', customer: stripeCustomerId });
+    const detachPaymentMethods = paymentMethods.data.filter(e => e.id != paymentMethodId);
+
+    await Promise.all(
+      detachPaymentMethods.map(e => 
+        this.stripe.paymentMethods.detach(e.id)
+      )
+    );
+  }
+
   async deletePaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
     await this.prisma.stripePaymentMethod.delete({ where: { id: paymentMethod.id } });
   }
 
   async updateDefaultPaymentMethod(stripeCustomerId: string, paymentMethodId: string) {
-    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId }, select: { id: true, stripeCustomerId: true } });
-    if (!project) throw new Error('Project not found from stripe customer!');
-
     await this.stripe.customers.update(stripeCustomerId, {
       invoice_settings: {
         default_payment_method: paymentMethodId,

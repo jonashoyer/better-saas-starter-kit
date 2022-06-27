@@ -28,6 +28,7 @@ const relevantEvents = new Set([
   'price.created',
   'price.updated',
   'checkout.session.completed',
+  'customer.updated',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -70,6 +71,9 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
     try {
       switch (event.type) {
         // customer.updated -> catch new default payment method ?
+        case 'customer.updated':
+          await handler.mangeCustomerUpdate(obj);
+          break;
         case 'charge.succeeded':
           // NOTE: Use metadata to trace user and product
           await handler.manageChargeSucceeded(obj);
