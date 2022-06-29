@@ -72,6 +72,7 @@ export type Mutation = {
   deleteTaxId?: Maybe<Ok>;
   deleteUserInvite?: Maybe<UserInvite>;
   deleteUserProject?: Maybe<UserProject>;
+  purchasePriceItems?: Maybe<Scalars['Boolean']>;
   replacePrimaryPaymentMethod?: Maybe<StripePaymentMethod>;
   sendVerificationEmail?: Maybe<StatusResponse>;
   syncProjectStripe?: Maybe<Ok>;
@@ -139,6 +140,12 @@ export type MutationDeleteUserProjectArgs = {
 };
 
 
+export type MutationPurchasePriceItemsArgs = {
+  priceItems: Array<PurchasePriceItemsItemInput>;
+  projectId: Scalars['String'];
+};
+
+
 export type MutationReplacePrimaryPaymentMethodArgs = {
   id: Scalars['String'];
 };
@@ -198,11 +205,19 @@ export type Project = {
   __typename?: 'Project';
   id: Scalars['String'];
   name: Scalars['String'];
+  purchasedProducts: Array<PurchasedProduct>;
   stripeInvoices: Array<StripeInvoice>;
   stripePaymentMethods: Array<StripePaymentMethod>;
   stripeSubscriptions: Array<StripeSubscription>;
   userInvites: Array<UserInvite>;
   users: Array<UserProject>;
+};
+
+
+export type ProjectPurchasedProductsArgs = {
+  cursor?: Maybe<PurchasedProductWhereUniqueInput>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 
@@ -244,6 +259,26 @@ export enum ProjectRole {
   Admin = 'ADMIN',
   User = 'USER'
 }
+
+export type PurchasePriceItemsItemInput = {
+  priceId: Scalars['String'];
+  quantity?: Maybe<Scalars['Int']>;
+};
+
+export type PurchasedProduct = {
+  __typename?: 'PurchasedProduct';
+  createdAt: Scalars['DateTime'];
+  id: Scalars['String'];
+  quantity: Scalars['Int'];
+  stripeInvoice: StripeInvoice;
+  stripePrice: StripePrice;
+  stripeProduct: StripeProduct;
+};
+
+export type PurchasedProductWhereUniqueInput = {
+  id?: Maybe<Scalars['String']>;
+  stripeInvoiceLineId?: Maybe<Scalars['String']>;
+};
 
 export type Query = {
   __typename?: 'Query';
@@ -321,8 +356,14 @@ export type StripePrice = {
   metadata: Scalars['Json'];
   stripeProduct?: Maybe<StripeProduct>;
   trialPeriodDays?: Maybe<Scalars['Int']>;
+  type: StripePriceType;
   unitAmount?: Maybe<Scalars['Int']>;
 };
+
+export enum StripePriceType {
+  OneTime = 'ONE_TIME',
+  Recurring = 'RECURRING'
+}
 
 export type StripePriceWhereUniqueInput = {
   id?: Maybe<Scalars['String']>;
@@ -534,6 +575,16 @@ export const BaseProjcetFragmentDoc = gql`
     fragment BaseProjcet on Project {
   id
   name
+}
+    `;
+export const BasePurchasedProductFragmentDoc = gql`
+    fragment BasePurchasedProduct on PurchasedProduct {
+  id
+  quantity
+  stripeProduct {
+    id
+    metadata
+  }
 }
     `;
 export const BaseSelfFragmentDoc = gql`
@@ -1025,12 +1076,16 @@ export const ProjectSettingsDocument = gql`
     stripeInvoices {
       ...BaseStripeInvoice
     }
+    purchasedProducts {
+      ...BasePurchasedProduct
+    }
   }
 }
     ${BaseProjcetFragmentDoc}
 ${BaseStripeSubscriptionFragmentDoc}
 ${BaseStripePaymenthMethodFragmentDoc}
-${BaseStripeInvoiceFragmentDoc}`;
+${BaseStripeInvoiceFragmentDoc}
+${BasePurchasedProductFragmentDoc}`;
 
 /**
  * __useProjectSettingsQuery__
@@ -1097,6 +1152,38 @@ export function useProjectSubscriptionsLazyQuery(baseOptions?: Apollo.LazyQueryH
 export type ProjectSubscriptionsQueryHookResult = ReturnType<typeof useProjectSubscriptionsQuery>;
 export type ProjectSubscriptionsLazyQueryHookResult = ReturnType<typeof useProjectSubscriptionsLazyQuery>;
 export type ProjectSubscriptionsQueryResult = Apollo.QueryResult<ProjectSubscriptionsQuery, ProjectSubscriptionsQueryVariables>;
+export const PurchasePriceItemsDocument = gql`
+    mutation PurchasePriceItems($projectId: String!, $priceItems: [PurchasePriceItemsItemInput!]!) {
+  purchasePriceItems(projectId: $projectId, priceItems: $priceItems)
+}
+    `;
+export type PurchasePriceItemsMutationFn = Apollo.MutationFunction<PurchasePriceItemsMutation, PurchasePriceItemsMutationVariables>;
+
+/**
+ * __usePurchasePriceItemsMutation__
+ *
+ * To run a mutation, you first call `usePurchasePriceItemsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePurchasePriceItemsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [purchasePriceItemsMutation, { data, loading, error }] = usePurchasePriceItemsMutation({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *      priceItems: // value for 'priceItems'
+ *   },
+ * });
+ */
+export function usePurchasePriceItemsMutation(baseOptions?: Apollo.MutationHookOptions<PurchasePriceItemsMutation, PurchasePriceItemsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PurchasePriceItemsMutation, PurchasePriceItemsMutationVariables>(PurchasePriceItemsDocument, options);
+      }
+export type PurchasePriceItemsMutationHookResult = ReturnType<typeof usePurchasePriceItemsMutation>;
+export type PurchasePriceItemsMutationResult = Apollo.MutationResult<PurchasePriceItemsMutation>;
+export type PurchasePriceItemsMutationOptions = Apollo.BaseMutationOptions<PurchasePriceItemsMutation, PurchasePriceItemsMutationVariables>;
 export const ReplacePrimaryPaymentMethodDocument = gql`
     mutation ReplacePrimaryPaymentMethod($id: String!) {
   replacePrimaryPaymentMethod(id: $id) {
@@ -1527,6 +1614,15 @@ export type BaseProjcetFragment = (
   & Pick<Project, 'id' | 'name'>
 );
 
+export type BasePurchasedProductFragment = (
+  { __typename?: 'PurchasedProduct' }
+  & Pick<PurchasedProduct, 'id' | 'quantity'>
+  & { stripeProduct: (
+    { __typename?: 'StripeProduct' }
+    & Pick<StripeProduct, 'id' | 'metadata'>
+  ) }
+);
+
 export type BaseSelfFragment = (
   { __typename?: 'User' }
   & Pick<User, 'id' | 'email' | 'emailVerified' | 'name' | 'image'>
@@ -1738,6 +1834,9 @@ export type ProjectSettingsQuery = (
     )>, stripeInvoices: Array<(
       { __typename?: 'StripeInvoice' }
       & BaseStripeInvoiceFragment
+    )>, purchasedProducts: Array<(
+      { __typename?: 'PurchasedProduct' }
+      & BasePurchasedProductFragment
     )> }
     & BaseProjcetFragment
   )> }
@@ -1758,6 +1857,17 @@ export type ProjectSubscriptionsQuery = (
       & BaseStripeSubscriptionFragment
     )> }
   )> }
+);
+
+export type PurchasePriceItemsMutationVariables = Exact<{
+  projectId: Scalars['String'];
+  priceItems: Array<PurchasePriceItemsItemInput> | PurchasePriceItemsItemInput;
+}>;
+
+
+export type PurchasePriceItemsMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'purchasePriceItems'>
 );
 
 export type ReplacePrimaryPaymentMethodMutationVariables = Exact<{

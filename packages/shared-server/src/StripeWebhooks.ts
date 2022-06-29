@@ -33,6 +33,8 @@ const relevantEvents = new Set([
   'customer.subscription.updated',
   'customer.subscription.deleted',
   'subscription_schedule.updated',
+  'invoice.created',
+  'invoice.updated',
   'invoice.paid',
   'invoice.payment_failed',
   'payment_method.attached',
@@ -103,12 +105,18 @@ export const stripeWebhookHandler = (stripe: Stripe, prisma: PrismaClient): Next
             await handler.upsertSubscription(subscription);
           }
           break;
+        case 'invoice.created':
+        case 'invoice.updated':
         case 'invoice.paid':
+          const invoice = obj as Stripe.Invoice;
+
+          await handler.upsertPurchasedProducts(invoice);
+          
           //TODO: 
           // Used to provision services after the trial has ended.
           // The status of the invoice will show up as paid. Store the status in your
           // database to reference when a user accesses your service to avoid hitting rate limits.
-          await handler.upsertInvoice(obj);
+          await handler.upsertInvoice(invoice);
           break;
         case 'invoice.payment_failed':
           //TODO: 

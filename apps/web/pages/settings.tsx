@@ -14,6 +14,7 @@ import ProjectDetailsPaper from 'components/layouts/ProjectDetailsPaper';
 import ProjectMembersPaper from 'components/layouts/ProjectMembersPaper';
 import ProjectDangerZonePaper from 'components/layouts/ProjectDangerZonePaper';
 import ProjectPlanPaper from 'components/layouts/ProjectPlanPaper';
+import ProjectProductPaper from 'components/layouts/ProjectProductPaper';
 import ProjectPaymentMethodPaper from 'components/layouts/ProjectPaymentMethodPaper';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
@@ -35,6 +36,8 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
     },
   });
 
+
+  
   return (
     <Elements stripe={stripePromise}>
 
@@ -52,6 +55,7 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
             <ProjectDetailsPaper project={projectData.project} />
             <ProjectMembersPaper project={projectData.project} self={selfData?.self} />
             <ProjectPlanPaper project={projectData.project} products={props.products} />
+            <ProjectProductPaper project={projectData.project} products={props.products} />
             <ProjectPaymentMethodPaper project={projectData.project} />
             <ProjectInvoicePaper project={projectData.project} />
             <ProjectDangerZonePaper project={projectData.project} />

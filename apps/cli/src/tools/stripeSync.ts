@@ -13,20 +13,18 @@ const prisma = new PrismaClient();
 (async () => {
   
   const handler = new StripeHandler(stripe, prisma);
-  const products = await handler.fetchProductList();
+  const products = (await handler.fetchProductList()).data;
   const prices = await handler.fetchPriceList();
 
-  const filtedProducts = products.data.filter(e => !!e.metadata.type);
-  const filtedPrices = prices.data.filter(e => filtedProducts.some(x => x.id == e.product));
+  const filtedPrices = prices.data.filter(e => products.some(x => x.id == e.product));
 
   await prisma.stripeProduct.createMany({
-    data: filtedProducts.map(e => ({
+    data: products.map(e => ({
       id: e.id,
       active: e.active,
       metadata: e.metadata,
       name: e.name,
       image: e.images?.[0] ?? null,
-
     })),
     skipDuplicates: true,
   });
@@ -47,6 +45,6 @@ const prisma = new PrismaClient();
     skipDuplicates: true,
   });
 
-  console.log(`Imported ${filtedProducts.length} products and ${filtedPrices.length} prices`);
+  console.log(`Imported ${products.length} products and ${filtedPrices.length} prices`);
   process.exit();
 })();

@@ -39,6 +39,14 @@ export interface NexusGenInputs {
     projectId: string; // String!
     role: NexusGenEnums['ProjectRole']; // ProjectRole!
   }
+  PurchasePriceItemsItemInput: { // input type
+    priceId: string; // String!
+    quantity?: number | null; // Int
+  }
+  PurchasedProductWhereUniqueInput: { // input type
+    id?: string | null; // String
+    stripeInvoiceLineId?: string | null; // String
+  }
   StripeInvoiceWhereUniqueInput: { // input type
     id?: string | null; // String
   }
@@ -104,6 +112,7 @@ export interface NexusGenEnums {
   InvoiceBillingReason: prisma.InvoiceBillingReason
   InvoiceStatus: prisma.InvoiceStatus
   ProjectRole: prisma.ProjectRole
+  StripePriceType: prisma.StripePriceType
   StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
 }
@@ -130,6 +139,7 @@ export interface NexusGenObjects {
     ok: boolean; // Boolean!
   }
   Project: prisma.Project;
+  PurchasedProduct: prisma.PurchasedProduct;
   Query: {};
   StatusResponse: { // root type
     message?: string | null; // String
@@ -174,6 +184,7 @@ export interface NexusGenFieldTypes {
     deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    purchasePriceItems: boolean | null; // Boolean
     replacePrimaryPaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
     sendVerificationEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
     syncProjectStripe: NexusGenRootTypes['Ok'] | null; // Ok
@@ -193,11 +204,20 @@ export interface NexusGenFieldTypes {
   Project: { // field return type
     id: string; // String!
     name: string; // String!
+    purchasedProducts: NexusGenRootTypes['PurchasedProduct'][]; // [PurchasedProduct!]!
     stripeInvoices: NexusGenRootTypes['StripeInvoice'][]; // [StripeInvoice!]!
     stripePaymentMethods: NexusGenRootTypes['StripePaymentMethod'][]; // [StripePaymentMethod!]!
     stripeSubscriptions: NexusGenRootTypes['StripeSubscription'][]; // [StripeSubscription!]!
     userInvites: NexusGenRootTypes['UserInvite'][]; // [UserInvite!]!
     users: NexusGenRootTypes['UserProject'][]; // [UserProject!]!
+  }
+  PurchasedProduct: { // field return type
+    createdAt: NexusGenScalars['DateTime']; // DateTime!
+    id: string; // String!
+    quantity: number; // Int!
+    stripeInvoice: NexusGenRootTypes['StripeInvoice']; // StripeInvoice!
+    stripePrice: NexusGenRootTypes['StripePrice']; // StripePrice!
+    stripeProduct: NexusGenRootTypes['StripeProduct']; // StripeProduct!
   }
   Query: { // field return type
     getUserInvites: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
@@ -248,6 +268,7 @@ export interface NexusGenFieldTypes {
     metadata: NexusGenScalars['Json']; // Json!
     stripeProduct: NexusGenRootTypes['StripeProduct'] | null; // StripeProduct
     trialPeriodDays: number | null; // Int
+    type: NexusGenEnums['StripePriceType']; // StripePriceType!
     unitAmount: number | null; // Int
   }
   StripeProduct: { // field return type
@@ -322,6 +343,7 @@ export interface NexusGenFieldTypeNames {
     deleteTaxId: 'Ok'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
+    purchasePriceItems: 'Boolean'
     replacePrimaryPaymentMethod: 'StripePaymentMethod'
     sendVerificationEmail: 'StatusResponse'
     syncProjectStripe: 'Ok'
@@ -341,11 +363,20 @@ export interface NexusGenFieldTypeNames {
   Project: { // field return type name
     id: 'String'
     name: 'String'
+    purchasedProducts: 'PurchasedProduct'
     stripeInvoices: 'StripeInvoice'
     stripePaymentMethods: 'StripePaymentMethod'
     stripeSubscriptions: 'StripeSubscription'
     userInvites: 'UserInvite'
     users: 'UserProject'
+  }
+  PurchasedProduct: { // field return type name
+    createdAt: 'DateTime'
+    id: 'String'
+    quantity: 'Int'
+    stripeInvoice: 'StripeInvoice'
+    stripePrice: 'StripePrice'
+    stripeProduct: 'StripeProduct'
   }
   Query: { // field return type name
     getUserInvites: 'UserInvite'
@@ -396,6 +427,7 @@ export interface NexusGenFieldTypeNames {
     metadata: 'Json'
     stripeProduct: 'StripeProduct'
     trialPeriodDays: 'Int'
+    type: 'StripePriceType'
     unitAmount: 'Int'
   }
   StripeProduct: { // field return type name
@@ -490,6 +522,10 @@ export interface NexusGenArgTypes {
     deleteUserProject: { // args
       id: string; // String!
     }
+    purchasePriceItems: { // args
+      priceItems: NexusGenInputs['PurchasePriceItemsItemInput'][]; // [PurchasePriceItemsItemInput!]!
+      projectId: string; // String!
+    }
     replacePrimaryPaymentMethod: { // args
       id: string; // String!
     }
@@ -522,6 +558,11 @@ export interface NexusGenArgTypes {
     }
   }
   Project: {
+    purchasedProducts: { // args
+      cursor?: NexusGenInputs['PurchasedProductWhereUniqueInput'] | null; // PurchasedProductWhereUniqueInput
+      skip?: number | null; // Int
+      take?: number | null; // Int
+    }
     stripeInvoices: { // args
       cursor?: NexusGenInputs['StripeInvoiceWhereUniqueInput'] | null; // StripeInvoiceWhereUniqueInput
       skip?: number | null; // Int

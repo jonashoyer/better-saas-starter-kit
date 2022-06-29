@@ -1,4 +1,4 @@
-import { StripeSubscription, PrismaClient, StripeInvoice, StripePriceType, StripeSubscriptionStatus } from '@prisma/client';
+import { StripeSubscription, PrismaClient, StripeInvoice, StripePriceType, StripeSubscriptionStatus, Prisma } from '@prisma/client';
 import dayjs from 'dayjs';
 import Stripe from 'stripe'
 
@@ -92,7 +92,7 @@ export class StripeHandler {
       active: product.active,
       name: product.name,
       image: product.images?.[0] ?? null,
-      metadata: product.metadata,
+      metadata: StripeHandler.formatMetadata(product.metadata)!,
     };
 
     return this.prisma.stripeProduct.upsert({
@@ -158,7 +158,7 @@ export class StripeHandler {
     const upcoming = StripeHandler.getUpcomingPhase(s.schedule as Stripe.SubscriptionSchedule | null);
     return {
       id: s.id,
-      metadata: s.metadata,
+      metadata: StripeHandler.formatMetadata(s.metadata)!,
       status: s.status.toUpperCase() as StripeSubscriptionStatus,
       stripePriceId: s.items.data[0].price.id,
 
@@ -352,18 +352,77 @@ export class StripeHandler {
     });
   }
 
-  createChargeSession(customerId: string, lineItems: Stripe.Checkout.SessionCreateParams.LineItem[], metadata?: Stripe.MetadataParam) {
-    return this.stripe.checkout.sessions.create({
-      customer: customerId,
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/success`,
-      cancel_url: `${process.env.CLIENT_URL}/cancelled`,
-      payment_intent_data: {
-        metadata // NOTE: { userId, productId }
+  async purchasePriceItems(projectId: string, items: ({ priceId: string, description?: string, metadata?: Stripe.MetadataParam, quantity?: number })[], description?: string, metadata?: Stripe.MetadataParam) {
+
+    const project = await this.prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        purchasedProducts: true,
       },
-    })
+    });
+
+    if (!project) {
+      throw new Error(`Project not found! (id: ${projectId})`);
+    }
+
+    const productPrices = await this.prisma.stripePrice.findMany({
+      where: {
+        id: { in: items.map(e => e.priceId) },
+      },
+      include: {
+        stripeProduct: true,
+      },
+    });
+
+    items.forEach(e => {
+      if (!productPrices.some(x => x.id == e.priceId)) throw new Error(`Product was not found with price id (${e.priceId})`);
+    });
+
+    const qtyInitial = project.purchasedProducts.reduce((obj, e) => ({
+      ...obj,
+      [e.stripeProductId]: (obj[e.stripePriceId] ?? 0) + e.quantity,
+    }), {} as Record<string, number>);
+
+    const productQty = items.reduce((obj, e) => {
+      const prod = productPrices.find(x => x.id == e.priceId)?.stripeProduct;
+      if (!prod) throw new Error(`Product was not found with price id (${e.priceId})`);
+
+      const limit: number | undefined = (prod.metadata as any)?.limit;
+
+      const qty = (obj[prod.id] ?? 0) + (e.quantity ?? 1);
+
+      if (typeof limit == 'number' && limit < qty) throw new Error(`Product exceeded quantity limit! (limit: ${limit}, quantity: ${qty})`);
+
+      return {
+        ...obj,
+        [prod.id]: qty,
+      }
+    }, qtyInitial);
+
+    // TODO: Throw if transaction is already in progress
+
+
+
+    await Promise.all(
+      items.map(({ priceId, metadata, ...rest }) => {
+        return this.stripe.invoiceItems.create({
+          customer: project.stripeCustomerId,
+          price: priceId,
+          metadata: StripeHandler.formatMetadata(metadata),
+          ...rest,
+        })
+      })
+    );
+
+    const invoice = await this.stripe.invoices.create({
+      customer: project.stripeCustomerId,
+      auto_advance: true,
+      collection_method: 'charge_automatically',
+      description,
+      metadata: StripeHandler.formatMetadata(metadata),
+    });
+
+    return await this.stripe.invoices.pay(invoice.id);
   }
 
   async upsertPaymentMethodRecord(paymentMethod: Stripe.PaymentMethod) {
@@ -478,7 +537,9 @@ export class StripeHandler {
 
   async upsertInvoice(invoice: Stripe.Invoice) {
 
-    const customerId = typeof invoice.customer == 'string' ? invoice.customer : invoice.customer!.id;
+    const customerId = StripeHandler.getStripeId(invoice.customer);
+    if (!customerId) return;
+    
     const project = await this.prisma.project.findUnique({ where: { stripeCustomerId: customerId }, select: { id: true } });
     if (!project) return;
 
@@ -496,7 +557,39 @@ export class StripeHandler {
       where: { id: invoice.id },
     })
   }
+  async upsertPurchasedProducts(invoice: Stripe.Invoice) {
 
+    const customerId = StripeHandler.getStripeId(invoice.customer);
+    if (!customerId) return;
+
+    const project = await this.prisma.project.findUnique({ where: { stripeCustomerId: customerId }, select: { id: true } });
+    if (!project) return;
+
+    if (invoice.status != 'paid') return;
+
+    const data = invoice.lines.data.reduce<Prisma.PurchasedProductCreateManyInput[]>((arr, e) => {
+      if (e.price?.type != 'one_time') return arr;
+
+      return [
+        ...arr,
+        {
+          quantity: e.quantity ?? 1,
+          projectId: project.id,
+          stripeInvoiceId: invoice.id,
+          stripeInvoiceLineId: e.id,
+          stripePriceId: e.price.id,
+          stripeProductId: StripeHandler.getStripeId(e.price.product)!,
+        }
+      ]
+    }, []);
+
+    if (data.length == 0) return;
+
+    await this.prisma.purchasedProduct.createMany({
+      data,
+      skipDuplicates: true,
+    });
+  }
 
   async fetchCustomerInfo(stripeCustomerId: string) {
 
@@ -517,8 +610,6 @@ export class StripeHandler {
     ]);
 
     const schedule = StripeHandler.getUpcomingPhase(subscriptionData.data[0].schedule as any);
-    console.log({ a: schedule?.items });
-
 
     return {
       customer,
@@ -546,6 +637,8 @@ export class StripeHandler {
     await Promise.all(info.invoices.map(e => this.upsertInvoice(e)));
     await this.prisma.stripeInvoice.deleteMany({ where: { projectId: project.id, id: { notIn: info.invoices.map(e => e.id) } } });
 
+    await Promise.all(info.invoices.map(e => this.upsertPurchasedProducts(e)));
+
     return info;
   }
 
@@ -558,6 +651,22 @@ export class StripeHandler {
       from_subscription: subscription.id,
     });
     return schedule.id;
+  }
+
+  static convertValue(val: any) {
+    const num = Number(val);
+    if (!isNaN(num)) return num;
+    if (val == 'true') return true;
+    if (val == 'false') return false;
+    return val;
+  }
+
+  static formatMetadata(meta: Stripe.MetadataParam | undefined) {
+    if (!meta) return meta;
+    return Object.fromEntries(
+      Object.entries(meta)
+        .map(([key, val]) => ([key, StripeHandler.convertValue(val)]))
+    )
   }
 
   static getStripeId(id: null | string | { id: string }) {

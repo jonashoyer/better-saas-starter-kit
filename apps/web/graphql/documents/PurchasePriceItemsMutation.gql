@@ -1,0 +1,3 @@
+mutation PurchasePriceItems($projectId: String!, $priceItems: [PurchasePriceItemsItemInput!]!) {
+  purchasePriceItems(projectId: $projectId, priceItems: $priceItems)
+}

@@ -39,21 +39,6 @@ export const StripeSubscription = objectType({
   }
 })
 
-export const StripePrice = objectType({
-  name: 'StripePrice',
-  definition(t) {
-    t.model.id();
-    t.model.active();
-    t.model.currency();
-    t.model.interval();
-    t.model.intervalCount();
-    t.model.metadata();
-    t.model.trialPeriodDays();
-    t.model.unitAmount();
-    t.model.stripeProduct();
-  }
-})
-
 export const UpsertSubscriptionInput = inputObjectType({
   name: 'UpsertStripeSubscriptionInput',
   definition(t) {

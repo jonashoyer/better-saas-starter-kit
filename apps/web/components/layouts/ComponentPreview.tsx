@@ -34,15 +34,17 @@ const ComponentPreview = (props: ComponentPreviewProps) => {
   return (
     <Box sx={{ position: 'relative', ':hover .preview-handler': { opacity: 1 } }}>
       {props.components[index]}
-      <Box className='preview-handler' sx={{ ...positionEnumToCSSPosition(props.position ?? Position.BottomRight, 8), opacity: 0, transition: 'opacity 150ms linear', position: 'absolute', display: 'flex', alignItems: 'center', gap: 1 }}>
-        <IconButton disabled={index == 0} size='small' onClick={onBack}>
-          <ArrowBackIosIcon fontSize='small' />
-        </IconButton>
-        <Typography color='textSecondary'>{index}</Typography>
-        <IconButton disabled={index == props.components.length - 1} size='small' onClick={onForward}>
-          <ArrowForwardIosIcon fontSize='small' />
-        </IconButton>
-      </Box>
+      {props.components.length > 1 &&
+        <Box className='preview-handler' sx={{ ...positionEnumToCSSPosition(props.position ?? Position.BottomRight, 8), opacity: 0, transition: 'opacity 150ms linear', position: 'absolute', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton disabled={index == 0} size='small' onClick={onBack}>
+            <ArrowBackIosIcon fontSize='small' />
+          </IconButton>
+          <Typography color='textSecondary'>{index}</Typography>
+          <IconButton disabled={index == props.components.length - 1} size='small' onClick={onForward}>
+            <ArrowForwardIosIcon fontSize='small' />
+          </IconButton>
+        </Box>
+      }
     </Box>
   )
 }

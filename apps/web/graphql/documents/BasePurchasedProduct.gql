@@ -1,0 +1,8 @@
+fragment BasePurchasedProduct on PurchasedProduct {
+  id
+  quantity
+  stripeProduct {
+    id
+    metadata
+  }
+}

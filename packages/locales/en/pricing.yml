@@ -56,6 +56,8 @@ upgrade: 'Upgrade'
 downgrade: 'Downgrade'
 stay: 'Stay'
 upcoming: 'Upcoming'
+purchase: 'Purchase'
+purchased: 'Purchased'
 
 free: 'Free'
 
@@ -84,3 +86,9 @@ subscriptionChange: 'Your subscription will change to {{planName}} {{seats}} the
 seat:
   one: 'seat'
   other: 'seats'
+
+products: 'Products'
+
+purchaseProduct: 'Purchase {{productName}}'
+purchaseContent: 'Are you sure to purchase {{productName}} for a one time payment of {{amount}}?'
+purchaseConfirm: 'Purchase for {{amount}}'

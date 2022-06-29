@@ -62,6 +62,7 @@ type Mutation {
   deleteTaxId(projectId: String!): Ok
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
+  purchasePriceItems(priceItems: [PurchasePriceItemsItemInput!]!, projectId: String!): Boolean
   replacePrimaryPaymentMethod(id: String!): StripePaymentMethod
   sendVerificationEmail: StatusResponse
   syncProjectStripe(projectId: String!): Ok
@@ -83,6 +84,7 @@ type Ok {
 type Project {
   id: String!
   name: String!
+  purchasedProducts(cursor: PurchasedProductWhereUniqueInput, skip: Int, take: Int): [PurchasedProduct!]!
   stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, skip: Int, take: Int): [StripeInvoice!]!
   stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
   stripeSubscriptions(cursor: StripeSubscriptionWhereUniqueInput, skip: Int, take: Int): [StripeSubscription!]!
@@ -93,6 +95,25 @@ type Project {
 enum ProjectRole {
   ADMIN
   USER
+}
+
+input PurchasePriceItemsItemInput {
+  priceId: String!
+  quantity: Int
+}
+
+type PurchasedProduct {
+  createdAt: DateTime!
+  id: String!
+  quantity: Int!
+  stripeInvoice: StripeInvoice!
+  stripePrice: StripePrice!
+  stripeProduct: StripeProduct!
+}
+
+input PurchasedProductWhereUniqueInput {
+  id: String
+  stripeInvoiceLineId: String
 }
 
 type Query {
@@ -156,7 +177,13 @@ type StripePrice {
   metadata: Json!
   stripeProduct: StripeProduct
   trialPeriodDays: Int
+  type: StripePriceType!
   unitAmount: Int
+}
+
+enum StripePriceType {
+  ONE_TIME
+  RECURRING
 }
 
 input StripePriceWhereUniqueInput {

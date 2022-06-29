@@ -4,17 +4,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { ProjectSettingsQuery, StripePrice, useCreateStripeSetupIntentMutation, useUpsertStripeSubscriptionMutation } from 'types/gql';
+import { ProjectSettingsQuery, StripePrice, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
-import { Box, capitalize, Divider, FormControlLabel, ListItem, ListItemIcon, ListItemText, Switch, Typography } from '@mui/material';
-import PaymentMethodForm from './PaymentMethodForm';
-import { useForm } from 'react-hook-form';
-import PaymentIcon from '@mui/icons-material/Payment';
+import { Box, Divider, FormControlLabel, Switch, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
-import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import usePollPaymentMethods from 'hooks/usePollPaymentMethods';
 import usePollSubscriptions from 'hooks/usePollSubscriptions';
 import { StripeProductWithPricing } from '../../types/types';
+import usePaymentMethodSelection from '../../hooks/usePaymentMethodSelection';
 
 export type DialogChangePlanProps = {
   open: boolean;
@@ -28,18 +24,24 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const { t, lang } = useTranslation();
 
-  const stripe = useStripe();
-  const elements = useElements();
-
-  const form = useForm({ criteriaMode: 'firstError', mode: 'all' });
-  const { reset } = form;
-
-  const [error, setError] = React.useState(null);
-  const [cardComplete, setCardComplete] = React.useState(false);
-  const [stripeClientSecret, setStripeClientSecret] = React.useState(null);
-  const [processing, setProcessing] = React.useState(false);
-
   const [price, setPrice] = React.useState<StripePrice | null>(null);
+
+  const { Form, reset, submitPaymentMethod, cardComplete, loading: paymenthMethodLoading } = usePaymentMethodSelection({
+    project,
+    async onPaymentMethodAdded() {
+      await pollPlan();
+
+      upsertSubscription({
+        variables: {
+          input: {
+            projectId: project.id,
+            priceId: price.id,
+          }
+        },
+      });
+    }
+  });
+
   const latestProductRef = React.useRef(null);
 
   const [upsertSubscription, { loading: upsertSubscriptionLoading }] = useUpsertStripeSubscriptionMutation();
@@ -57,30 +59,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     onFailed() {
       console.error('Failed to poll updated plan!');
       handleClose();
-    }
-  })
-
-  const [pollPaymentMethods, loadingPaymentMethods, stopPollPaymentMethods] = usePollPaymentMethods({
-    projectId: project.id,
-    async onCompleted() {
-      setProcessing(false);
-
-      await pollPlan();
-
-      upsertSubscription({
-        variables: {
-          input: {
-            projectId: project.id,
-            priceId: price.id,
-          }
-        },
-      })
-    },
-  })
-
-  const [createSetupIntent, { loading: createSetupIntentLoading }] = useCreateStripeSetupIntentMutation({
-    variables: {
-      projectId: project.id,
     }
   })
 
@@ -129,21 +107,6 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     return `${t('pricing:planPricingSummary', { price: formatCurrency(lang, price.currency, monthlyPrice, { shortFraction: true }), interval: 'month' })} · ${t('pricing:billedAnnually')}`;
   }, [interval, isMonthOrYearlyBilling, lang, price, t]);
 
-  React.useEffect(() => {
-    if (stripeClientSecret || currentPaymentMethod) return;
-    if (!project) return;
-    if (!open) return;
-    (async () => {
-      try {
-        const { data } = await createSetupIntent();
-        setStripeClientSecret(data.createStripeSetupIntent.clientSecret);
-      } catch (err) {
-        // TODO: Catch this
-        console.error(err);
-      }
-    })();
-
-  }, [createSetupIntent, currentPaymentMethod, open, project, stripeClientSecret]);
 
   const primarySubscription = React.useMemo(() => {
     return project.stripeSubscriptions.find(e => e.metadata.type == 'primary');
@@ -152,51 +115,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const handleChangePlan = async (data: any) => {
 
-    const createPaymentMethod = async () => {
-      if (!stripe || !elements || !stripeClientSecret) {
-        return;
-      }
-  
-      if (error) {
-        elements.getElement("card").focus();
-        return;
-      }
-  
-      if (cardComplete) {
-        setProcessing(true);
-      }
-  
-  
-      const payload = await stripe.confirmCardSetup(
-        stripeClientSecret,
-        {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              address: {
-                country: data.country.code,
-              },
-              name: data.fullName,
-            },
-          },
-        }
-      )
-      
-  
-      if (payload.error) {
-        console.log('[error]', payload.error);
-        setError(payload.error);
-        setProcessing(false);
-        stopPollPaymentMethods();
-        return;
-      }
-
-      pollPaymentMethods();
-      console.log('[PaymentMethod]', payload.setupIntent);
-    }
-
     if (!isFree && !currentPaymentMethod) {
-      return createPaymentMethod();
+      return submitPaymentMethod();
     }
 
     await pollPlan();
@@ -211,7 +131,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     })
   }
 
-  const loading = processing || createSetupIntentLoading || upsertSubscriptionLoading || loadingPlan || loadingPaymentMethods;
+  const loading = paymenthMethodLoading || upsertSubscriptionLoading || loadingPlan;
   const canSubmit = !loading && (isFree || !!currentPaymentMethod || cardComplete);
 
   
@@ -241,26 +161,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
               />
             }
             {!isFree &&
-              <Box>
-                <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
-                {currentPaymentMethod &&
-                  <ListItem dense>
-                    <ListItemIcon>
-                      <PaymentIcon color='primary' />
-                    </ListItemIcon>
-                    <ListItemText primary={`${capitalize(currentPaymentMethod.brand)} •••• ${currentPaymentMethod.last4}`} secondary={`${t('pricing:expires')} ${currentPaymentMethod.expMonth}/${currentPaymentMethod.expYear}`} />
-                  </ListItem>
-                }
-                {price && !currentPaymentMethod &&
-                  <PaymentMethodForm
-                    autoFocus
-                    form={form}
-                    setCardComplete={setCardComplete}
-                    loading={loading}
-                    setError={setError} 
-                  />
-                }
-              </Box>
+              <Form />
             }
           </Box>
           {!isFree &&
@@ -294,7 +195,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       </DialogContent>
       <DialogActions>
         <Button disabled={loading} onClick={handleCloseProxy}>{t('common:close')}</Button>
-        <LoadingButton loading={loading} disabled={!canSubmit} onClick={form.handleSubmit(handleChangePlan)} variant='contained'>{t('pricing:changePlanConfirm')}</LoadingButton>
+        <LoadingButton loading={loading} disabled={!canSubmit} onClick={handleChangePlan} variant='contained'>{t('pricing:changePlanConfirm')}</LoadingButton>
       </DialogActions>
     </Dialog>
   );

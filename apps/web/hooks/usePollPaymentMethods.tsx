@@ -23,7 +23,7 @@ const usePollPaymentMethods = (option: UsePollPaymentMethodsOption): [() => Prom
 
   const apolloClient =  useApolloClient();
   
-  const { projectId, onCompleted, onFailed, maxTries = 8, delay = 1500, initialDelay = 800 } = option;
+  const { projectId, onCompleted, onFailed, maxTries = 15, delay = 2000, initialDelay = 2000 } = option;
   
   const currentHashRef = React.useRef(null);
 

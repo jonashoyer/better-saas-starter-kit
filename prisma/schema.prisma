@@ -98,6 +98,7 @@ model Project {
   stripeSubscriptions  StripeSubscription[]
   stripePaymentMethods StripePaymentMethod[]
   stripeInvoices       StripeInvoice[]
+  purchasedProducts    PurchasedProduct[]
 }
 
 model UserInvite {
@@ -182,7 +183,8 @@ model StripeProduct {
   image    String?
   metadata Json
 
-  stripePrices StripePrice[]
+  stripePrices      StripePrice[]
+  purchasedProducts PurchasedProduct[]
 }
 
 model StripePrice {
@@ -200,6 +202,7 @@ model StripePrice {
   stripeProduct               StripeProduct?       @relation(fields: [stripeProductId], references: [id], onDelete: Cascade)
   stripeSubscriptions         StripeSubscription[] @relation(name: "StripeSubscription_StripePrice")
   upcomingStripeSubscriptions StripeSubscription[] @relation(name: "StripeSubscription_UpcomingStripePrice")
+  purchasedProducts           PurchasedProduct[]
 }
 
 enum StripePriceType {
@@ -245,6 +248,26 @@ model StripeInvoice {
   tax             Int?
   total           Int
 
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId         String
+  project           Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  purchasedProducts PurchasedProduct[]
+}
+
+model PurchasedProduct {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  quantity Int
+
+  stripeInvoiceLineId String @unique
+
+  projectId       String
+  stripeInvoiceId String
+  stripePriceId   String
+  stripeProductId String
+
+  project       Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stripeInvoice StripeInvoice @relation(fields: [stripeInvoiceId], references: [id], onDelete: Cascade)
+  stripePrice   StripePrice   @relation(fields: [stripePriceId], references: [id], onDelete: Cascade)
+  stripeProduct StripeProduct @relation(fields: [stripeProductId], references: [id], onDelete: Cascade)
 }

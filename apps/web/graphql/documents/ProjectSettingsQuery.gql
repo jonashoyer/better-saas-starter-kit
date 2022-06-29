@@ -28,5 +28,8 @@ query ProjectSettings($projectId: String) {
     stripeInvoices {
       ...BaseStripeInvoice
     }
+    purchasedProducts {
+      ...BasePurchasedProduct
+    }
   }
 }

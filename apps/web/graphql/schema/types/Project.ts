@@ -11,6 +11,7 @@ export const Project = objectType({
     t.model.id();
     t.model.name();
     t.model.users();
+    t.model.purchasedProducts();
     t.model.stripeSubscriptions();
     t.model.stripePaymentMethods();
     t.model.stripeInvoices();
