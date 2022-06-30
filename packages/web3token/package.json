@@ -15,7 +15,7 @@
   "dependencies": {
     "tsconfig": "*",
     "uuid": "^8.3.2",
-    "web3": "^1.7.3"
+    "web3": "^1.7.4"
   },
   "devDependencies": {
     "@types/uuid": "^8.3.4"

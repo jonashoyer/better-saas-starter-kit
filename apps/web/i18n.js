@@ -7,7 +7,7 @@ module.exports = {
     '/dashboard': ['home', 'pricing'],
     '/settings': ['settings', 'pricing'],
   },
-  async loadLocaleFrom(lang, ns) {
-    return import(`locales/${lang}/${ns}.yml`).then((m) => m.default)
+  loadLocaleFrom(lang, ns) {
+    return require(`locales/${lang}/${ns}.yml`);
   }
 }

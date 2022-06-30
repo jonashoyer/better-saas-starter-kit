@@ -20,11 +20,9 @@
   },
   "devDependencies": {
     "config": "*",
+    "prisma": "^3.15.2",
     "tsconfig": "*"
   },
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "prisma": "^3.14.0"
-  }
+  "license": "ISC"
 }

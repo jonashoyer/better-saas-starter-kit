@@ -53,7 +53,7 @@
     "@types/rate-limit-redis": "^1.7.2",
     "nexus-plugin-prisma": "^0.35.0",
     "prettier": "^2.3.2",
-    "prisma": "^3.14.0",
+    "prisma": "^3.15.2",
     "ts-node": "^10.1.0",
     "ts-node-dev": "^1.1.8"
   },

@@ -147,6 +147,8 @@ export const DeleteProject = mutationField('deleteProject', {
     role: 'ADMIN',
   }),
   async resolve(root, { id }, ctx) {
+    const project = await ctx.prisma.project.findUnique({ where: { id } });
+    await ctx.getStripeHandler().deleteCustomer(project.stripeCustomerId);
     return ctx.prisma.project.delete({ where: { id } });
   }
 })
