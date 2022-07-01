@@ -66,7 +66,7 @@ export default function PaymentMethodForm({ autoFocus, form, setError, setCardCo
             label: t('pricing:country'),
             disabled: loading,
           }}
-          getOptionLabel={(option) => option.label}
+          getOptionLabel={(option: any) => option.label}
           renderOption={(props, option: any) => (
             <Box
               component="li"

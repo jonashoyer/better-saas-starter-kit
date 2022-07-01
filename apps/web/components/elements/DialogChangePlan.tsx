@@ -10,7 +10,7 @@ import { Box, Divider, FormControlLabel, Switch, Typography } from '@mui/materia
 import { LoadingButton } from '@mui/lab';
 import usePollSubscriptions from 'hooks/usePollSubscriptions';
 import { StripeProductWithPricing } from '../../types/types';
-import usePaymentMethodSelection from '../../hooks/usePaymentMethodSelection';
+import usePaymentMethodSelection, { PaymentMethodSelection } from '../../hooks/usePaymentMethodSelection';
 
 export type DialogChangePlanProps = {
   open: boolean;
@@ -26,7 +26,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
 
   const [price, setPrice] = React.useState<StripePrice | null>(null);
 
-  const { Form, reset, submitPaymentMethod, cardComplete, loading: paymenthMethodLoading } = usePaymentMethodSelection({
+  const { paymentMethodSelectionProps, reset, submitPaymentMethod, cardComplete, loading: paymenthMethodLoading } = usePaymentMethodSelection({
     project,
     async onPaymentMethodAdded() {
       await pollPlan();
@@ -161,7 +161,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
               />
             }
             {!isFree &&
-              <Form />
+              <PaymentMethodSelection {...paymentMethodSelectionProps} />
             }
           </Box>
           {!isFree &&

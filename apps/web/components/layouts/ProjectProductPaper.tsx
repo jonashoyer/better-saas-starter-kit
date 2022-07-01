@@ -73,7 +73,7 @@ const ProjectProductList = ({ project, t, lang, products }: ProjectProductListPr
   const [selectedPrice, setSelectedPrice, dialogOpen] = useDialogState<StripePrice | null>();
 
 
-  const [purchase, { loading }] = usePurchasePriceItemsMutation();
+  // const [purchase, { loading }] = usePurchasePriceItemsMutation();
 
   return (
     <React.Fragment>
@@ -128,7 +128,7 @@ const ProjectProductList = ({ project, t, lang, products }: ProjectProductListPr
                 </Box>
               }
               <Box>
-                <LoadingButton sx={{ minWidth: 92 }} loading={loading} disabled={purchased} variant='outlined' onClick={() => setSelectedPrice({ ...price, stripeProduct: e })}>{purchased ? t('pricing:purchased') : t('pricing:purchase')}</LoadingButton>
+                <LoadingButton sx={{ minWidth: 92 }} disabled={purchased} variant='outlined' onClick={() => setSelectedPrice({ ...price, stripeProduct: e })}>{purchased ? t('pricing:purchased') : t('pricing:purchase')}</LoadingButton>
               </Box>
             </Box>
           </Box>

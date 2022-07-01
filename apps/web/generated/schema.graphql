@@ -23,6 +23,46 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTime
 
+input DateTimeFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeFilter
+  notIn: [DateTime!]
+}
+
+input DateTimeNullableFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeNullableFilter
+  notIn: [DateTime!]
+}
+
+input EnumInvoiceStatusNullableFilter {
+  equals: InvoiceStatus
+  in: [InvoiceStatus!]
+  not: NestedEnumInvoiceStatusNullableFilter
+  notIn: [InvoiceStatus!]
+}
+
+input IntFilter {
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntFilter
+  notIn: [Int!]
+}
+
 enum InvoiceBillingReason {
   AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE
   MANUAL
@@ -76,6 +116,46 @@ type Mutation {
   verifyEmail(token: String!): User
 }
 
+input NestedDateTimeFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeFilter
+  notIn: [DateTime!]
+}
+
+input NestedDateTimeNullableFilter {
+  equals: DateTime
+  gt: DateTime
+  gte: DateTime
+  in: [DateTime!]
+  lt: DateTime
+  lte: DateTime
+  not: NestedDateTimeNullableFilter
+  notIn: [DateTime!]
+}
+
+input NestedEnumInvoiceStatusNullableFilter {
+  equals: InvoiceStatus
+  in: [InvoiceStatus!]
+  not: NestedEnumInvoiceStatusNullableFilter
+  notIn: [InvoiceStatus!]
+}
+
+input NestedIntFilter {
+  equals: Int
+  gt: Int
+  gte: Int
+  in: [Int!]
+  lt: Int
+  lte: Int
+  not: NestedIntFilter
+  notIn: [Int!]
+}
+
 type Ok {
   message: String
   ok: Boolean!
@@ -85,7 +165,7 @@ type Project {
   id: String!
   name: String!
   purchasedProducts(cursor: PurchasedProductWhereUniqueInput, skip: Int, take: Int): [PurchasedProduct!]!
-  stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, skip: Int, take: Int): [StripeInvoice!]!
+  stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, orderBy: [ProjectStripeInvoicesOrderByInput!], skip: Int, take: Int, where: ProjectStripeInvoicesWhereInput): [StripeInvoice!]!
   stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
   stripeSubscriptions(cursor: StripeSubscriptionWhereUniqueInput, skip: Int, take: Int): [StripeSubscription!]!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
@@ -95,6 +175,18 @@ type Project {
 enum ProjectRole {
   ADMIN
   USER
+}
+
+input ProjectStripeInvoicesOrderByInput {
+  dueDate: SortOrder
+}
+
+input ProjectStripeInvoicesWhereInput {
+  dueDate: DateTimeNullableFilter
+  periodEnd: DateTimeFilter
+  periodStart: DateTimeFilter
+  status: EnumInvoiceStatusNullableFilter
+  total: IntFilter
 }
 
 input PurchasePriceItemsItemInput {
@@ -122,6 +214,11 @@ type Query {
   project(projectId: String): Project
   self: User
   stripeProducts: [StripeProduct]
+}
+
+enum SortOrder {
+  asc
+  desc
 }
 
 type StatusResponse {

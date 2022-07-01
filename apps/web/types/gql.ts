@@ -37,6 +37,46 @@ export type CreateUserInviteInput = {
 
 
 
+export type DateTimeFilter = {
+  equals?: Maybe<Scalars['DateTime']>;
+  gt?: Maybe<Scalars['DateTime']>;
+  gte?: Maybe<Scalars['DateTime']>;
+  in?: Maybe<Array<Scalars['DateTime']>>;
+  lt?: Maybe<Scalars['DateTime']>;
+  lte?: Maybe<Scalars['DateTime']>;
+  not?: Maybe<NestedDateTimeFilter>;
+  notIn?: Maybe<Array<Scalars['DateTime']>>;
+};
+
+export type DateTimeNullableFilter = {
+  equals?: Maybe<Scalars['DateTime']>;
+  gt?: Maybe<Scalars['DateTime']>;
+  gte?: Maybe<Scalars['DateTime']>;
+  in?: Maybe<Array<Scalars['DateTime']>>;
+  lt?: Maybe<Scalars['DateTime']>;
+  lte?: Maybe<Scalars['DateTime']>;
+  not?: Maybe<NestedDateTimeNullableFilter>;
+  notIn?: Maybe<Array<Scalars['DateTime']>>;
+};
+
+export type EnumInvoiceStatusNullableFilter = {
+  equals?: Maybe<InvoiceStatus>;
+  in?: Maybe<Array<InvoiceStatus>>;
+  not?: Maybe<NestedEnumInvoiceStatusNullableFilter>;
+  notIn?: Maybe<Array<InvoiceStatus>>;
+};
+
+export type IntFilter = {
+  equals?: Maybe<Scalars['Int']>;
+  gt?: Maybe<Scalars['Int']>;
+  gte?: Maybe<Scalars['Int']>;
+  in?: Maybe<Array<Scalars['Int']>>;
+  lt?: Maybe<Scalars['Int']>;
+  lte?: Maybe<Scalars['Int']>;
+  not?: Maybe<NestedIntFilter>;
+  notIn?: Maybe<Array<Scalars['Int']>>;
+};
+
 export enum InvoiceBillingReason {
   AutomaticPendingInvoiceItemInvoice = 'AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE',
   Manual = 'MANUAL',
@@ -195,6 +235,46 @@ export type MutationVerifyEmailArgs = {
   token: Scalars['String'];
 };
 
+export type NestedDateTimeFilter = {
+  equals?: Maybe<Scalars['DateTime']>;
+  gt?: Maybe<Scalars['DateTime']>;
+  gte?: Maybe<Scalars['DateTime']>;
+  in?: Maybe<Array<Scalars['DateTime']>>;
+  lt?: Maybe<Scalars['DateTime']>;
+  lte?: Maybe<Scalars['DateTime']>;
+  not?: Maybe<NestedDateTimeFilter>;
+  notIn?: Maybe<Array<Scalars['DateTime']>>;
+};
+
+export type NestedDateTimeNullableFilter = {
+  equals?: Maybe<Scalars['DateTime']>;
+  gt?: Maybe<Scalars['DateTime']>;
+  gte?: Maybe<Scalars['DateTime']>;
+  in?: Maybe<Array<Scalars['DateTime']>>;
+  lt?: Maybe<Scalars['DateTime']>;
+  lte?: Maybe<Scalars['DateTime']>;
+  not?: Maybe<NestedDateTimeNullableFilter>;
+  notIn?: Maybe<Array<Scalars['DateTime']>>;
+};
+
+export type NestedEnumInvoiceStatusNullableFilter = {
+  equals?: Maybe<InvoiceStatus>;
+  in?: Maybe<Array<InvoiceStatus>>;
+  not?: Maybe<NestedEnumInvoiceStatusNullableFilter>;
+  notIn?: Maybe<Array<InvoiceStatus>>;
+};
+
+export type NestedIntFilter = {
+  equals?: Maybe<Scalars['Int']>;
+  gt?: Maybe<Scalars['Int']>;
+  gte?: Maybe<Scalars['Int']>;
+  in?: Maybe<Array<Scalars['Int']>>;
+  lt?: Maybe<Scalars['Int']>;
+  lte?: Maybe<Scalars['Int']>;
+  not?: Maybe<NestedIntFilter>;
+  notIn?: Maybe<Array<Scalars['Int']>>;
+};
+
 export type Ok = {
   __typename?: 'Ok';
   message?: Maybe<Scalars['String']>;
@@ -223,8 +303,10 @@ export type ProjectPurchasedProductsArgs = {
 
 export type ProjectStripeInvoicesArgs = {
   cursor?: Maybe<StripeInvoiceWhereUniqueInput>;
+  orderBy?: Maybe<Array<ProjectStripeInvoicesOrderByInput>>;
   skip?: Maybe<Scalars['Int']>;
   take?: Maybe<Scalars['Int']>;
+  where?: Maybe<ProjectStripeInvoicesWhereInput>;
 };
 
 
@@ -259,6 +341,18 @@ export enum ProjectRole {
   Admin = 'ADMIN',
   User = 'USER'
 }
+
+export type ProjectStripeInvoicesOrderByInput = {
+  dueDate?: Maybe<SortOrder>;
+};
+
+export type ProjectStripeInvoicesWhereInput = {
+  dueDate?: Maybe<DateTimeNullableFilter>;
+  periodEnd?: Maybe<DateTimeFilter>;
+  periodStart?: Maybe<DateTimeFilter>;
+  status?: Maybe<EnumInvoiceStatusNullableFilter>;
+  total?: Maybe<IntFilter>;
+};
 
 export type PurchasePriceItemsItemInput = {
   priceId: Scalars['String'];
@@ -298,6 +392,11 @@ export type QueryGetUserInvitesArgs = {
 export type QueryProjectArgs = {
   projectId?: Maybe<Scalars['String']>;
 };
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc'
+}
 
 export type StatusResponse = {
   __typename?: 'StatusResponse';
@@ -1010,6 +1109,44 @@ export function usePingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PingQ
 export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
 export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
 export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
+export const ProjectPurchasesDocument = gql`
+    query ProjectPurchases($projectId: String) {
+  project(projectId: $projectId) {
+    id
+    purchasedProducts {
+      ...BasePurchasedProduct
+    }
+  }
+}
+    ${BasePurchasedProductFragmentDoc}`;
+
+/**
+ * __useProjectPurchasesQuery__
+ *
+ * To run a query within a React component, call `useProjectPurchasesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectPurchasesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectPurchasesQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useProjectPurchasesQuery(baseOptions?: Apollo.QueryHookOptions<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>(ProjectPurchasesDocument, options);
+      }
+export function useProjectPurchasesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>(ProjectPurchasesDocument, options);
+        }
+export type ProjectPurchasesQueryHookResult = ReturnType<typeof useProjectPurchasesQuery>;
+export type ProjectPurchasesLazyQueryHookResult = ReturnType<typeof useProjectPurchasesLazyQuery>;
+export type ProjectPurchasesQueryResult = Apollo.QueryResult<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>;
 export const ProjectDocument = gql`
     query Project($projectId: String) {
   project(projectId: $projectId) {
@@ -1791,6 +1928,23 @@ export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 export type PingQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'ping'>
+);
+
+export type ProjectPurchasesQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+}>;
+
+
+export type ProjectPurchasesQuery = (
+  { __typename?: 'Query' }
+  & { project?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id'>
+    & { purchasedProducts: Array<(
+      { __typename?: 'PurchasedProduct' }
+      & BasePurchasedProductFragment
+    )> }
+  )> }
 );
 
 export type ProjectQueryVariables = Exact<{

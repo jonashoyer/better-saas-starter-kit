@@ -8,16 +8,14 @@ import { ProjectSettingsQuery, useCreateStripeSetupIntentMutation } from '../typ
 import PaymentMethodForm from '../components/elements/PaymentMethodForm';
 import PaymentIcon from '@mui/icons-material/Payment';
 
-export type UseCardSelectionProps = {
+export type UsePaymentMethodSelectionProps = {
   project?: ProjectSettingsQuery['project'];
   onPaymentMethodAdded?: () => void;
 }
 
-const useCardSelection = ({ project, onPaymentMethodAdded }: UseCardSelectionProps) => {
+const usePaymentMethodSelection = ({ project, onPaymentMethodAdded }: UsePaymentMethodSelectionProps) => {
 
   const currentPaymentMethod = project.stripePaymentMethods.find(e => e.isDefault) ?? project.stripePaymentMethods[0] ?? null;
-
-  const { t } = useTranslation();
 
   const stripe = useStripe();
   const elements = useElements();
@@ -48,32 +46,6 @@ const useCardSelection = ({ project, onPaymentMethodAdded }: UseCardSelectionPro
   })
 
   const loading = processing || createSetupIntentLoading || loadingPaymentMethods;
-
-
-  const Form = React.useCallback(() => {
-    return (
-      <Box>
-        <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
-        {currentPaymentMethod &&
-          <ListItem dense>
-            <ListItemIcon>
-              <PaymentIcon color='primary' />
-            </ListItemIcon>
-            <ListItemText primary={`${capitalize(currentPaymentMethod.brand)} •••• ${currentPaymentMethod.last4}`} secondary={`${t('pricing:expires')} ${currentPaymentMethod.expMonth}/${currentPaymentMethod.expYear}`} />
-          </ListItem>
-        }
-        {!currentPaymentMethod &&
-          <PaymentMethodForm
-            autoFocus
-            form={form}
-            setCardComplete={setCardComplete}
-            loading={loading}
-            setError={setError}
-          />
-        }
-      </Box>
-    )
-  }, [currentPaymentMethod, form, loading, t]);
 
   const getClientSecret = React.useCallback(async () => {
     if (!stripeClientSecretRef.current) {
@@ -142,16 +114,65 @@ const useCardSelection = ({ project, onPaymentMethodAdded }: UseCardSelectionPro
   }, [cardComplete, clearClientSecret, elements, error, form, getClientSecret, pollPaymentMethods, stopPollPaymentMethods, stripe]);
 
 
+  const paymentMethodSelectionProps = React.useMemo(() => ({
+    currentPaymentMethod,
+    form,
+    loading,
+    cardComplete,
+    setCardComplete,
+    error,
+    setError,
+  }), [cardComplete, currentPaymentMethod, error, form, loading]);
 
   return {
     form,
-    Form,
     reset,
     cardComplete,
     error,
     submitPaymentMethod,
     loading,
+    paymentMethodSelectionProps,
   }
 }
 
-export default useCardSelection;
+export default usePaymentMethodSelection;
+
+
+export interface PaymentMethodSelectionProps {
+  currentPaymentMethod?: ProjectSettingsQuery['project']['stripePaymentMethods'][0];
+  form: any;
+  loading: boolean;
+  cardComplete: boolean;
+  setCardComplete: React.Dispatch<React.SetStateAction<boolean>>;
+  error: any;
+  setError: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const PaymentMethodSelection = ({ currentPaymentMethod, form, loading, cardComplete, setCardComplete, error, setError }: PaymentMethodSelectionProps) => {
+
+
+  const { t } = useTranslation();
+
+  return (
+    <Box>
+      <Typography color='textSecondary' variant='body2'>{t('settings:paymentMethod', { count: 1 })}</Typography>
+      {currentPaymentMethod &&
+        <ListItem dense>
+          <ListItemIcon>
+            <PaymentIcon color='primary' />
+          </ListItemIcon>
+          <ListItemText primary={`${capitalize(currentPaymentMethod.brand)} •••• ${currentPaymentMethod.last4}`} secondary={`${t('pricing:expires')} ${currentPaymentMethod.expMonth}/${currentPaymentMethod.expYear}`} />
+        </ListItem>
+      }
+      {!currentPaymentMethod &&
+        <PaymentMethodForm
+          autoFocus
+          form={form}
+          setCardComplete={setCardComplete}
+          loading={loading}
+          setError={setError}
+        />
+      }
+    </Box>
+  )
+}

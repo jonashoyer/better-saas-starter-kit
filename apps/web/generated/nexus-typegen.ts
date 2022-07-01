@@ -39,6 +39,88 @@ export interface NexusGenInputs {
     projectId: string; // String!
     role: NexusGenEnums['ProjectRole']; // ProjectRole!
   }
+  DateTimeFilter: { // input type
+    equals?: NexusGenScalars['DateTime'] | null; // DateTime
+    gt?: NexusGenScalars['DateTime'] | null; // DateTime
+    gte?: NexusGenScalars['DateTime'] | null; // DateTime
+    in?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+    lt?: NexusGenScalars['DateTime'] | null; // DateTime
+    lte?: NexusGenScalars['DateTime'] | null; // DateTime
+    not?: NexusGenInputs['NestedDateTimeFilter'] | null; // NestedDateTimeFilter
+    notIn?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+  }
+  DateTimeNullableFilter: { // input type
+    equals?: NexusGenScalars['DateTime'] | null; // DateTime
+    gt?: NexusGenScalars['DateTime'] | null; // DateTime
+    gte?: NexusGenScalars['DateTime'] | null; // DateTime
+    in?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+    lt?: NexusGenScalars['DateTime'] | null; // DateTime
+    lte?: NexusGenScalars['DateTime'] | null; // DateTime
+    not?: NexusGenInputs['NestedDateTimeNullableFilter'] | null; // NestedDateTimeNullableFilter
+    notIn?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+  }
+  EnumInvoiceStatusNullableFilter: { // input type
+    equals?: NexusGenEnums['InvoiceStatus'] | null; // InvoiceStatus
+    in?: NexusGenEnums['InvoiceStatus'][] | null; // [InvoiceStatus!]
+    not?: NexusGenInputs['NestedEnumInvoiceStatusNullableFilter'] | null; // NestedEnumInvoiceStatusNullableFilter
+    notIn?: NexusGenEnums['InvoiceStatus'][] | null; // [InvoiceStatus!]
+  }
+  IntFilter: { // input type
+    equals?: number | null; // Int
+    gt?: number | null; // Int
+    gte?: number | null; // Int
+    in?: number[] | null; // [Int!]
+    lt?: number | null; // Int
+    lte?: number | null; // Int
+    not?: NexusGenInputs['NestedIntFilter'] | null; // NestedIntFilter
+    notIn?: number[] | null; // [Int!]
+  }
+  NestedDateTimeFilter: { // input type
+    equals?: NexusGenScalars['DateTime'] | null; // DateTime
+    gt?: NexusGenScalars['DateTime'] | null; // DateTime
+    gte?: NexusGenScalars['DateTime'] | null; // DateTime
+    in?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+    lt?: NexusGenScalars['DateTime'] | null; // DateTime
+    lte?: NexusGenScalars['DateTime'] | null; // DateTime
+    not?: NexusGenInputs['NestedDateTimeFilter'] | null; // NestedDateTimeFilter
+    notIn?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+  }
+  NestedDateTimeNullableFilter: { // input type
+    equals?: NexusGenScalars['DateTime'] | null; // DateTime
+    gt?: NexusGenScalars['DateTime'] | null; // DateTime
+    gte?: NexusGenScalars['DateTime'] | null; // DateTime
+    in?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+    lt?: NexusGenScalars['DateTime'] | null; // DateTime
+    lte?: NexusGenScalars['DateTime'] | null; // DateTime
+    not?: NexusGenInputs['NestedDateTimeNullableFilter'] | null; // NestedDateTimeNullableFilter
+    notIn?: NexusGenScalars['DateTime'][] | null; // [DateTime!]
+  }
+  NestedEnumInvoiceStatusNullableFilter: { // input type
+    equals?: NexusGenEnums['InvoiceStatus'] | null; // InvoiceStatus
+    in?: NexusGenEnums['InvoiceStatus'][] | null; // [InvoiceStatus!]
+    not?: NexusGenInputs['NestedEnumInvoiceStatusNullableFilter'] | null; // NestedEnumInvoiceStatusNullableFilter
+    notIn?: NexusGenEnums['InvoiceStatus'][] | null; // [InvoiceStatus!]
+  }
+  NestedIntFilter: { // input type
+    equals?: number | null; // Int
+    gt?: number | null; // Int
+    gte?: number | null; // Int
+    in?: number[] | null; // [Int!]
+    lt?: number | null; // Int
+    lte?: number | null; // Int
+    not?: NexusGenInputs['NestedIntFilter'] | null; // NestedIntFilter
+    notIn?: number[] | null; // [Int!]
+  }
+  ProjectStripeInvoicesOrderByInput: { // input type
+    dueDate?: NexusGenEnums['SortOrder'] | null; // SortOrder
+  }
+  ProjectStripeInvoicesWhereInput: { // input type
+    dueDate?: NexusGenInputs['DateTimeNullableFilter'] | null; // DateTimeNullableFilter
+    periodEnd?: NexusGenInputs['DateTimeFilter'] | null; // DateTimeFilter
+    periodStart?: NexusGenInputs['DateTimeFilter'] | null; // DateTimeFilter
+    status?: NexusGenInputs['EnumInvoiceStatusNullableFilter'] | null; // EnumInvoiceStatusNullableFilter
+    total?: NexusGenInputs['IntFilter'] | null; // IntFilter
+  }
   PurchasePriceItemsItemInput: { // input type
     priceId: string; // String!
     quantity?: number | null; // Int
@@ -112,6 +194,7 @@ export interface NexusGenEnums {
   InvoiceBillingReason: prisma.InvoiceBillingReason
   InvoiceStatus: prisma.InvoiceStatus
   ProjectRole: prisma.ProjectRole
+  SortOrder: prisma.SortOrder
   StripePriceType: prisma.StripePriceType
   StripeSubscriptionStatus: prisma.StripeSubscriptionStatus
   TaxType: "AE_TRN" | "AU_ABN" | "AU_ARN" | "BR_CNPJ" | "BR_CPF" | "CA_BN" | "CA_GST_HST" | "CA_PST_BC" | "CA_PST_MB" | "CA_PST_SK" | "CA_QST" | "CH_VAT" | "CL_TIN" | "ES_CIF" | "EU_VAT" | "GB_VAT" | "HK_BR" | "ID_NPWP" | "IL_VAT" | "IN_GST" | "JP_CN" | "JP_RN" | "KR_BRN" | "LI_UID" | "MX_RFC" | "MY_FRP" | "MY_ITN" | "MY_SST" | "NO_VAT" | "NZ_GST" | "RU_INN" | "RU_KPP" | "SA_VAT" | "SG_GST" | "SG_UEN" | "TH_VAT" | "TW_VAT" | "US_EIN" | "ZA_VAT"
@@ -565,8 +648,10 @@ export interface NexusGenArgTypes {
     }
     stripeInvoices: { // args
       cursor?: NexusGenInputs['StripeInvoiceWhereUniqueInput'] | null; // StripeInvoiceWhereUniqueInput
+      orderBy?: NexusGenInputs['ProjectStripeInvoicesOrderByInput'][] | null; // [ProjectStripeInvoicesOrderByInput!]
       skip?: number | null; // Int
       take?: number | null; // Int
+      where?: NexusGenInputs['ProjectStripeInvoicesWhereInput'] | null; // ProjectStripeInvoicesWhereInput
     }
     stripePaymentMethods: { // args
       cursor?: NexusGenInputs['StripePaymentMethodWhereUniqueInput'] | null; // StripePaymentMethodWhereUniqueInput

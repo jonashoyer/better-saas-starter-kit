@@ -14,7 +14,11 @@ export const Project = objectType({
     t.model.purchasedProducts();
     t.model.stripeSubscriptions();
     t.model.stripePaymentMethods();
-    t.model.stripeInvoices();
+    t.model.stripeInvoices({
+      filtering: { total: true, status: true, dueDate: true, periodEnd: true, periodStart: true },
+      ordering: { dueDate: true },
+      pagination: true,
+    });
     t.model.userInvites();
   },
 });
