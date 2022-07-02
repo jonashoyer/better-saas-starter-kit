@@ -1,4 +1,4 @@
-query ProjectSettings($projectId: String) {
+query ProjectSettings($projectId: String, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
   project(projectId: $projectId) {
     ...BaseProjcet
     users {
@@ -25,7 +25,7 @@ query ProjectSettings($projectId: String) {
     stripePaymentMethods {
       ...BaseStripePaymenthMethod
     }
-    stripeInvoices {
+    stripeInvoices(where: $invoicesWhere, orderBy: $invoicesOrderBy) {
       ...BaseStripeInvoice
     }
     purchasedProducts {

@@ -1,7 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import { getSession } from "next-auth/react";
-import { ProjectSettingsDocument, SelfDocument, useProjectSettingsQuery, useSelfQuery } from 'types/gql';
+import { ProjectSettingsDocument, SelfDocument, SortOrder, useProjectSettingsQuery, useSelfQuery } from 'types/gql';
 import { prisma } from 'utils/prisma';
 import { GetServerSideProps } from 'next';
 import { initializeApollo } from 'utils/GraphqlClient';
@@ -33,6 +33,10 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
   const { data: projectData } = useProjectSettingsQuery({
     variables: {
       projectId,
+      invoicesWhere: {
+        total: { gt: 0 },
+      },
+      invoicesOrderBy: { dueDate: SortOrder.Desc },
     },
   });
 

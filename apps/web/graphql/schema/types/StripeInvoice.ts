@@ -48,22 +48,3 @@ export const StripeInvoice = objectType({
     t.model.total();
   }
 })
-
-// const formatStripeInvoice = (s: Stripe.Invoice) => ({
-//   id: 'unset',
-//   created: secondsToDate(s.created),
-//   dueDate: s.due_date && secondsToDate(s.due_date),
-//   status: s.status.toUpperCase() as any,
-//   amountDue: s.amount_due,
-//   amountPaid: s.amount_paid,
-//   amountRemaining: s.amount_remaining,
-//   billingReason: s.billing_reason as any,
-//   invoicePdf: s.invoice_pdf,
-//   periodStart: secondsToDate(s.period_start),
-//   periodEnd: secondsToDate(s.period_end),
-//   receiptNumber: s.receipt_number,
-//   subtotal: s.subtotal,
-//   tax: s.tax,
-//   total: s.total,
-//   projectId: 'unset',
-// })

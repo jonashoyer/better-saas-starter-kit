@@ -1183,7 +1183,7 @@ export type ProjectQueryHookResult = ReturnType<typeof useProjectQuery>;
 export type ProjectLazyQueryHookResult = ReturnType<typeof useProjectLazyQuery>;
 export type ProjectQueryResult = Apollo.QueryResult<ProjectQuery, ProjectQueryVariables>;
 export const ProjectSettingsDocument = gql`
-    query ProjectSettings($projectId: String) {
+    query ProjectSettings($projectId: String, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
   project(projectId: $projectId) {
     ...BaseProjcet
     users {
@@ -1210,7 +1210,7 @@ export const ProjectSettingsDocument = gql`
     stripePaymentMethods {
       ...BaseStripePaymenthMethod
     }
-    stripeInvoices {
+    stripeInvoices(where: $invoicesWhere, orderBy: $invoicesOrderBy) {
       ...BaseStripeInvoice
     }
     purchasedProducts {
@@ -1237,6 +1237,8 @@ ${BasePurchasedProductFragmentDoc}`;
  * const { data, loading, error } = useProjectSettingsQuery({
  *   variables: {
  *      projectId: // value for 'projectId'
+ *      invoicesWhere: // value for 'invoicesWhere'
+ *      invoicesOrderBy: // value for 'invoicesOrderBy'
  *   },
  * });
  */
@@ -1962,6 +1964,8 @@ export type ProjectQuery = (
 
 export type ProjectSettingsQueryVariables = Exact<{
   projectId?: Maybe<Scalars['String']>;
+  invoicesWhere?: Maybe<ProjectStripeInvoicesWhereInput>;
+  invoicesOrderBy?: Maybe<Array<ProjectStripeInvoicesOrderByInput> | ProjectStripeInvoicesOrderByInput>;
 }>;
 
 
