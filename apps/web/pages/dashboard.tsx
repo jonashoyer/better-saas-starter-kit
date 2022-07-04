@@ -12,6 +12,7 @@ import { setCookie } from 'utils/cookies';
 import { AppNextPage } from '../types/types';
 import { useUserContext } from '../contexts/UserContext';
 import { fetchUserContext } from '../utils/serverSideUtils';
+import Link from 'next/link';
 
 // FIXME: Cookie project is deleted it should fallback
 
@@ -29,8 +30,13 @@ const Dashboard: AppNextPage = (props: any) => {
       </Head>
 
       <StaticPageLayout padded pageTitle='SaaS Dashboard'>
-        {!user && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
-        {user && <Button onClick={() => signOut()} variant='contained'>Logout</Button>}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Link passHref href='/settings'>
+            <Button variant='contained'>Project Settings</Button>
+          </Link>
+          {!user && <Button onClick={() => signIn()} variant='contained'>Login</Button>}
+          {user && <Button onClick={() => signOut()} variant='contained'>Logout</Button>}
+        </Box>
         <Paper sx={{ p: 2, my: 2 }}>
           <Typography variant='subtitle1' color='textSecondary'>Project</Typography>
           {project &&
