@@ -1,9 +1,28 @@
-import pino from 'pino';
-import pinoHttp from 'pino-http';
+import Pino from 'pino';
+import PinoHttp from 'pino-http';
+import { NodeEnv } from 'shared';
+import { NODE_ENV } from './config';
 
-export const logger = pino();
+const createTransport = () => {
+  if (NODE_ENV === NodeEnv.Development) {
+    return {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        messageFormat: '\x1b[0m\x1b[44m{res.statusCode}\x1b[0m \x1b[34m{req.method}\x1b[0m {req.url} \x1b[32m{responseTime}ms\x1b[0m',
+        hideObject: true,
+        ignore: 'pid,hostname',
+      }
+    }
+  }
+  return undefined;
+}
 
-export const httpLoggerMiddleware = pinoHttp({
+export const logger = Pino({
+  transport: createTransport(),
+});
+
+export const httpLoggerMiddleware = PinoHttp({
   logger,
   customLogLevel: function (req, res, err) {
     if (res.statusCode >= 400 && res.statusCode < 500) return 'warn';

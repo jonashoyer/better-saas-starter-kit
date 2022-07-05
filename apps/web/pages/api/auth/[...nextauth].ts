@@ -62,7 +62,6 @@ export default NextAuth({
       },
     })
   ],
-  debug: false,
   theme: { colorScheme: "light" },
   session: {
     maxAge: s(Constants.NEXT_AUTH_SESSION_MAX_AGE),
