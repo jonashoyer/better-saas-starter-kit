@@ -17,12 +17,12 @@ export interface RedisCacheOptions<T = any> {
    * Method of sanitizing the data in to the string saved in redis.
    * Default ```JSON.stringify``` 
    */
-  sanitize?: (input: T) => string;
+  serializer?: (input: T) => string;
   /**
    * Method of desanitizing the data that has been stored in redis.
    * Default ```JSON.parse``` 
    */
-  desanitize?: (input: string | null) => T;
+  deserializer?: (input: string | null) => T;
 
   defaultSetOptions?: KeyValueCacheSetOptions;
 
@@ -38,8 +38,8 @@ export class RedisCache<T = any> {
 
   private loader: DataLoader<string, string | null>;
 
-  private sanitize: (input: T) => string;
-  private desanitize: (input: string | null) => T;
+  private serializer: (input: T) => string;
+  private deserializer: (input: string | null) => T;
 
   defaultSetOptions?: KeyValueCacheSetOptions;
 
@@ -51,8 +51,8 @@ export class RedisCache<T = any> {
     this.defaultSetOptions = options.defaultSetOptions;
     this.keyPrefix = options.keyPrefix ?? '';
 
-    this.sanitize = options.sanitize ?? JSON.stringify;
-    this.desanitize = options.desanitize ?? ((input: string | null) => input === null ? null : JSON.parse(input));
+    this.serializer = options.serializer ?? JSON.stringify;
+    this.deserializer = options.deserializer ?? ((input: string | null) => input === null ? null : JSON.parse(input));
 
     this.loader = new DataLoader((keys) => client.mget(...keys), {
       cache: false,
@@ -67,21 +67,21 @@ export class RedisCache<T = any> {
 
     const { ttl } = Object.assign({}, this.defaultSetOptions, options);
     if (typeof ttl === 'number') {
-      await this.client.set(this.cacheKey(key), this.sanitize(value), 'EX', ttl);
+      await this.client.set(this.cacheKey(key), this.serializer(value), 'EX', ttl);
       return;
     }
     
-    await this.client.set(this.cacheKey(key), this.sanitize(value));
+    await this.client.set(this.cacheKey(key), this.serializer(value));
   }
 
   async get(key: string): Promise<T | null> {
     const reply = await this.loader.load(this.cacheKey(key));
-    return this.desanitize(reply);
+    return this.deserializer(reply);
   }
 
   async mget(keys: readonly string[]): Promise<(T | null)[]> {
     const reply = await this.loader.loadMany(keys.map(key => this.cacheKey(key)));
-    return reply.map(e => this.desanitize(e as any));
+    return reply.map(e => this.deserializer(e as any));
   }
 
   async delete(key: string): Promise<boolean> {
