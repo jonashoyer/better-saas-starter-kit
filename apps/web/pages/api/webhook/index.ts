@@ -1,5 +1,5 @@
 import { NextApiHandler } from 'next';
-import { createStripe, stripeWebhookHandler } from 'shared-server';
+import { createStripe, httpLoggerMiddleware, stripeWebhookHandler } from 'shared-server';
 import { prisma } from '../../../utils/prisma';
 
 
@@ -10,6 +10,9 @@ export const config = {
   },
 };
 
-const webhookHandler: NextApiHandler = stripeWebhookHandler(createStripe(), prisma);
+const webhookHandler: NextApiHandler = async (req, res) => {
+  httpLoggerMiddleware(req, res);
+  await stripeWebhookHandler(createStripe(), prisma)(req, res);
+}
 
 export default webhookHandler;

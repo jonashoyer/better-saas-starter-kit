@@ -28,6 +28,8 @@
     "mjml": "^4.10.2",
     "node-mailjet": "^3.3.4",
     "nodemailer": "^6.6.3",
+    "pino": "^8.1.0",
+    "pino-http": "^8.1.1",
     "shared": "*",
     "stripe": "^8.169.0",
     "tsconfig": "*",

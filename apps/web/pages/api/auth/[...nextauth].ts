@@ -9,10 +9,12 @@ import { prisma } from '../../../utils/prisma';
 import jwt from 'jsonwebtoken';
 import { NEXT_AUTH_SECRET } from "../../../configServer";
 import { Constants, s } from 'shared';
+import { logger } from "shared-server";
 
 const prismaAdapter = PrismaAdapter(prisma);
 
 export default NextAuth({
+  logger,
   cookies: {
     sessionToken: {
       name: Constants.NEXT_AUTH_SESSION_TOKEN_COOKIE,

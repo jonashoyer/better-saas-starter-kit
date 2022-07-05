@@ -7,7 +7,7 @@ import { RequestHandler } from 'micro'
 import { NextApiHandler } from "next";
 import Cors from 'cors';
 import initMiddleware from "../../../utils/init-middleware";
-import { createRedisClient } from "shared-server";
+import { createRedisClient, httpLoggerMiddleware, logger } from "shared-server";
 
 const cors = initMiddleware(
   Cors({
@@ -20,6 +20,7 @@ const apolloServer = new ApolloServer({
   schema,
   context: createContext,
   validationRules: [depthLimit(4)],
+  logger,
   persistedQueries: {
     cache: new BaseRedisCache({
       client: createRedisClient('client'),
@@ -38,6 +39,7 @@ export const config = {
 };
 
 const handler: RequestHandler = async (req, res) => {
+  httpLoggerMiddleware(req, res);
   await cors(req, res);
   await apolloServer.createHandler({ path: '/api/graphql' })(req, res);
 }

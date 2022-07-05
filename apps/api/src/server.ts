@@ -9,7 +9,7 @@ import cors from 'cors';
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import { NodeEnv } from 'shared';
-import { createRedisClient } from 'shared-server';
+import { createRedisClient, httpLoggerMiddleware } from 'shared-server';
 import cookieParser from 'cookie-parser';
 import bullboardRoute from './routes/bullboard';
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
@@ -22,6 +22,8 @@ import { BaseRedisCache } from 'apollo-server-cache-redis';
   
   const app = express();
   const httpServer = http.createServer(app);
+
+  app.use(httpLoggerMiddleware);
   
   app.use(cors({
     credentials: true,
