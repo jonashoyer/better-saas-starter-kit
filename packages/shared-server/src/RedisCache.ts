@@ -12,15 +12,27 @@ export interface KeyValueCacheSetOptions {
 
 export interface RedisCacheOptions<T = any> {
   client: IORedis.Redis;
+
+  /**
+   * Method of sanitizing the data in to the string saved in redis.
+   * Default ```JSON.stringify``` 
+   */
   sanitize?: (input: T) => string;
+  /**
+   * Method of desanitizing the data that has been stored in redis.
+   * Default ```JSON.parse``` 
+   */
   desanitize?: (input: string | null) => T;
 
   defaultSetOptions?: KeyValueCacheSetOptions;
 
+  /**
+   * The redis key prefix to save the data under.
+   */
   keyPrefix?: string
 }
 
-class RedisCache<T = any> {
+export class RedisCache<T = any> {
 
   readonly client: IORedis.Redis;
 
@@ -67,7 +79,7 @@ class RedisCache<T = any> {
     return this.desanitize(reply);
   }
 
-  async mget(keys: string[]): Promise<(T | null)[]> {
+  async mget(keys: readonly string[]): Promise<(T | null)[]> {
     const reply = await this.loader.loadMany(keys.map(key => this.cacheKey(key)));
     return reply.map(e => this.desanitize(e as any));
   }
@@ -85,5 +97,3 @@ class RedisCache<T = any> {
     return this.keyPrefix + key;
   }
 }
-
-export default RedisCache;

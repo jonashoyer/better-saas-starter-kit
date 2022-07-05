@@ -11,3 +11,5 @@ export * from './utils';
 export * as config from './config';
 export * from './services'
 export * from './RedisCache';
+export * from './CachedDataloader';
+export * from './Dataloaders';

@@ -1,7 +1,7 @@
 import type * as Prisma from "@prisma/client"
 import type { Adapter } from "next-auth/adapters"
 import { isJWT } from "shared";
-import { authorizeWeb3Token, userService, verifyNextAuthJWT } from 'shared-server';
+import { authorizeWeb3Token, userService, verifyNextAuthJWT, CachedDataloader, createRedisClient, Dataloaders } from 'shared-server';
 import { isW3T } from "web3token";
 
 const GENERATE_ACCESS_TOKEN = true;
@@ -9,7 +9,6 @@ const GENERATE_ACCESS_TOKEN = true;
 
 // const SESSION_MAX_AGE = ms('30d');
 // const SESSION_UPDATE_AGE = ms('1d');
-
 
 
 export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
@@ -86,8 +85,9 @@ export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
     async getSessionAndUser(sessionToken) {
       if (isJWT(sessionToken)) {
         const tok = verifyNextAuthJWT(sessionToken);
-        const user = await prisma.user.findUnique({ where: { id: tok.sub! } });
-        
+
+        const user = await Dataloaders.getLoaders(prisma).authUserLoader.get(tok.sub!);
+
         const session = {
           id: 'jwt',
           sessionToken,
@@ -119,10 +119,7 @@ export const PrismaAdapter = (prisma: Prisma.PrismaClient): Adapter => {
         }
       }
       
-      const sessionWithUser = await prisma.session.findUnique({
-        where: { sessionToken },
-        include: { user: true },
-      });
+      const sessionWithUser = await Dataloaders.getLoaders(prisma).sessionLoader.get(sessionToken);
 
       if (!sessionWithUser) return null;
       const { user, ...session } = sessionWithUser;

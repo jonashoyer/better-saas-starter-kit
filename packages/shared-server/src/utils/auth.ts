@@ -2,15 +2,13 @@ import type * as Prisma from "@prisma/client"
 import type { Profile } from "next-auth"
 import { PrismaClient } from '@prisma/client';
 import w3t from "web3token";
-import Web3 from 'web3';
 import { Constants, isJWT } from "shared";
 import { createUserWithProject } from '../services/userService';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET, NEXT_AUTH_SECRET } from "../config";
+import { Dataloaders } from "../Dataloaders";
 
 export const getSession = async (prisma: PrismaClient, sessionToken: string) => {
-
-  // TODO: Caching layer...
 
   if (isJWT(sessionToken)) {
     const tok = verifyNextAuthJWT(sessionToken);
@@ -22,10 +20,7 @@ export const getSession = async (prisma: PrismaClient, sessionToken: string) => 
     }
   }
   
-  const session = await prisma.session.findUnique({
-    where: { sessionToken },
-  })
-  
+  const session = await Dataloaders.getLoaders(prisma).sessionLoader.get(sessionToken);
   if (!session) return null;
 
   if (session && session.expires < new Date()) {
@@ -42,20 +37,7 @@ export const verifyNextAuthJWT = (tok: string) => {
 
 export const getUserProjectRole = async (prisma: PrismaClient, userId: string, projectId: string) => {
 
-  //TODO: Caching layer...
-
-  const userProject = await prisma.userProject.findUnique({
-    where: {
-      projectId_userId: {
-        projectId,
-        userId
-      }
-    },
-    select: {
-      role: true,
-    }
-  })
-
+  const userProject = await Dataloaders.getLoaders(prisma).userProject.get({ projectId, userId });
   return userProject?.role ?? null;
 }
 
@@ -64,17 +46,7 @@ export const authorizeWeb3Token = async (prisma: PrismaClient, token: string) =>
 
   const decoded = await w3t.verify(token, { statement: Constants.WEB3_TOKEN_STATEMENT });
   
-  const account = await prisma.account.findUnique({
-    where: {
-      provider_providerAccountId: {
-        provider: 'w3t',
-        providerAccountId: decoded.address,
-      }
-    },
-    include: {
-      user: true,
-    },
-  });
+  const account = await Dataloaders.getLoaders(prisma).w3tAccount.get(decoded.address);
 
   if (!account) {
 
