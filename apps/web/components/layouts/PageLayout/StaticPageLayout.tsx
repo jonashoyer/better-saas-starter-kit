@@ -28,7 +28,7 @@ const StaticPageLayout = ({ padded, children, pageTitle, pageDescription, fullWi
       <Box>
 
         <Banner />
-        <StaticAppBar content={<PrivateAppBarContent />} />
+        {/* <StaticAppBar content={<PrivateAppBarContent />} /> */}
         {inner}
         <AppFooter />
       </Box>

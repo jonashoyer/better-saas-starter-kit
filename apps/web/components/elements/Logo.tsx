@@ -1,16 +1,15 @@
-import { Link } from "@mui/material";
+import { Typography } from "@mui/material";
 import React from "react";
 
 
-const Logo = (props: any) => {
+const Logo = () => {
   return (
-    <Link
-      variant="h6"
-      underline="none"
-      color="inherit"
+    <Typography
+      variant='h6'
+      color='inherit'
     >
       Better SaaS Starter Kit
-    </Link>
+    </Typography>
   )
 }
 

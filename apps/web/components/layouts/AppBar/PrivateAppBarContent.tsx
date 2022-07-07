@@ -30,7 +30,7 @@ const BaseAppBarContent = () => {
       <Box sx={{ flex: '1', px: 2, display: 'flex', gap: 4, alignItems: 'center' }}>
         <Link href='/dashboard' passHref>
           <MuiLink color='inherit' underline='none'>
-            <Logo />
+            Better SaaS Starter Kit
           </MuiLink>
         </Link>
         <ProjectSelector variant='text' size='small' projects={projects} />

@@ -1,6 +1,6 @@
 import { NoSsr } from '@mui/material';
 import React from 'react';
-import { useLocalStorage } from 'react-use';
+import useSavedState from '../../hooks/useSavedState';
 import CookieSnackbar from '../elements/CookieSnackbar';
 
 export interface CookieProvider {
@@ -10,13 +10,11 @@ export interface CookieProvider {
 
 const WithCookieSnackbar = ({ children }) => {
   
-  const [value, setValue, remove] = useLocalStorage('allow-tracking');
+  const [value, setValue] = useSavedState('allow-tracking');
 
   return (
     <React.Fragment>
-      <NoSsr>
-        <CookieSnackbar open={value == undefined} onOk={() => setValue(true)} onNoTrack={() => setValue(false)} />
-      </NoSsr>
+      <CookieSnackbar open={value == undefined} onOk={() => setValue(true)} onNoTrack={() => setValue(false)} />
       {children}
     </React.Fragment>
   )

@@ -56,7 +56,6 @@ const Dashboard: AppNextPage = (props: any) => {
         <Box sx={{ py: 1 }}>
           <ProjectSelector projects={projects} />
         </Box>
-        <Typography>Text</Typography>
 
       </StaticPageLayout>
     </React.Fragment>

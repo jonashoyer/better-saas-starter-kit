@@ -67,12 +67,13 @@ MyDocument.getInitialProps = async (ctx) => {
     originalRenderPage({
       // Take precedence over the CacheProvider in our custom _app.js
       // eslint-disable-next-line react/display-name
-      enhanceComponent: (Component) => (props) =>
-        (
+      enhanceComponent: (Component) => {
+        return Object.assign(Component, (props) => (
           <CacheProvider value={cache}>
             <Component {...props} />
           </CacheProvider>
-        ),
+        ));
+      },
     });
 
   const initialProps = await Document.getInitialProps(ctx);

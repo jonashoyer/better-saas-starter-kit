@@ -31,8 +31,8 @@ const BaseAppBarContent = () => {
     <React.Fragment>
       <Box sx={{ flexBasis: '300px', px: 2 }}>
         <Link href='/' passHref>
-          <MuiLink color='inherit' underline='none'>
-            <Logo />
+          <MuiLink variant='h6' color='inherit' underline='none'>
+            Better SaaS Starter Kit
           </MuiLink>
         </Link>
       </Box>
