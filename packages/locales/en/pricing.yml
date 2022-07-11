@@ -47,7 +47,28 @@ subtotal: 'Subtotal'
 tax: 'Tax'
 total: 'Total'
 
-planPricingSummary: '{{price}} / member / {{interval}}'
+planPricingMemberSummary: '{{price}} / member / {{interval}}'
+planPricingMemberAnnuallySummary: '{{price}} / member / {{interval}} · Billed annually'
+
+planPricingSummary: '{{price}} / {{interval}}'
+planPricingAnnuallySummary: '{{price}} / {{interval}} · Billed annually'
+
+perMemberMonth:
+  one: 'per member / month'
+  other: 'per member / {{count}} months'
+
+perMemberYear:
+  one: 'per member / year'
+  other: 'per member / {{count}} years'
+
+perMonth:
+  one: 'per month'
+  other: 'per {{count}} months'
+
+perYear:
+  one: 'per year'
+  other: 'per {{count}} years'
+
 billedAnnually: 'Billed annually'
 recommended: 'Recommended'
 
@@ -83,6 +104,9 @@ deletePaymentMethod: 'Delete payment method'
 cancelSubscriptionDowngrade: 'Cancel'
 subscriptionChange: 'Your subscription will change to {{planName}} {{seats}} the {{date}}'
 
+cancelSubscription: 'Cancel'
+keepSubscription: 'Keep'
+
 seat:
   one: 'seat'
   other: 'seats'
@@ -92,3 +116,17 @@ products: 'Products'
 purchaseProduct: 'Purchase {{productName}}'
 purchaseContent: 'Are you sure to purchase {{productName}} for a one time payment of {{amount}}?'
 purchaseConfirm: 'Purchase for {{amount}}'
+purchaseConfirmPerMonth:
+  one: 'Purchase for {{amount}} / {{interval}}'
+  other: 'Purchase for {{amount}} / {{count}} {{interval}}'
+
+intervalShort:
+  month: 'mo'
+  year: 'yr'
+
+dialogCancelSubscription:
+  title: 'Are you sure of cancelling {{productName}}?'
+  content: 'Your cancelaction will take effect at the end of the subscription cycle the {{cancelAt}}.'
+  submit: 'Yes'
+
+cancelSubscriptionNote: 'Your subscription will be canceled at the end of the subscription cycle {{cancelAt}}'

@@ -331,6 +331,16 @@ export class StripeHandler {
     return StripeHandler.formatStripeSubscription(newSubscription);
   }
 
+  async cancelSubscription(subscriptionId: string) {
+    const subscription = await this.stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: true });
+    return StripeHandler.formatStripeSubscription(subscription);
+  }
+
+  async keepSubscription(subscriptionId: string) {
+    const subscription = await this.stripe.subscriptions.update(subscriptionId, { cancel_at_period_end: false });
+    return StripeHandler.formatStripeSubscription(subscription);
+  }
+
   async subscriptionScheduleUpdate(stripeSubscriptionSchedule: Stripe.SubscriptionSchedule) {
     const subscriptionId = StripeHandler.getStripeId(stripeSubscriptionSchedule.subscription);
     if (!subscriptionId) throw new Error(`No upcoming subscription found!`);

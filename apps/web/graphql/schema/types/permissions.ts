@@ -70,3 +70,8 @@ export const projectRoleMapping: Record<prisma.ProjectRole, prisma.ProjectRole[]
   ADMIN: ['ADMIN', 'USER'],
   USER: ['USER'],
 }
+
+export const throwFalsy = async (promise: Promise<any>, error: Error) => {
+  const result = await promise;
+  if (!result) throw error;
+}

@@ -12,7 +12,7 @@ import usePollSubscriptions from 'hooks/usePollSubscriptions';
 import { StripeProductWithPricing } from '../../types/types';
 import usePaymentMethodSelection, { PaymentMethodSelection } from '../../hooks/usePaymentMethodSelection';
 
-export type DialogChangePlanProps = {
+export type DialogPlanProps = {
   open: boolean;
   handleClose: () => any;
   project?: ProjectSettingsQuery['project'];
@@ -20,7 +20,7 @@ export type DialogChangePlanProps = {
   targetProduct?: StripeProductWithPricing;
 }
 
-export default function DialogChangePlan({ open,  handleClose, targetProduct, project }: DialogChangePlanProps) {
+export default function DialogPlan({ open,  handleClose, targetProduct, project }: DialogPlanProps) {
 
   const { t, lang } = useTranslation();
 
@@ -79,6 +79,8 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   const currentPaymentMethod = project.stripePaymentMethods.find(e => e.isDefault) ?? project.stripePaymentMethods[0] ?? null;
   const interval = price && `${price.intervalCount != 1 ? price.intervalCount : ''} ${t(`pricing:${price.interval}`, { count: price.intervalCount })}`.trimStart();
   const isFree = price?.unitAmount == 0;
+  const isPerMember = product.metadata.pricing == 'per-member';
+  const isPrimarySubscription = product.metadata.type == 'primary';
 
   const isMonthOrYearlyBilling = React.useMemo(() => {
     if (!product) return true;
@@ -98,14 +100,20 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
   }, [isMonthOrYearlyBilling, product])
 
   const planPricingSummary = React.useMemo(() => {
-    const defaultFormat = () => {
-      return t('pricing:planPricingSummary', { price: formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true }), interval });;
-    }
+
     if (!price) return null;
-    if (!isMonthOrYearlyBilling || price.interval == 'month') return defaultFormat();
+
+    if (isPerMember) {
+      if (!isMonthOrYearlyBilling || price.interval == 'month') return t('pricing:planPricingMemberSummary', { price: formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true }), interval });;
+      const monthlyPrice = price.unitAmount / 100 / 12;
+      return t('pricing:planPricingMemberAnnuallySummary', { price: formatCurrency(lang, price.currency, monthlyPrice, { shortFraction: true }), interval: 'month' });
+    }
+
+    if (!isMonthOrYearlyBilling || price.interval == 'month') return t('pricing:planPricingSummary', { price: formatCurrency(lang, price.currency, price.unitAmount / 100, { shortFraction: true }), interval });;
     const monthlyPrice = price.unitAmount / 100 / 12;
-    return `${t('pricing:planPricingSummary', { price: formatCurrency(lang, price.currency, monthlyPrice, { shortFraction: true }), interval: 'month' })} · ${t('pricing:billedAnnually')}`;
-  }, [interval, isMonthOrYearlyBilling, lang, price, t]);
+    return t('pricing:planPricingAnnuallySummary', { price: formatCurrency(lang, price.currency, monthlyPrice, { shortFraction: true }), interval: 'month' });
+    
+  }, [interval, isMonthOrYearlyBilling, isPerMember, lang, price, t]);
 
 
   const primarySubscription = React.useMemo(() => {
@@ -140,13 +148,32 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
     handleClose();
   }
 
+  const dialogTitle = React.useMemo(() => {
+    if (!isPrimarySubscription) return t('pricing:purchaseProduct', { productName: product.name })
+    if (primarySubscription?.stripePrice.unitAmount == 0) return t('pricing:upgradeToPlan', { planName: product.name });
+    return t('pricing:changePlanTitle', { planName: product.name });
+  }, [isPrimarySubscription, primarySubscription?.stripePrice.unitAmount, product.name, t]);
+
+  const subscriptionPrice = React.useMemo(() => {
+    if (!price) return null;
+    return formatCurrency(lang, price.currency, price.unitAmount / 100 * (isPerMember ? project.users.length : 1), { shortFraction: true })
+  }, [price, lang, isPerMember, project?.users.length]);
+
+  const subTotal = React.useMemo(() => {
+    return subscriptionPrice;
+  }, [subscriptionPrice]);
+
+  const total = React.useMemo(() => {
+    return subTotal;
+  }, [subTotal]);
+
   return (
     <Dialog open={open} onClose={handleCloseProxy} maxWidth='sm' fullWidth>
       <DialogContent>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Box sx={{ flex: '1' }}>
             <Box sx={{ mb: 2 }}>
-              <Typography variant='h6'>{primarySubscription?.stripePrice.unitAmount == 0 ? t('pricing:upgradeToPlan', { planName: product.metadata.key.toLowerCase() }) : t('pricing:changePlanTitle', { planName: product.metadata.key.toLowerCase() })}</Typography>
+              <Typography variant='h6'>{dialogTitle}</Typography>
               <Typography color='textSecondary' variant='body2'>{t(`pricing:${product?.metadata.key?.toLowerCase()}Description`)}</Typography>
             </Box>
 
@@ -170,14 +197,18 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
               <Box sx={{ flex: '0 0 220px' }}>
                 <Typography sx={{ mb: 3 }} fontSize={16} variant='h6'>{t('pricing:planSummary')}</Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography color='text' variant='body2'>{t('pricing:productNameMemberCount', { productName: product?.name, count: project.users.length })}</Typography>
-                  <Typography fontSize='0.875rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+                  <Typography color='text' variant='body2'>{
+                  isPerMember
+                    ? t('pricing:productNameMemberCount', { productName: product?.name, count: project.users.length })
+                    : product?.name
+                  }</Typography>
+                  <Typography fontSize='0.875rem' variant='body1'>{subscriptionPrice}</Typography>
                 </Box>
                 <Typography fontSize='0.725rem' color='textSecondary' variant='body2'>{planPricingSummary}</Typography>
                 <Divider sx={{ my: 1 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography color='textSecondary' variant='body2'>{t('pricing:subtotal')}</Typography>
-                  <Typography fontSize='0.75rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+                  <Typography fontSize='0.75rem' variant='body1'>{subTotal}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography color='textSecondary' variant='body2'>{t('pricing:tax')}</Typography>
@@ -186,7 +217,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
                 <Divider sx={{ my: 1 }} />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography color='textSecondary' variant='body2'>{t('pricing:total')}</Typography>
-                  <Typography fontSize='1.15rem' variant='body1'>{price && formatCurrency(lang, price.currency, price.unitAmount / 100 * project.users.length, { shortFraction: true })}</Typography>
+                  <Typography fontSize='1.15rem' variant='body1'>{total}</Typography>
                 </Box>
               </Box>
             </React.Fragment>
@@ -195,7 +226,7 @@ export default function DialogChangePlan({ open,  handleClose, targetProduct, pr
       </DialogContent>
       <DialogActions>
         <Button disabled={loading} onClick={handleCloseProxy}>{t('common:close')}</Button>
-        <LoadingButton loading={loading} disabled={!canSubmit} onClick={handleChangePlan} variant='contained'>{t('pricing:changePlanConfirm')}</LoadingButton>
+        <LoadingButton loading={loading} disabled={!canSubmit} onClick={handleChangePlan} variant='contained'>{isPrimarySubscription ? t('pricing:changePlanConfirm') : t('pricing:purchaseConfirmPerMonth', { amount: subscriptionPrice, count: price?.intervalCount, interval: price && t(`pricing:intervalShort.${price.interval}`) })}</LoadingButton>
       </DialogActions>
     </Dialog>
   );

@@ -92,16 +92,19 @@ scalar JSONObject @specifiedBy(url: "http://www.ecma-international.org/publicati
 scalar Json
 
 type Mutation {
+  cancelSubscription(subscriptionId: String!): StripeSubscription
   cancelSubscriptionDowngrade(projectId: String!): StripeSubscription
   createCheckoutSession(metadata: Json = "{}", price: String!, projectId: String!, quantity: Int = 1): CheckoutSession
   createManyUserInvite(input: CreateUserInviteInput!): [UserInvite]
   createProject(input: CreateProjectInput!): Project
   createStripeSetupIntent(projectId: String!): StripeSetupIntent
+  createSubscription(priceId: String!, projectId: String!, quantity: Int): StripeSubscription
   deleteProject(id: String!): Project
   deleteStripePaymentMethod(id: String!): StripePaymentMethod
   deleteTaxId(projectId: String!): Ok
   deleteUserInvite(id: String!): UserInvite
   deleteUserProject(id: String!): UserProject
+  keepSubscription(subscriptionId: String!): StripeSubscription
   purchasePriceItems(priceItems: [PurchasePriceItemsItemInput!]!, projectId: String!): Boolean
   replacePrimaryPaymentMethod(id: String!): StripePaymentMethod
   sendVerificationEmail: StatusResponse

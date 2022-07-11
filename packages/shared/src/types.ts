@@ -12,3 +12,5 @@ export enum SubscriptionType {
   Primary = 'primary',
   Extra = 'extra',
 }
+
+export type StripeMetadata = Record<string, string>

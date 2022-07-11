@@ -1,5 +1,7 @@
-import { arg, enumType, inputObjectType, mutationField, objectType, stringArg } from 'nexus';
-import { requireProjectAccess } from './permissions';
+import { arg, enumType, inputObjectType, intArg, mutationField, objectType, stringArg } from 'nexus';
+import { hasUserProjectAccess, requireAuth, requireProjectAccess, throwFalsy } from './permissions';
+import type { StripeMetadata } from 'shared';
+import { ForbiddenError } from 'apollo-server-micro';
 
 export const StripeSubscriptionStatus = enumType({
   name: 'StripeSubscriptionStatus',
@@ -62,6 +64,13 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
       select: { stripeCustomerId: true },
     });
 
+    // per-member / standard
+
+    
+    const price = await ctx.prisma.stripePrice.findUnique({ where: { id: priceId }, include: { stripeProduct: true } });
+    const isPrimarySubscription = (price.stripeProduct.metadata as StripeMetadata).type == 'primary';
+    const isPerMember = (price.stripeProduct.metadata as StripeMetadata).pricing == 'per-member';
+
     const subscriptions = await ctx.prisma.stripeSubscription.findMany({
       where: { projectId },
       include: {
@@ -73,21 +82,25 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
       }
     });
 
-    const quantity = await ctx.prisma.userProject.count({
-      where: { projectId },
-    });
+    const quantity = isPerMember
+      ? await ctx.prisma.userProject.count({
+        where: { projectId },
+      })
+      : 1;
     
-    
-    const currentPrimarySubscription = subscriptions.find(e => (e.stripePrice.stripeProduct.metadata as any).type == 'primary');
-    if (currentPrimarySubscription) {
-      const price = await ctx.prisma.stripePrice.findUnique({ where: { id: priceId } });
-      if (!price) {
-        throw new Error('Price do not exists!');
-      }
 
-      const isDowngrade = currentPrimarySubscription.stripePrice.unitAmount > price.unitAmount;
-      const sub = await ctx.getStripeHandler().updateSubscription(currentPrimarySubscription.id, priceId, quantity, isDowngrade);
-      return { ...sub, projectId: input.projectId };
+    if (isPrimarySubscription) {
+
+      const currentPrimarySubscription = subscriptions.find(e => (e.stripePrice.stripeProduct.metadata as any).type == 'primary');
+      if (currentPrimarySubscription) {
+        if (!price) {
+          throw new Error('Price do not exists!');
+        }
+
+        const isDowngrade = currentPrimarySubscription.stripePrice.unitAmount > price.unitAmount;
+        const sub = await ctx.getStripeHandler().updateSubscription(currentPrimarySubscription.id, priceId, quantity, isDowngrade);
+        return { ...sub, projectId: input.projectId };
+      }
     }
 
     const sub = await ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity);
@@ -125,5 +138,80 @@ export const cancelSubscriptionDowngrade = mutationField('cancelSubscriptionDown
       ...subscription,
       projectId,
     }
+  }
+});
+
+export const createSubscription = mutationField('createSubscription', {
+  type: StripeSubscription,
+  args: {
+    projectId: stringArg({ required: true }),
+    priceId: stringArg({ required: true }),
+    quantity: intArg(),
+  },
+  authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, args) => args.projectId}),
+  async resolve(root, { projectId, priceId, quantity }, ctx) {
+
+    const project = await ctx.prisma.project.findUnique({ where: { id: projectId } });
+
+    // TODO: Validate quantity limit
+
+    const subscription = await ctx.getStripeHandler().createSubscription(project.stripeCustomerId, priceId, quantity ?? 1);
+    return {
+      ...subscription,
+      projectId: project.id,
+    }
+  }
+})
+
+export const cancelSubscription = mutationField('cancelSubscription', {
+  type: StripeSubscription,
+  args: {
+    subscriptionId: stringArg({ required: true }),
+  },
+  authorize: requireAuth,
+  async resolve(root, { subscriptionId }, ctx) {
+
+    const subscription = await ctx.prisma.stripeSubscription.findUnique({ where: { id: subscriptionId }, include: { stripePrice: { include: { stripeProduct: true } } } });
+
+    if (!subscription) throw new ForbiddenError('Not allowed to cancel subscription');
+
+    if ((subscription.stripePrice.stripeProduct.metadata as StripeMetadata).type == 'primary') {
+      throw new ForbiddenError('Not allowed to cancel primary subscription');
+    }
+
+    await throwFalsy(hasUserProjectAccess(ctx.prisma, ctx.user!.id, subscription.projectId, 'ADMIN'), new ForbiddenError('Not allowed to cancel subscription'));
+
+    const updatedSubscription = await ctx.getStripeHandler().cancelSubscription(subscription.id);
+    return {
+      ...updatedSubscription,
+      projectId: subscription.projectId,
+    }
+  }
+})
+
+export const keepSubscription = mutationField('keepSubscription', {
+  type: StripeSubscription,
+  args: {
+    subscriptionId: stringArg({ required: true }),
+  },
+  authorize: requireAuth,
+  async resolve(root, { subscriptionId }, ctx) {
+
+    const subscription = await ctx.prisma.stripeSubscription.findUnique({ where: { id: subscriptionId }, include: { stripePrice: { include: { stripeProduct: true } } } });
+
+    if (!subscription) throw new ForbiddenError('Not allowed to keep subscription');
+
+    if ((subscription.stripePrice.stripeProduct.metadata as StripeMetadata).type == 'primary') {
+      throw new ForbiddenError('Not allowed to interact primary subscription');
+    }
+
+    await throwFalsy(hasUserProjectAccess(ctx.prisma, ctx.user!.id, subscription.projectId, 'ADMIN'), new ForbiddenError('Not allowed to keep subscription'));
+
+    const updatedSubscription = await ctx.getStripeHandler().keepSubscription(subscription.id);
+    return {
+      ...updatedSubscription,
+      projectId: subscription.projectId,
+    }
+    
   }
 })

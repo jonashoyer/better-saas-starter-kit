@@ -1,0 +1,5 @@
+mutation KeepSubscription($subscriptionId: String!) {
+  keepSubscription(subscriptionId: $subscriptionId) {
+    ...BaseStripeSubscription
+  }
+}

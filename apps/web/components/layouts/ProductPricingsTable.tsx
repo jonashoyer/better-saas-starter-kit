@@ -62,7 +62,7 @@ const ProductPricingsTable = ({ component, products, onPlanSwitch, onCancelDowng
                 return (
                   <TableCell key={e.id} sx={{ width: 192 }}>
                     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'column' }}>
-                      {price && <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} />}
+                      {price && <PricingDisplay t={t} lang={lang} price={price} hideFree={!!onPlanSwitch || isCurrentProduct} product={e} preferMonthlyPricing />}
                       {onPlanSwitch && <LoadingButton sx={{ mt: .5 }} loading={isCurrentProduct && cancelLoading} disabled={isUpcoming || (!upcomingPriceId && isCurrentProduct)} onClick={() => isCurrentProduct ? onCancelDowngrade() : onPlanSwitch(e)} variant='outlined' size='small'>{isCurrentProduct ? (upcomingPriceId ? t('pricing:stay') : t('pricing:current')) : (isUpcoming ? t('pricing:upcoming') : (currentProductIndex < i ? t('pricing:upgrade') : t('pricing:downgrade')))}</LoadingButton>}
                     </Box>
                   </TableCell>

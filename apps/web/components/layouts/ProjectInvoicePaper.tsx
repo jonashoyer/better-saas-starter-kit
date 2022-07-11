@@ -18,6 +18,10 @@ const ProjectInvoicePaper = ({ project }: ProjectInvoicePaperProps) => {
     return project.stripeInvoices.filter(e => e.dueDate && e.status == InvoiceStatus.Open && dayjs(e.dueDate).unix() < dayjs().unix());
   }, [project.stripeInvoices]);
 
+  const invoices = React.useMemo(() => {
+    return [...project.stripeInvoices].sort((a, b) => dayjs(b.created).unix() - dayjs(a.created).unix());
+  }, [project.stripeInvoices]);
+
   return (
     <React.Fragment>
 
@@ -35,7 +39,7 @@ const ProjectInvoicePaper = ({ project }: ProjectInvoicePaperProps) => {
         </Box>
 
         <List dense>
-          {project.stripeInvoices.map(e => {
+          {invoices.map(e => {
 
             return (
               <React.Fragment key={e.id}>

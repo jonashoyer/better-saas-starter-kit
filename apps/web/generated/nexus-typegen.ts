@@ -257,16 +257,19 @@ export interface NexusGenFieldTypes {
     sessionId: string | null; // String
   }
   Mutation: { // field return type
+    cancelSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     cancelSubscriptionDowngrade: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     createCheckoutSession: NexusGenRootTypes['CheckoutSession'] | null; // CheckoutSession
     createManyUserInvite: Array<NexusGenRootTypes['UserInvite'] | null> | null; // [UserInvite]
     createProject: NexusGenRootTypes['Project'] | null; // Project
     createStripeSetupIntent: NexusGenRootTypes['StripeSetupIntent'] | null; // StripeSetupIntent
+    createSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     deleteProject: NexusGenRootTypes['Project'] | null; // Project
     deleteStripePaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
     deleteTaxId: NexusGenRootTypes['Ok'] | null; // Ok
     deleteUserInvite: NexusGenRootTypes['UserInvite'] | null; // UserInvite
     deleteUserProject: NexusGenRootTypes['UserProject'] | null; // UserProject
+    keepSubscription: NexusGenRootTypes['StripeSubscription'] | null; // StripeSubscription
     purchasePriceItems: boolean | null; // Boolean
     replacePrimaryPaymentMethod: NexusGenRootTypes['StripePaymentMethod'] | null; // StripePaymentMethod
     sendVerificationEmail: NexusGenRootTypes['StatusResponse'] | null; // StatusResponse
@@ -416,16 +419,19 @@ export interface NexusGenFieldTypeNames {
     sessionId: 'String'
   }
   Mutation: { // field return type name
+    cancelSubscription: 'StripeSubscription'
     cancelSubscriptionDowngrade: 'StripeSubscription'
     createCheckoutSession: 'CheckoutSession'
     createManyUserInvite: 'UserInvite'
     createProject: 'Project'
     createStripeSetupIntent: 'StripeSetupIntent'
+    createSubscription: 'StripeSubscription'
     deleteProject: 'Project'
     deleteStripePaymentMethod: 'StripePaymentMethod'
     deleteTaxId: 'Ok'
     deleteUserInvite: 'UserInvite'
     deleteUserProject: 'UserProject'
+    keepSubscription: 'StripeSubscription'
     purchasePriceItems: 'Boolean'
     replacePrimaryPaymentMethod: 'StripePaymentMethod'
     sendVerificationEmail: 'StatusResponse'
@@ -572,6 +578,9 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    cancelSubscription: { // args
+      subscriptionId: string; // String!
+    }
     cancelSubscriptionDowngrade: { // args
       projectId: string; // String!
     }
@@ -590,6 +599,11 @@ export interface NexusGenArgTypes {
     createStripeSetupIntent: { // args
       projectId: string; // String!
     }
+    createSubscription: { // args
+      priceId: string; // String!
+      projectId: string; // String!
+      quantity?: number | null; // Int
+    }
     deleteProject: { // args
       id: string; // String!
     }
@@ -604,6 +618,9 @@ export interface NexusGenArgTypes {
     }
     deleteUserProject: { // args
       id: string; // String!
+    }
+    keepSubscription: { // args
+      subscriptionId: string; // String!
     }
     purchasePriceItems: { // args
       priceItems: NexusGenInputs['PurchasePriceItemsItemInput'][]; // [PurchasePriceItemsItemInput!]!
