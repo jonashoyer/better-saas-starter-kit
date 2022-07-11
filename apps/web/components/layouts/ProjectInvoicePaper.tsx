@@ -1,5 +1,5 @@
 import React from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Chip, Divider, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Paper, Typography } from "@mui/material";
+import { Box, Divider, IconButton, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import { ProjectSettingsQuery, InvoiceStatus } from "types/gql";
 import DownloadIcon from '@mui/icons-material/Download';

@@ -1195,6 +1195,46 @@ export function usePingLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PingQ
 export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
 export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
 export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
+export const ProjectInvoicesDocument = gql`
+    query ProjectInvoices($projectId: String, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
+  project(projectId: $projectId) {
+    id
+    stripeInvoices(where: $invoicesWhere, orderBy: $invoicesOrderBy) {
+      ...BaseStripeInvoice
+    }
+  }
+}
+    ${BaseStripeInvoiceFragmentDoc}`;
+
+/**
+ * __useProjectInvoicesQuery__
+ *
+ * To run a query within a React component, call `useProjectInvoicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectInvoicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectInvoicesQuery({
+ *   variables: {
+ *      projectId: // value for 'projectId'
+ *      invoicesWhere: // value for 'invoicesWhere'
+ *      invoicesOrderBy: // value for 'invoicesOrderBy'
+ *   },
+ * });
+ */
+export function useProjectInvoicesQuery(baseOptions?: Apollo.QueryHookOptions<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>(ProjectInvoicesDocument, options);
+      }
+export function useProjectInvoicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>(ProjectInvoicesDocument, options);
+        }
+export type ProjectInvoicesQueryHookResult = ReturnType<typeof useProjectInvoicesQuery>;
+export type ProjectInvoicesLazyQueryHookResult = ReturnType<typeof useProjectInvoicesLazyQuery>;
+export type ProjectInvoicesQueryResult = Apollo.QueryResult<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>;
 export const ProjectPurchasesDocument = gql`
     query ProjectPurchases($projectId: String) {
   project(projectId: $projectId) {
@@ -2042,6 +2082,25 @@ export type PingQueryVariables = Exact<{ [key: string]: never; }>;
 export type PingQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'ping'>
+);
+
+export type ProjectInvoicesQueryVariables = Exact<{
+  projectId?: Maybe<Scalars['String']>;
+  invoicesWhere?: Maybe<ProjectStripeInvoicesWhereInput>;
+  invoicesOrderBy?: Maybe<Array<ProjectStripeInvoicesOrderByInput> | ProjectStripeInvoicesOrderByInput>;
+}>;
+
+
+export type ProjectInvoicesQuery = (
+  { __typename?: 'Query' }
+  & { project?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id'>
+    & { stripeInvoices: Array<(
+      { __typename?: 'StripeInvoice' }
+      & BaseStripeInvoiceFragment
+    )> }
+  )> }
 );
 
 export type ProjectPurchasesQueryVariables = Exact<{

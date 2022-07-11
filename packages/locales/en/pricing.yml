@@ -126,7 +126,7 @@ intervalShort:
 
 dialogCancelSubscription:
   title: 'Are you sure of cancelling {{productName}}?'
-  content: 'Your cancelaction will take effect at the end of the subscription cycle the {{cancelAt}}.'
+  content: 'Your cancellation will take effect at the end of the subscription cycle the {{cancelAt}}.'
   submit: 'Yes'
 
 cancelSubscriptionNote: 'Your subscription will be canceled at the end of the subscription cycle {{cancelAt}}'

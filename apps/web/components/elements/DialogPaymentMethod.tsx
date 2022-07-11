@@ -29,6 +29,7 @@ export type DialogPaymentMethodProps = {
 export default function DialogPaymentMethod({ project, open, handleClose, replacePrimary }: DialogPaymentMethodProps) {
 
   const { t, lang } = useTranslation();
+  
 
   const [replacePrimaryPaymentMethod, { loading: loadingReplacePrimaryPaymentMethod }] = useReplacePrimaryPaymentMethodMutation({
     onCompleted() {
@@ -166,7 +167,7 @@ export default function DialogPaymentMethod({ project, open, handleClose, replac
 
     isSetupIntentUsedRef.current = true;
     console.log('[PaymentMethod]', payload.setupIntent);
-    setPrimaryReplacement(payload.setupIntent.payment_method);
+    setPrimaryReplacement(payload.setupIntent.payment_method as string);
   };
 
   const loading = processing || createSetupIntentLoading || pollingPaymentMethods || loadingReplacePrimaryPaymentMethod;

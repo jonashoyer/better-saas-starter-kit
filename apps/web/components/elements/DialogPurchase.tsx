@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { ProjectSettingsQuery, StripePrice, usePurchasePriceItemsMutation } from 'types/gql';
+import { ProjectSettingsQuery, SortOrder, StripePrice, useProjectInvoicesLazyQuery, usePurchasePriceItemsMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, Divider, Typography } from '@mui/material';
 import usePaymentMethodSelection, { PaymentMethodSelection } from '../../hooks/usePaymentMethodSelection';
@@ -23,6 +23,15 @@ export default function DialogPurchase({ open, handleClose, targetProductPrice, 
 
   const { t, lang } = useTranslation();
 
+  const [refreshInvoices] = useProjectInvoicesLazyQuery({
+    variables: {
+      invoicesWhere: {
+        total: { gt: 0 },
+      },
+      invoicesOrderBy: { dueDate: SortOrder.Desc },
+    }
+  });
+
 
   const [startPoll, polling, stopPoll] = usePollPurchases({
     projectId: project?.id,
@@ -30,6 +39,7 @@ export default function DialogPurchase({ open, handleClose, targetProductPrice, 
       // Success message?
       onPurchaseCompleted?.(targetProductPrice);
       handleClose();
+      refreshInvoices();
     },
   });
 

@@ -4,7 +4,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { ProjectSettingsQuery, StripePrice, useUpsertStripeSubscriptionMutation } from 'types/gql';
+import { ProjectSettingsQuery, SortOrder, StripePrice, useProjectInvoicesLazyQuery, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, Divider, FormControlLabel, Switch, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
@@ -23,6 +23,15 @@ export type DialogPlanProps = {
 export default function DialogPlan({ open,  handleClose, targetProduct, project }: DialogPlanProps) {
 
   const { t, lang } = useTranslation();
+
+  const [refreshInvoices] = useProjectInvoicesLazyQuery({
+    variables: {
+      invoicesWhere: {
+        total: { gt: 0 },
+      },
+      invoicesOrderBy: { dueDate: SortOrder.Desc },
+    }
+  });
 
   const [price, setPrice] = React.useState<StripePrice | null>(null);
 
@@ -55,6 +64,7 @@ export default function DialogPlan({ open,  handleClose, targetProduct, project 
     upcomingChange: true,
     onCompleted() {
       handleClose();
+      refreshInvoices();
     },
     onFailed() {
       console.error('Failed to poll updated plan!');
