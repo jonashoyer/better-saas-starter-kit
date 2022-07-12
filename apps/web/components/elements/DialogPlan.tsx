@@ -15,7 +15,7 @@ import usePaymentMethodSelection, { PaymentMethodSelection } from '../../hooks/u
 export type DialogPlanProps = {
   open: boolean;
   handleClose: () => any;
-  project?: ProjectSettingsQuery['project'];
+  project: ProjectSettingsQuery['project'];
   products: StripeProductWithPricing[];
   targetProduct?: StripeProductWithPricing;
 }
@@ -26,6 +26,7 @@ export default function DialogPlan({ open,  handleClose, targetProduct, project 
 
   const [refreshInvoices] = useProjectInvoicesLazyQuery({
     variables: {
+      projectId: project.id,
       invoicesWhere: {
         total: { gt: 0 },
       },

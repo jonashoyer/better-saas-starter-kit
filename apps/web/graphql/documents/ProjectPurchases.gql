@@ -1,4 +1,4 @@
-query ProjectPurchases($projectId: String) {
+query ProjectPurchases($projectId: String!) {
   project(projectId: $projectId) {
     id
     purchasedProducts {

@@ -1,4 +1,4 @@
-query ProjectInvoices($projectId: String, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
+query ProjectInvoices($projectId: String!, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
   project(projectId: $projectId) {
     id
     stripeInvoices(where: $invoicesWhere, orderBy: $invoicesOrderBy) {

@@ -14,7 +14,7 @@ import usePollPurchases from '../../hooks/usePollPurchases';
 export type DialogPurchaseProps = {
   open: boolean;
   handleClose: () => any;
-  project?: ProjectSettingsQuery['project'];
+  project: ProjectSettingsQuery['project'];
   targetProductPrice?: StripePrice;
   onPurchaseCompleted?: (productPrice?: StripePrice) => void;
 }
@@ -25,6 +25,7 @@ export default function DialogPurchase({ open, handleClose, targetProductPrice, 
 
   const [refreshInvoices] = useProjectInvoicesLazyQuery({
     variables: {
+      projectId: project.id,
       invoicesWhere: {
         total: { gt: 0 },
       },
