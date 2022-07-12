@@ -37,7 +37,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   });
 
   return (
-    <SessionProvider session={pageProps.session}>
+    <SessionProvider session={pageProps.session} refetchOnWindowFocus={false}>
       <ApolloProvider client={apolloClient}>
         <ProjectValueProvider initialValue={pageProps.projectId}>
           <UserContextProvider>
