@@ -1,7 +1,7 @@
 query ProjectSubscriptions($projectId: String) {
   project(projectId: $projectId) {
     id
-    stripeSubscriptions {
+    stripeSubscriptions(where: { status: { equals: ACTIVE } }) {
       ...BaseStripeSubscription
     }
   }

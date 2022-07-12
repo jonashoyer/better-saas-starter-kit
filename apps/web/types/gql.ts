@@ -66,6 +66,13 @@ export type EnumInvoiceStatusNullableFilter = {
   notIn?: Maybe<Array<InvoiceStatus>>;
 };
 
+export type EnumStripeSubscriptionStatusFilter = {
+  equals?: Maybe<StripeSubscriptionStatus>;
+  in?: Maybe<Array<StripeSubscriptionStatus>>;
+  not?: Maybe<NestedEnumStripeSubscriptionStatusFilter>;
+  notIn?: Maybe<Array<StripeSubscriptionStatus>>;
+};
+
 export type IntFilter = {
   equals?: Maybe<Scalars['Int']>;
   gt?: Maybe<Scalars['Int']>;
@@ -284,6 +291,13 @@ export type NestedEnumInvoiceStatusNullableFilter = {
   notIn?: Maybe<Array<InvoiceStatus>>;
 };
 
+export type NestedEnumStripeSubscriptionStatusFilter = {
+  equals?: Maybe<StripeSubscriptionStatus>;
+  in?: Maybe<Array<StripeSubscriptionStatus>>;
+  not?: Maybe<NestedEnumStripeSubscriptionStatusFilter>;
+  notIn?: Maybe<Array<StripeSubscriptionStatus>>;
+};
+
 export type NestedIntFilter = {
   equals?: Maybe<Scalars['Int']>;
   gt?: Maybe<Scalars['Int']>;
@@ -341,6 +355,7 @@ export type ProjectStripeSubscriptionsArgs = {
   cursor?: Maybe<StripeSubscriptionWhereUniqueInput>;
   skip?: Maybe<Scalars['Int']>;
   take?: Maybe<Scalars['Int']>;
+  where?: Maybe<ProjectStripeSubscriptionsWhereInput>;
 };
 
 
@@ -372,6 +387,10 @@ export type ProjectStripeInvoicesWhereInput = {
   periodStart?: Maybe<DateTimeFilter>;
   status?: Maybe<EnumInvoiceStatusNullableFilter>;
   total?: Maybe<IntFilter>;
+};
+
+export type ProjectStripeSubscriptionsWhereInput = {
+  status?: Maybe<EnumStripeSubscriptionStatusFilter>;
 };
 
 export type PurchasePriceItemsItemInput = {
@@ -1196,7 +1215,7 @@ export type PingQueryHookResult = ReturnType<typeof usePingQuery>;
 export type PingLazyQueryHookResult = ReturnType<typeof usePingLazyQuery>;
 export type PingQueryResult = Apollo.QueryResult<PingQuery, PingQueryVariables>;
 export const ProjectInvoicesDocument = gql`
-    query ProjectInvoices($projectId: String, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
+    query ProjectInvoices($projectId: String!, $invoicesWhere: ProjectStripeInvoicesWhereInput, $invoicesOrderBy: [ProjectStripeInvoicesOrderByInput!]) {
   project(projectId: $projectId) {
     id
     stripeInvoices(where: $invoicesWhere, orderBy: $invoicesOrderBy) {
@@ -1224,7 +1243,7 @@ export const ProjectInvoicesDocument = gql`
  *   },
  * });
  */
-export function useProjectInvoicesQuery(baseOptions?: Apollo.QueryHookOptions<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>) {
+export function useProjectInvoicesQuery(baseOptions: Apollo.QueryHookOptions<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>(ProjectInvoicesDocument, options);
       }
@@ -1236,7 +1255,7 @@ export type ProjectInvoicesQueryHookResult = ReturnType<typeof useProjectInvoice
 export type ProjectInvoicesLazyQueryHookResult = ReturnType<typeof useProjectInvoicesLazyQuery>;
 export type ProjectInvoicesQueryResult = Apollo.QueryResult<ProjectInvoicesQuery, ProjectInvoicesQueryVariables>;
 export const ProjectPurchasesDocument = gql`
-    query ProjectPurchases($projectId: String) {
+    query ProjectPurchases($projectId: String!) {
   project(projectId: $projectId) {
     id
     purchasedProducts {
@@ -1262,7 +1281,7 @@ export const ProjectPurchasesDocument = gql`
  *   },
  * });
  */
-export function useProjectPurchasesQuery(baseOptions?: Apollo.QueryHookOptions<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>) {
+export function useProjectPurchasesQuery(baseOptions: Apollo.QueryHookOptions<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ProjectPurchasesQuery, ProjectPurchasesQueryVariables>(ProjectPurchasesDocument, options);
       }
@@ -1330,7 +1349,7 @@ export const ProjectSettingsDocument = gql`
       role
       email
     }
-    stripeSubscriptions {
+    stripeSubscriptions(where: {status: {equals: ACTIVE}}) {
       ...BaseStripeSubscription
     }
     stripePaymentMethods {
@@ -1383,7 +1402,7 @@ export const ProjectSubscriptionsDocument = gql`
     query ProjectSubscriptions($projectId: String) {
   project(projectId: $projectId) {
     id
-    stripeSubscriptions {
+    stripeSubscriptions(where: {status: {equals: ACTIVE}}) {
       ...BaseStripeSubscription
     }
   }
@@ -2085,7 +2104,7 @@ export type PingQuery = (
 );
 
 export type ProjectInvoicesQueryVariables = Exact<{
-  projectId?: Maybe<Scalars['String']>;
+  projectId: Scalars['String'];
   invoicesWhere?: Maybe<ProjectStripeInvoicesWhereInput>;
   invoicesOrderBy?: Maybe<Array<ProjectStripeInvoicesOrderByInput> | ProjectStripeInvoicesOrderByInput>;
 }>;
@@ -2104,7 +2123,7 @@ export type ProjectInvoicesQuery = (
 );
 
 export type ProjectPurchasesQueryVariables = Exact<{
-  projectId?: Maybe<Scalars['String']>;
+  projectId: Scalars['String'];
 }>;
 
 

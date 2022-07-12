@@ -12,7 +12,9 @@ export const Project = objectType({
     t.model.name();
     t.model.users();
     t.model.purchasedProducts();
-    t.model.stripeSubscriptions();
+    t.model.stripeSubscriptions({
+      filtering: { status: true },
+    });
     t.model.stripePaymentMethods();
     t.model.stripeInvoices({
       filtering: { total: true, status: true, dueDate: true, periodEnd: true, periodStart: true },

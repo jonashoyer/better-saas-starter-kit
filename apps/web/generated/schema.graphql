@@ -52,6 +52,13 @@ input EnumInvoiceStatusNullableFilter {
   notIn: [InvoiceStatus!]
 }
 
+input EnumStripeSubscriptionStatusFilter {
+  equals: StripeSubscriptionStatus
+  in: [StripeSubscriptionStatus!]
+  not: NestedEnumStripeSubscriptionStatusFilter
+  notIn: [StripeSubscriptionStatus!]
+}
+
 input IntFilter {
   equals: Int
   gt: Int
@@ -148,6 +155,13 @@ input NestedEnumInvoiceStatusNullableFilter {
   notIn: [InvoiceStatus!]
 }
 
+input NestedEnumStripeSubscriptionStatusFilter {
+  equals: StripeSubscriptionStatus
+  in: [StripeSubscriptionStatus!]
+  not: NestedEnumStripeSubscriptionStatusFilter
+  notIn: [StripeSubscriptionStatus!]
+}
+
 input NestedIntFilter {
   equals: Int
   gt: Int
@@ -170,7 +184,7 @@ type Project {
   purchasedProducts(cursor: PurchasedProductWhereUniqueInput, skip: Int, take: Int): [PurchasedProduct!]!
   stripeInvoices(cursor: StripeInvoiceWhereUniqueInput, orderBy: [ProjectStripeInvoicesOrderByInput!], skip: Int, take: Int, where: ProjectStripeInvoicesWhereInput): [StripeInvoice!]!
   stripePaymentMethods(cursor: StripePaymentMethodWhereUniqueInput, skip: Int, take: Int): [StripePaymentMethod!]!
-  stripeSubscriptions(cursor: StripeSubscriptionWhereUniqueInput, skip: Int, take: Int): [StripeSubscription!]!
+  stripeSubscriptions(cursor: StripeSubscriptionWhereUniqueInput, skip: Int, take: Int, where: ProjectStripeSubscriptionsWhereInput): [StripeSubscription!]!
   userInvites(cursor: UserInviteWhereUniqueInput, skip: Int, take: Int): [UserInvite!]!
   users(cursor: UserProjectWhereUniqueInput, skip: Int, take: Int): [UserProject!]!
 }
@@ -190,6 +204,10 @@ input ProjectStripeInvoicesWhereInput {
   periodStart: DateTimeFilter
   status: EnumInvoiceStatusNullableFilter
   total: IntFilter
+}
+
+input ProjectStripeSubscriptionsWhereInput {
+  status: EnumStripeSubscriptionStatusFilter
 }
 
 input PurchasePriceItemsItemInput {

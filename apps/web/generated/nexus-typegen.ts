@@ -65,6 +65,12 @@ export interface NexusGenInputs {
     not?: NexusGenInputs['NestedEnumInvoiceStatusNullableFilter'] | null; // NestedEnumInvoiceStatusNullableFilter
     notIn?: NexusGenEnums['InvoiceStatus'][] | null; // [InvoiceStatus!]
   }
+  EnumStripeSubscriptionStatusFilter: { // input type
+    equals?: NexusGenEnums['StripeSubscriptionStatus'] | null; // StripeSubscriptionStatus
+    in?: NexusGenEnums['StripeSubscriptionStatus'][] | null; // [StripeSubscriptionStatus!]
+    not?: NexusGenInputs['NestedEnumStripeSubscriptionStatusFilter'] | null; // NestedEnumStripeSubscriptionStatusFilter
+    notIn?: NexusGenEnums['StripeSubscriptionStatus'][] | null; // [StripeSubscriptionStatus!]
+  }
   IntFilter: { // input type
     equals?: number | null; // Int
     gt?: number | null; // Int
@@ -101,6 +107,12 @@ export interface NexusGenInputs {
     not?: NexusGenInputs['NestedEnumInvoiceStatusNullableFilter'] | null; // NestedEnumInvoiceStatusNullableFilter
     notIn?: NexusGenEnums['InvoiceStatus'][] | null; // [InvoiceStatus!]
   }
+  NestedEnumStripeSubscriptionStatusFilter: { // input type
+    equals?: NexusGenEnums['StripeSubscriptionStatus'] | null; // StripeSubscriptionStatus
+    in?: NexusGenEnums['StripeSubscriptionStatus'][] | null; // [StripeSubscriptionStatus!]
+    not?: NexusGenInputs['NestedEnumStripeSubscriptionStatusFilter'] | null; // NestedEnumStripeSubscriptionStatusFilter
+    notIn?: NexusGenEnums['StripeSubscriptionStatus'][] | null; // [StripeSubscriptionStatus!]
+  }
   NestedIntFilter: { // input type
     equals?: number | null; // Int
     gt?: number | null; // Int
@@ -120,6 +132,9 @@ export interface NexusGenInputs {
     periodStart?: NexusGenInputs['DateTimeFilter'] | null; // DateTimeFilter
     status?: NexusGenInputs['EnumInvoiceStatusNullableFilter'] | null; // EnumInvoiceStatusNullableFilter
     total?: NexusGenInputs['IntFilter'] | null; // IntFilter
+  }
+  ProjectStripeSubscriptionsWhereInput: { // input type
+    status?: NexusGenInputs['EnumStripeSubscriptionStatusFilter'] | null; // EnumStripeSubscriptionStatusFilter
   }
   PurchasePriceItemsItemInput: { // input type
     priceId: string; // String!
@@ -679,6 +694,7 @@ export interface NexusGenArgTypes {
       cursor?: NexusGenInputs['StripeSubscriptionWhereUniqueInput'] | null; // StripeSubscriptionWhereUniqueInput
       skip?: number | null; // Int
       take?: number | null; // Int
+      where?: NexusGenInputs['ProjectStripeSubscriptionsWhereInput'] | null; // ProjectStripeSubscriptionsWhereInput
     }
     userInvites: { // args
       cursor?: NexusGenInputs['UserInviteWhereUniqueInput'] | null; // UserInviteWhereUniqueInput

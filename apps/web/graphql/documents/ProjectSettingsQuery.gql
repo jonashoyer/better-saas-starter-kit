@@ -19,7 +19,7 @@ query ProjectSettings($projectId: String, $invoicesWhere: ProjectStripeInvoicesW
       role
       email
     }
-    stripeSubscriptions {
+    stripeSubscriptions(where: { status: { equals: ACTIVE } }) {
       ...BaseStripeSubscription
     }
     stripePaymentMethods {
