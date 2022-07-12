@@ -2,6 +2,7 @@ import { arg, enumType, inputObjectType, intArg, mutationField, objectType, stri
 import { hasUserProjectAccess, requireAuth, requireProjectAccess, throwFalsy } from './permissions';
 import type { StripeMetadata } from 'shared';
 import { ForbiddenError } from 'apollo-server-micro';
+import { getProjectUsedSeats } from 'shared-server/dist/services/projectService';
 
 export const StripeSubscriptionStatus = enumType({
   name: 'StripeSubscriptionStatus',
@@ -61,11 +62,13 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
 
     const project = await ctx.prisma.project.findUnique({
       where: { id: projectId },
-      select: { stripeCustomerId: true },
+      select: { id: true, stripeCustomerId: true, stripePaymentMethods: true },
     });
 
     // per-member / standard
 
+
+    if (project.stripePaymentMethods.length == 0) throw new ForbiddenError('No payment methods attached to account');
     
     const price = await ctx.prisma.stripePrice.findUnique({ where: { id: priceId }, include: { stripeProduct: true } });
     const isPrimarySubscription = (price.stripeProduct.metadata as StripeMetadata).type == 'primary';
@@ -83,9 +86,7 @@ export const upsertStripeSubscription = mutationField('upsertStripeSubscription'
     });
 
     const quantity = isPerMember
-      ? await ctx.prisma.userProject.count({
-        where: { projectId },
-      })
+      ? await getProjectUsedSeats(ctx.prisma, project.id)
       : 1;
     
 
@@ -151,7 +152,9 @@ export const createSubscription = mutationField('createSubscription', {
   authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, args) => args.projectId}),
   async resolve(root, { projectId, priceId, quantity }, ctx) {
 
-    const project = await ctx.prisma.project.findUnique({ where: { id: projectId } });
+    const project = await ctx.prisma.project.findUnique({ where: { id: projectId }, include: { stripePaymentMethods: true } });
+
+    if (project.stripePaymentMethods.length == 0) throw new ForbiddenError('No payment methods attached to account');
 
     // TODO: Validate quantity limit
 
