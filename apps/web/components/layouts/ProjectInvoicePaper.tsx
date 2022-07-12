@@ -63,15 +63,9 @@ const ProjectInvoicePaper = ({ project }: ProjectInvoicePaperProps) => {
                     }
                     secondary={
                       <React.Fragment>
-                        <Typography
-                          sx={{ display: 'inline' }}
-                          component="span"
-                          variant="body2"
-                          color="text.primary"
-                        >
-                          {t('settings:invoiceAmount', { amount: (e.amountPaid / 100).toFixed(2) })}
+                        <Typography variant='body2'>
+                          ${(e.amountPaid / 100).toFixed(2)}
                         </Typography>
-                        {e.receiptNumber && `- #${e.receiptNumber}`}
                       </React.Fragment>
                     }
                   />
