@@ -10,10 +10,11 @@ import jwt from 'jsonwebtoken';
 import { NEXT_AUTH_SECRET } from "../../../configServer";
 import { Constants, s } from 'shared';
 import { logger } from "shared-server";
+import { withSentry } from "@sentry/nextjs";
 
 const prismaAdapter = PrismaAdapter(prisma);
 
-export default NextAuth({
+const handler = NextAuth({
   logger,
   cookies: {
     sessionToken: {
@@ -93,3 +94,5 @@ export type Session = DefaultSession & {
     id: string;
   }
 }
+
+export default withSentry(handler);

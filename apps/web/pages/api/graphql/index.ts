@@ -8,6 +8,7 @@ import { NextApiHandler } from "next";
 import Cors from 'cors';
 import initMiddleware from "../../../utils/init-middleware";
 import { createRedisClient, httpLoggerMiddleware, logger } from "shared-server";
+import { withSentry } from "@sentry/nextjs";
 
 const cors = initMiddleware(
   Cors({
@@ -57,4 +58,4 @@ const getHandler = async () => {
 
 const requestHandler: NextApiHandler = async (req, res) => (await getHandler())(req, res);
 
-export default requestHandler;
+export default withSentry(requestHandler);

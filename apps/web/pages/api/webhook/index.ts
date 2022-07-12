@@ -1,6 +1,7 @@
 import { NextApiHandler } from 'next';
 import { createStripe, httpLoggerMiddleware, stripeWebhookHandler } from 'shared-server';
 import { prisma } from '../../../utils/prisma';
+import { withSentry } from "@sentry/nextjs";
 
 
 // Stripe requires the raw body to construct the event.
@@ -15,4 +16,4 @@ const webhookHandler: NextApiHandler = async (req, res) => {
   await stripeWebhookHandler(createStripe(), prisma)(req, res);
 }
 
-export default webhookHandler;
+export default withSentry(webhookHandler);
