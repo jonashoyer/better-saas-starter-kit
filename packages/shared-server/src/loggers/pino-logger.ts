@@ -1,7 +1,8 @@
+// @ts-nocheck
 import Pino from 'pino';
 import PinoHttp from 'pino-http';
 import { NodeEnv } from 'shared';
-import { NODE_ENV } from './config';
+import { NODE_ENV } from '../config';
 
 const createTransport = () => {
   if (NODE_ENV === NodeEnv.Development) {

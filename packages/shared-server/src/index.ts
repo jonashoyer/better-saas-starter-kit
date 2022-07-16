@@ -13,4 +13,4 @@ export * from './services'
 export * from './RedisCache';
 export * from './CachedDataloader';
 export * from './Dataloaders';
-export * from './logger';
+export * from './loggers';

@@ -9,6 +9,7 @@
     "@types/mjml": "^4.7.0",
     "@types/node-mailjet": "^3.3.7",
     "@types/nodemailer": "^6.4.4",
+    "@types/on-finished": "^2.3.1",
     "pino-pretty": "^8.1.0",
     "prisma": "^3.15.2"
   },
@@ -29,11 +30,15 @@
     "mjml": "^4.10.2",
     "node-mailjet": "^3.3.4",
     "nodemailer": "^6.6.3",
-    "pino": "^8.1.0",
-    "pino-http": "^8.1.1",
+    "on-finished": "^2.4.1",
     "shared": "*",
     "stripe": "^8.169.0",
     "tsconfig": "*",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.8.1"
+  },
+  "optionalDependencies": {
+    "@google-cloud/logging-winston": "^5.1.1",
+    "winston-logzio": "^5.1.5"
   }
 }
