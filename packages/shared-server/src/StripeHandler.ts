@@ -1,6 +1,8 @@
 import { StripeSubscription, PrismaClient, StripeInvoice, StripePriceType, StripeSubscriptionStatus, Prisma } from '@prisma/client';
 import dayjs from 'dayjs';
+import { StripeMetadata } from 'shared';
 import Stripe from 'stripe'
+import { projectService } from './services';
 
 // https://egghead.io/blog/saas-app-with-nextjs-prisma-auth0-and-stripe
 
@@ -206,7 +208,6 @@ export class StripeHandler {
 
 
     // Create a schedule if it does not exists
-
     if (currentPriceId == priceId) {
       const updatedSubscription = await this.stripe.subscriptions.update(stripeSubscriptionId, {
         items: [
@@ -662,6 +663,62 @@ export class StripeHandler {
     });
     return schedule.id;
   }
+
+
+  async updateProjectSubscriptionUsedSeats(projectId: string, seatsUsed?: number) {
+    const usedSeats = seatsUsed ?? (await projectService.getProjectUsedSeats(this.prisma, projectId));
+
+    const subscriptions = await this.prisma.stripeSubscription.findMany({
+      where: {
+        projectId,
+        status: { notIn: ['CANCELED'] },
+      },
+      include: {
+        stripePrice: {
+          include: {
+            stripeProduct: true,
+          }
+        },
+        upcomingStripePrice: {
+          include: {
+            stripeProduct: true,
+          }
+        }
+      }
+    });
+
+    // Size up:
+    // Instant curr sub, and update upcoming size
+
+    // Size down:
+    // only update upcoming
+
+
+    await Promise.all(
+      subscriptions.map(async (sub) => {
+
+        if ((sub.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing != 'per-member' && (sub.upcomingStripePrice!.stripeProduct?.metadata as StripeMetadata).pricing != 'per-member') return;
+
+        await this.stripe.subscriptions.update(sub.id, {
+          items: [
+            {
+              id: sub.id,
+              quantity: (sub.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing == 'per-member' && sub.quantity < usedSeats ? usedSeats : sub.quantity,
+            },
+            ...(sub.upcomingStripePriceId ? [{
+              price: sub.upcomingStripePriceId,
+              quantity: (sub.upcomingStripePrice!.stripeProduct?.metadata as StripeMetadata).pricing == 'per-member' ? usedSeats : sub.upcomingQuantity!,
+            }] : []),
+            ...(!sub.upcomingStripePriceId && (sub.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing == 'per-member' && sub.quantity > usedSeats ? [{
+              id: sub.id,
+              quantity: usedSeats,
+            }] : []),
+          ],
+        });
+      }, [])
+    )
+  }
+
 
   static convertValue(val: any) {
     const num = Number(val);

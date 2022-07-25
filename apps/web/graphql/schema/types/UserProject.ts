@@ -72,11 +72,13 @@ export const DeleteUserProject = mutationField('deleteUserProject', {
   }),
   async resolve(root, { id }, ctx) {
 
-    const userProject = await ctx.prisma.userProject.findUnique({ where: { id }, select: { userId: true } });
+    const userProject = await ctx.prisma.userProject.findUnique({ where: { id }, select: { userId: true, projectId: true } });
 
     if (userProject.userId === ctx.user.id) {
       throw new UserInputError('You cannot remove yourself from a project!');
     }
+
+    await ctx.getStripeHandler().updateProjectSubscriptionUsedSeats(userProject.projectId);
 
     return ctx.prisma.userProject.delete({
       where: { id }

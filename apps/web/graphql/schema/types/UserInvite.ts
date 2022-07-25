@@ -20,10 +20,9 @@ export const CreateUserInviteInput = inputObjectType({
     t.string('projectId', { required: true });
     t.field('role', { type: 'ProjectRole', required: true });
   }
-  
 })
 
-export const GetUserInvites  = queryField('getUserInvites', {
+export const GetUserInvites = queryField('getUserInvites', {
   type: 'UserInvite',
   list: true,
   args: {
@@ -77,6 +76,8 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
       }))
     )
 
+    await ctx.getStripeHandler().updateProjectSubscriptionUsedSeats(project.id);
+
     return ctx.prisma.userInvite.findMany({
       where: { token: { in: data.map(e => e.token) } },
     });
@@ -100,8 +101,13 @@ export const DeleteUserInvite = mutationField('deleteUserInvite', {
       throw new Error('Not allowed!');
     }
 
-    return ctx.prisma.userInvite.delete({
+
+    const result = await ctx.prisma.userInvite.delete({
       where: { id }
     });
+
+    await ctx.getStripeHandler().updateProjectSubscriptionUsedSeats(userInvite.projectId);
+
+    return result;
   }
 })
