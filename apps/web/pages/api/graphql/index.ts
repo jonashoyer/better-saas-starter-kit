@@ -34,12 +34,6 @@ const apolloServer = new ApolloServer({
   },
 });
 
-export const config = {
-  api: {
-    bodyParser: false
-  }
-};
-
 const handler: RequestHandler = async (req, res) => {
   httpLoggerMiddleware(req, res);
   await cors(req, res);
@@ -60,3 +54,10 @@ const getHandler = async () => {
 const requestHandler: NextApiHandler = async (req, res) => (await getHandler())(req, res);
 
 export default withSentry(requestHandler);
+
+export const config = {
+  api: {
+    bodyParser: false,
+    externalResolver: true,
+  },
+}

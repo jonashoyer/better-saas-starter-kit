@@ -44,8 +44,9 @@ module.exports = withBundleAnalyzer(
 
         return config
       },
+      
     }), {
-    silent: true,
-  }
+      silent: true,
+    }
   )
 );

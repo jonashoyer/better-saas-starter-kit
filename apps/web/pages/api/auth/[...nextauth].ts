@@ -16,7 +16,7 @@ const prismaAdapter = PrismaAdapter(prisma);
 
 const handler = NextAuth({
   logger: {
-    error(code, ...message) {a
+    error(code, ...message) {
       logger.error(code, message);
     },
     warn(code, ...message) {
@@ -106,3 +106,9 @@ export type Session = DefaultSession & {
 }
 
 export default withSentry(handler);
+
+export const config = {
+  api: {
+    externalResolver: true,
+  },
+}
