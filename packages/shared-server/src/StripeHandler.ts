@@ -665,8 +665,12 @@ export class StripeHandler {
   }
 
 
-  async updateProjectSubscriptionUsedSeats(projectId: string, seatsUsed?: number) {
-    const usedSeats = seatsUsed ?? (await projectService.getProjectUsedSeats(this.prisma, projectId));
+  async updateProjectSubscriptionUsedSeats(projectId: string, options?: { seatsUsed?: number, invoiceDescription?: string, invoiceMetadata?: any }) {
+    const usedSeats = options?.seatsUsed ?? (await projectService.getProjectUsedSeats(this.prisma, projectId));
+
+    const project = await this.prisma.project.findUnique({ where: { id: projectId }, select: { id: true, stripeCustomerId: true } });
+
+    if (!project) throw new Error(`Project not found with id '${projectId}'`);
 
     const subscriptions = await this.prisma.stripeSubscription.findMany({
       where: {
@@ -687,36 +691,111 @@ export class StripeHandler {
       }
     });
 
-    // Size up:
-    // Instant curr sub, and update upcoming size
+    const getSubscriptionQuantity = (metadata: any, currentQuantity: number, usedSeats: number, takeHighestQuantity?: boolean) => {
+      if (metadata.pricing != 'per-member') return currentQuantity;
+      if (takeHighestQuantity) return Math.max(currentQuantity, usedSeats);
+      return usedSeats;
+    }
 
-    // Size down:
-    // only update upcoming
+    
+    const changed = await Promise.all(
+      subscriptions.map(async (subRecord) => {
+
+        if ((subRecord.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing != 'per-member' && (subRecord.upcomingStripePrice?.stripeProduct?.metadata as StripeMetadata | null)?.pricing != 'per-member') return false;
+
+        const sub = await this.stripe.subscriptions.retrieve(subRecord.id);
+        
+        if (sub.items.data[0].quantity == usedSeats) return false;
 
 
-    await Promise.all(
-      subscriptions.map(async (sub) => {
+        const scheduleId = await this.getSubscriptionScheduleId(sub);
 
-        if ((sub.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing != 'per-member' && (sub.upcomingStripePrice!.stripeProduct?.metadata as StripeMetadata).pricing != 'per-member') return;
+        const updateCurrentSubscriptionQuantityInFuture = !subRecord.upcomingStripePriceId && (subRecord.stripePrice.stripeProduct?.metadata as StripeMetadata | null)?.pricing == 'per-member' && subRecord.quantity > usedSeats;
 
-        await this.stripe.subscriptions.update(sub.id, {
-          items: [
-            {
-              id: sub.id,
-              quantity: (sub.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing == 'per-member' && sub.quantity < usedSeats ? usedSeats : sub.quantity,
-            },
-            ...(sub.upcomingStripePriceId ? [{
-              price: sub.upcomingStripePriceId,
-              quantity: (sub.upcomingStripePrice!.stripeProduct?.metadata as StripeMetadata).pricing == 'per-member' ? usedSeats : sub.upcomingQuantity!,
-            }] : []),
-            ...(!sub.upcomingStripePriceId && (sub.stripePrice.stripeProduct?.metadata as StripeMetadata).pricing == 'per-member' && sub.quantity > usedSeats ? [{
-              id: sub.id,
+
+
+        console.log({
+          scheduleId,
+          setQuantity: getSubscriptionQuantity(subRecord.stripePrice.stripeProduct?.metadata, sub.items.data[0].quantity ?? 1, usedSeats, true),
+          usedSeats,
+          subRecordQuantity: subRecord.quantity,
+          updateCurrentSubscriptionQuantityInFuture,
+          upcomingStripePriceId: subRecord.upcomingStripePriceId,
+          upcomingQty: getSubscriptionQuantity(subRecord.upcomingStripePrice?.stripeProduct?.metadata ?? {}, subRecord.upcomingQuantity!, usedSeats),
+        })
+
+        console.dir([{
+          items: [{ price: sub.items.data[0].price.id, quantity: sub.items.data[0].quantity }],
+          start_date: sub.current_period_start,
+          end_date: subRecord.upcomingStripePriceId || updateCurrentSubscriptionQuantityInFuture ? sub.current_period_end : 'now',
+        },
+        ...(!updateCurrentSubscriptionQuantityInFuture ? [{
+          items: [{ price: sub.items.data[0].price.id, quantity: usedSeats }],
+          start_date: 'now' as const,
+          end_date: sub.current_period_end,
+        }] : []),
+        ...(subRecord.upcomingStripePriceId ? [{
+          items: [{
+            price: subRecord.upcomingStripePriceId,
+            quantity: getSubscriptionQuantity(subRecord.upcomingStripePrice?.stripeProduct?.metadata ?? {}, subRecord.upcomingQuantity!, usedSeats),
+          }],
+          start_date: sub.current_period_end,
+        }] : []),
+        ...(updateCurrentSubscriptionQuantityInFuture ? [{
+          items: [{
+            price: sub.items.data[0].price.id,
+            quantity: usedSeats,
+          }],
+          start_date: sub.current_period_end,
+        }] : []),
+        ], { depth: 5 });
+        
+
+        await this.stripe.subscriptionSchedules.update(scheduleId, {
+          proration_behavior: 'create_prorations',
+          phases: [{
+            items: [{ price: sub.items.data[0].price.id, quantity: sub.items.data[0].quantity }],
+            start_date: sub.current_period_start,
+            end_date: subRecord.upcomingStripePriceId || updateCurrentSubscriptionQuantityInFuture ? sub.current_period_end : 'now',
+          },
+          ...(!updateCurrentSubscriptionQuantityInFuture ? [{
+            items: [{ price: sub.items.data[0].price.id, quantity: usedSeats }],
+            start_date: 'now' as const,
+            end_date: sub.current_period_end,
+          }] : []),
+          ...(subRecord.upcomingStripePriceId ? [{
+            items: [{
+              price: subRecord.upcomingStripePriceId,
+              quantity: getSubscriptionQuantity(subRecord.upcomingStripePrice?.stripeProduct?.metadata ?? {}, subRecord.upcomingQuantity!, usedSeats),
+            }],
+            start_date: sub.current_period_end,
+          }] : []),
+          ...(updateCurrentSubscriptionQuantityInFuture ? [{
+            items: [{
+              price: sub.items.data[0].price.id,
               quantity: usedSeats,
-            }] : []),
+            }],
+            start_date: sub.current_period_end,
+          }] : []),
           ],
         });
-      }, [])
+
+        return true;
+      })
     )
+
+    if (changed.every(e => e === false)) return null;
+
+    const invoice = await this.stripe.invoices.create({
+      customer: project.stripeCustomerId,
+      auto_advance: true,
+      collection_method: 'charge_automatically',
+      description: options?.invoiceDescription,
+      metadata: typeof options?.invoiceMetadata == 'object' ?  StripeHandler.formatMetadata(options.invoiceMetadata) : undefined,
+    });
+
+
+    return invoice;
   }
 
 

@@ -11,8 +11,8 @@ import LogzioWinstonTransport from 'winston-logzio';
 // TODO: NPM package, SHARED SCRIPT!
 
 interface Request extends IncomingMessage {
-  body: any;
-  path: string;
+  body?: any;
+  path?: string;
   user?: { id: string, username?: string };
   project?: { id: string };
   unsafeUserId?: string;
@@ -91,11 +91,7 @@ export const logger = winston.createLogger({
 });
 
 
-
-
 const emitRequestLogEntry = (httpRequest: ReturnType<typeof makeHttpRequestData>) => {
-
-  if (httpRequest.graphql?.operationName === 'IntrospectionQuery') return;
 
   const payload = {
     logName: 'winston_log',
@@ -152,7 +148,7 @@ const makeHttpRequestData = (req: Request, res: Response, latencyNs: bigint) => 
     nanos: Number(latencyNs % BigInt(1e9)),
   } : undefined;
 
-  const isGraphql = req.method == 'POST' && ((typeof req.body == 'object' && !!req.body?.operationName) || req.path.includes('/graphql'));
+  const isGraphql = req.method == 'POST' && ((typeof req.body == 'object' && !!req.body?.operationName) || req.path?.includes('/graphql'));
 
   const getGraphqlData = () => {
     if (!isGraphql) return undefined;

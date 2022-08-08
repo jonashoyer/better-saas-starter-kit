@@ -45,7 +45,7 @@ export const CreateManyUserInvite = mutationField('createManyUserInvite', {
   authorize: requireProjectAccess({ role: 'ADMIN', projectIdFn: (_, { input }) => input.projectId }),
   async resolve(root, { input }, ctx) {
 
-    const project = await ctx.prisma.project.findUnique({ where: { id: input.projectId }, select: { name: true } });
+    const project = await ctx.prisma.project.findUnique({ where: { id: input.projectId }, select: { id: true, name: true } });
 
     const data = input.emails.map(email => ({
       email,

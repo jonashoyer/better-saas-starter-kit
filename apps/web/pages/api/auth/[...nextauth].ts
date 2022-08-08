@@ -15,7 +15,17 @@ import { withSentry } from "@sentry/nextjs";
 const prismaAdapter = PrismaAdapter(prisma);
 
 const handler = NextAuth({
-  logger,
+  logger: {
+    error(code, ...message) {a
+      logger.error(code, message);
+    },
+    warn(code, ...message) {
+      logger.warn(code, message);
+    },
+    debug(code, ...message) {
+      logger.debug(code, message);
+    },
+  },
   cookies: {
     sessionToken: {
       name: Constants.NEXT_AUTH_SESSION_TOKEN_COOKIE,

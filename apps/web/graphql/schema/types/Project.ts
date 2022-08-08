@@ -38,7 +38,7 @@ export const GetProject = queryField('project', {
 
       if (projectId && await hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId)) return projectId;
       const cookieProjectId = ctx.req.cookies[Constants.PROJECT_ID_COOKIE_KEY];
-      if (cookieProjectId && await hasUserProjectAccess(ctx.prisma, ctx.user!.id, projectId)) return cookieProjectId;
+      if (cookieProjectId && await hasUserProjectAccess(ctx.prisma, ctx.user!.id, cookieProjectId)) return cookieProjectId;
       const userProject = await ctx.prisma.userProject.findFirst({
         where: { userId: ctx.user!.id },
       })

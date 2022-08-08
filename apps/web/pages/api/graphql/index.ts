@@ -29,6 +29,7 @@ const apolloServer = new ApolloServer({
     ttl: 21600, // 6h
   },
   formatError(err) {
+    
     return err;
   },
 });
