@@ -29,21 +29,46 @@ const prisma = new PrismaClient();
     skipDuplicates: true,
   });
 
-  await prisma.stripePrice.createMany({
-    data: filtedPrices.map(e => ({
-      id: e.id,
-      stripeProductId: e.product as string,
-      active: e.active,
-      currency: e.currency,
-      type: e.type.toUpperCase() as StripePriceType,
-      unitAmount: e.unit_amount,
-      interval: e.recurring?.interval,
-      intervalCount: e.recurring?.interval_count,
-      trialPeriodDays: e.recurring?.trial_period_days,
-      metadata: e.metadata,
-    })),
-    skipDuplicates: true,
-  });
+  await Promise.all(
+    products.map(e => {
+      const data = {
+        id: e.id,
+        active: e.active,
+        metadata: e.metadata,
+        name: e.name,
+        image: e.images?.[0] ?? null,
+      };
+
+      return prisma.stripeProduct.upsert({
+        where: { id: e.id },
+        create: data,
+        update: data,
+      })
+    })
+  );
+
+  await Promise.all(
+    filtedPrices.map(e => {
+      const data = {
+        id: e.id,
+        stripeProductId: e.product as string,
+        active: e.active,
+        currency: e.currency,
+        type: e.type.toUpperCase() as StripePriceType,
+        unitAmount: e.unit_amount,
+        interval: e.recurring?.interval,
+        intervalCount: e.recurring?.interval_count,
+        trialPeriodDays: e.recurring?.trial_period_days,
+        metadata: e.metadata,
+      };
+
+      return prisma.stripePrice.upsert({
+        where: { id: e.id },
+        create: data,
+        update: data,
+      })
+    })
+  );
 
   console.log(`Imported ${products.length} products and ${filtedPrices.length} prices`);
   process.exit();

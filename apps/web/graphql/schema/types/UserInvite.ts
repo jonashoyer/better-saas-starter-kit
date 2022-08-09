@@ -106,6 +106,7 @@ export const DeleteUserInvite = mutationField('deleteUserInvite', {
       where: { id }
     });
 
+    //TODO: Do though Delayed Queue Job instead to avoid multiple update when deleting many user invitations
     await ctx.getStripeHandler().updateProjectSubscriptionUsedSeats(userInvite.projectId);
 
     return result;
