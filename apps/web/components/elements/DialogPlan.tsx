@@ -4,11 +4,12 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { ProjectSettingsQuery, SortOrder, StripePrice, useProjectInvoicesLazyQuery, useUpsertStripeSubscriptionMutation } from 'types/gql';
+import { ProjectSettingsQuery, StripePrice, useUpsertStripeSubscriptionMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, Divider, FormControlLabel, Switch, Typography } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 import usePollSubscriptions from 'hooks/usePollSubscriptions';
+import useFetchInvoices from 'hooks/useFetchInvoices';
 import { StripeProductWithPricing } from '../../types/types';
 import usePaymentMethodSelection, { PaymentMethodSelection } from '../../hooks/usePaymentMethodSelection';
 
@@ -24,15 +25,7 @@ export default function DialogPlan({ open,  handleClose, targetProduct, project 
 
   const { t, lang } = useTranslation();
 
-  const [refreshInvoices] = useProjectInvoicesLazyQuery({
-    variables: {
-      projectId: project.id,
-      invoicesWhere: {
-        total: { gt: 0 },
-      },
-      invoicesOrderBy: { dueDate: SortOrder.Desc },
-    }
-  });
+  const [refreshInvoices] = useFetchInvoices(project.id);
 
   const [price, setPrice] = React.useState<StripePrice | null>(null);
 

@@ -4,12 +4,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTranslation from 'next-translate/useTranslation';
-import { ProjectSettingsQuery, SortOrder, StripePrice, useProjectInvoicesLazyQuery, usePurchasePriceItemsMutation } from 'types/gql';
+import { ProjectSettingsQuery, StripePrice, usePurchasePriceItemsMutation } from 'types/gql';
 import { formatCurrency } from 'shared';
 import { Box, Divider, Typography } from '@mui/material';
 import usePaymentMethodSelection, { PaymentMethodSelection } from '../../hooks/usePaymentMethodSelection';
 import { LoadingButton } from '@mui/lab';
 import usePollPurchases from '../../hooks/usePollPurchases';
+import useFetchInvoices from '../../hooks/useFetchInvoices';
 
 export type DialogPurchaseProps = {
   open: boolean;
@@ -23,15 +24,7 @@ export default function DialogPurchase({ open, handleClose, targetProductPrice, 
 
   const { t, lang } = useTranslation();
 
-  const [refreshInvoices] = useProjectInvoicesLazyQuery({
-    variables: {
-      projectId: project.id,
-      invoicesWhere: {
-        total: { gt: 0 },
-      },
-      invoicesOrderBy: { dueDate: SortOrder.Desc },
-    }
-  });
+  const [refreshInvoices] = useFetchInvoices(project.id);
 
 
   const [startPoll, polling, stopPoll] = usePollPurchases({

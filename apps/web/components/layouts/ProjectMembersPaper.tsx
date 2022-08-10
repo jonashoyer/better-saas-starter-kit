@@ -1,7 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, Paper, Typography, IconButton, Menu, MenuItem, ListItemIcon } from '@mui/material';
-import { ProjectSettingsQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, useCreateManyUserInviteMutation, User, SelfQuery } from 'types/gql';
+import { ProjectSettingsQuery, Project, useDeleteUserInviteMutation, useDeleteUserProjectMutation, User, SelfQuery } from 'types/gql';
 import useTranslation from 'next-translate/useTranslation';
 import EmailIcon from '@mui/icons-material/Email';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -28,7 +28,6 @@ const ProjectMembersPaper = ({ project, self }: ProjectMembersPaperProps) => {
   const [deleteInvite, setDeleteInvite] = React.useState(null);
   const [deleteUserProjectId, setDeleteUserProjectId] = React.useState(null);
   const [editUserProject, setEditUserProject] = React.useState(null);
-
 
   const [deleteUserInvite, { loading: loadingDeleteUserInvite }] = useDeleteUserInviteMutation({
     update(cache, { data }) {

@@ -12,6 +12,7 @@ import FormTextField from './FormTextField';
 import { Box, MenuItem } from '@mui/material';
 import FormSelect from './FormSelect';
 import { ProjectSettingsQuery, Project, ProjectRole, useCreateManyUserInviteMutation } from 'types/gql';
+import useFetchInvoices from '../../hooks/useFetchInvoices';
 
 export interface DialogUserInviteProps {
   open: boolean;
@@ -22,6 +23,8 @@ export interface DialogUserInviteProps {
 export default function DialogUserInvite({ open, onClose, project }: DialogUserInviteProps) {
 
   const { t } = useTranslation();
+
+  const [refreshInvoices] = useFetchInvoices(project.id);
 
   const [createUserInvite, { loading }] = useCreateManyUserInviteMutation({
     update(cache, { data } ) {
@@ -36,6 +39,7 @@ export default function DialogUserInvite({ open, onClose, project }: DialogUserI
       })
     },
     onCompleted() {
+      refreshInvoices();
       onClose();
     }
   });

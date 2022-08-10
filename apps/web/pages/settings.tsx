@@ -20,6 +20,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import ProjectInvoicePaper from 'components/layouts/ProjectInvoicePaper';
 import { AppNextPage, StripeProductWithPricing } from '../types/types';
+import { defaultInvoiceVariables } from '../hooks/useFetchInvoices';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
@@ -33,10 +34,7 @@ const Settings: AppNextPage<{ products: StripeProductWithPricing[] }> = (props) 
   const { data: projectData } = useProjectSettingsQuery({
     variables: {
       projectId,
-      invoicesWhere: {
-        total: { gt: 0 },
-      },
-      invoicesOrderBy: { dueDate: SortOrder.Desc },
+      ...defaultInvoiceVariables,
     },
   });
 
