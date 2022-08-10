@@ -5,7 +5,7 @@ import { withSentry } from "@sentry/nextjs";
 
 
 const webhookHandler: NextApiHandler = async (req, res) => {
-  // httpLoggerMiddleware(req, res);
+  httpLoggerMiddleware(req, res);
   await stripeWebhookHandler(createStripe(), prisma)(req, res);
 }
 
